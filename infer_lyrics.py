@@ -221,7 +221,7 @@ class LyricsGenerator:
             
             logits = self.model.forward(X_input, genres_input, self.weights)[0]
             probs = self._topk_probs(logits, temperature, top_k)
-            probs_np = np.array(probs, dtype=np.float64)
+            probs_np = probs.get().astype(np.float64) if hasattr(probs, 'get') else np.asarray(probs, dtype=np.float64)
             probs_np = probs_np / probs_np.sum()  # ensure sums to 1 (float precision)
             next_token = int(np.random.choice(len(probs_np), p=probs_np))
             
