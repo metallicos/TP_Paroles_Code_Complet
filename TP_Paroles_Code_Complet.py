@@ -589,7 +589,9 @@ def generate_lyrics(model, genre_idx, max_length=50, temperature=1.0):
         
         exp_logits = xp.exp(logits - xp.max(logits))
         probs = exp_logits / xp.sum(exp_logits)
-        next_token = int(xp.random.choice(len(probs), p=probs).item())
+        sampled = xp.random.choice(len(probs), size=1, p=probs)
+        token_value = sampled[0]
+        next_token = int(token_value.item() if hasattr(token_value, 'item') else token_value)
         
         if next_token == EOS_IDX:
             break
