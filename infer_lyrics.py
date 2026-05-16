@@ -120,7 +120,7 @@ class LyricsGenerator:
             
             exp_logits = xp.exp(logits - xp.max(logits))
             probs = exp_logits / xp.sum(exp_logits)
-            next_token = int(xp.random.choice(len(probs), p=probs).item())
+            next_token = int(xp.random.choice(len(probs), p=probs))
             
             if next_token == self.EOS_IDX:
                 break
