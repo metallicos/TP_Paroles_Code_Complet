@@ -1,296 +1,431 @@
-# TP: Génération Automatique de Paroles de Chanson 🎵
+# 🎵 TP — Génération Automatique de Paroles de Chanson
 
-Projet de machine learning permettant de générer des paroles de chanson basées sur le genre musical, en utilisant les techniques du cours: régression, classification et réseaux de neurones.
+> Projet de Machine Learning : génération de paroles par genre musical
+> Techniques appliquées : embeddings, réseaux de neurones, backpropagation, gradient descent
 
-## Installation Rapide
+---
 
-### Pour Linux/macOS:
+## Table des Matières
+
+- [Installation](#installation)
+- [Utilisation](#utilisation)
+- [Paramètres & Configuration](#paramètres--configuration)
+- [Architecture du Modèle](#architecture-du-modèle)
+- [Métriques & Suivi](#métriques--suivi)
+- [Support GPU](#support-gpu)
+- [Structure des Fichiers](#structure-des-fichiers)
+- [Dépannage](#dépannage)
+- [Concepts Mathématiques](#concepts-mathématiques)
+
+---
+
+## Installation
+
+### Linux / macOS
 
 ```bash
-# 1. Rendre le script executable
+# 1. Rendre le script exécutable
 chmod +x setup.sh
 
-# 2. Lancer l'installation
+# 2. Installer les dépendances
 ./setup.sh
 
-# 3. Vérifier que tout fonctionne
+# 3. Vérifier l'installation
 python3 test_project.py
 ```
 
-### Pour Windows:
+### Windows
 
 ```bash
-# 1. Installer Python et pip si nécessaire
-
-# 2. Installer les dépendances
 pip install -r requirements.txt
-
-# 3. Vérifier installation
 python test_project.py
 ```
 
-## Structure du Projet
+### GPU — optionnel (A100 / CUDA)
 
+```bash
+# Vérifier votre version CUDA
+nvcc --version
+
+# Installer CuPy pour votre version CUDA (ex: CUDA 12.x)
+pip install cupy-cuda12x
 ```
-.
-├── TP_Paroles_Code_Complet.py    # Script d'entraînement (main)
-├── infer_lyrics.py                # Script d'inférence (génération)
-├── spotify_songs.csv              # Dataset (18,454 chansons)
-├── outputs/                        # Sorties générées automatiquement
-│   ├── lyrics_model.pkl            # Modèle entraîné
-│   └── training_stats.png          # Graphiques d'entraînement
-├── requirements.txt               # Dépendances Python
-├── setup.sh                        # Script d'initialisation (Linux/macOS)
-├── test_project.py                # Tests de vérification
-└── README.md                       # Ce fichier
-```
+
+---
 
 ## Utilisation
 
-### Étape 1: Entraîner le Modèle
+### 1. Entraîner le modèle
 
 ```bash
+# Entraînement standard (CPU, dataset complet)
 python3 TP_Paroles_Code_Complet.py
+
+# Entraînement rapide sur un sous-ensemble (debug)
+MAX_SAMPLES=2000 python3 TP_Paroles_Code_Complet.py
+
+# Entraînement sur GPU (A100)
+USE_GPU=1 python3 TP_Paroles_Code_Complet.py
+
+# GPU + dataset réduit
+USE_GPU=1 MAX_SAMPLES=5000 python3 TP_Paroles_Code_Complet.py
 ```
 
-Cela va:
-- Charger le dataset Spotify (18,454 chansons)
-- Prétraiter les paroles (tokenization, nettoyage)
-- Créer un vocabulaire de ~15k mots
-- Entraîner un réseau de neurones pendant 10 epochs
-- Sauvegarder le modèle dans `outputs/lyrics_model.pkl`
-- Sauvegarder les graphes dans `outputs/training_stats.png`
-
-**Durée estimée:** 5-15 minutes selon votre machine
-
-**Output:** Un modèle d'~2MB sauvegardé automatiquement
-
-### Étape 2: Générer des Paroles
+### 2. Générer des paroles
 
 ```bash
 # Générer une chanson rock
 python3 infer_lyrics.py --genre rock
 
-# Générer 3 exemples pop
-python3 infer_lyrics.py --genre pop --samples 3
+# 3 exemples pop avec plus de créativité
+python3 infer_lyrics.py --genre pop --samples 3 --temperature 1.2
 
-# Lister tous les genres disponibles
+# Lister les genres disponibles
 python3 infer_lyrics.py --list-genres
 
-# Options avancées:
-# --length N      : Nombre de mots max (défaut: 50)
-# --temperature X : Contrôle la créativité (< 1 = déterministe, > 1 = aléatoire)
+# Utiliser un checkpoint spécifique
+python3 infer_lyrics.py --model outputs/checkpoint_epoch5.pkl --genre rock
 ```
 
-## Architecture du Modèle
-
-### Concepts Appliqués du Cours
-
-| Concept | Application |
-|---------|------------|
-| **Régression** | Prédiction du prochain mot (tâche de classification multilabel) |
-| **Classification** | Encodage du genre musical (5 classes) |
-| **Réseaux Neuronaux** | Architecture 2 couches avec embeddings |
-| **Gradient Descent** | Mise à jour des poids pendant l'entraînement |
-| **Cross-Entropy** | Fonction de coût pour la classification |
-| **Backpropagation** | Calcul des gradients via chaîne de dérivation |
-
-### Structure Technique
-
-```
-Input: Séquence de tokens (10 mots max)
-  ↓
-Word Embeddings (vocabulaire → vecteurs 16D)
-  ↓
-Genre Embeddings (genre → vecteur 16D)
-  ↓
-Concatenation: [word_embed, genre_embed]
-  ↓
-Dense Layer 1: 176 → 32 (ReLU activation)
-  ↓
-Dense Layer 2: 32 → vocab_size (Softmax activation)
-  ↓
-Output: Probabilités du prochain mot
-```
-
-### Hyperparamètres
-
-- **Embedding Dimension:** 16
-- **Hidden Layer Size:** 32
-- **Sequence Length:** 10 tokens
-- **Epochs:** 10
-- **Batch Size:** 128
-- **Learning Rate:** 0.001
-- **Vocabulary Size:** ~15,000 mots
-
-## Dépendances
-
-- `pandas >= 1.1.0` - Manipulation de données
-- `numpy >= 1.19.0` - Calcul numérique
-- `scikit-learn >= 0.23.0` - Prétraitement données
-- `matplotlib >= 3.3.0` - Visualisation
-
-Toutes les dépendances sont listées dans `requirements.txt`
-
-## Vérification de l'Installation
-
-```bash
-python3 test_project.py
-```
-
-Vérifiera:
-- ✓ Tous les imports Python
-- ✓ Présence du dataset
-- ✓ Validité des fichiers
-- ✓ État du modèle
-
-## Fichiers Explicités
-
-### TP_Paroles_Code_Complet.py (Principal)
-Script d'entraînement complet divisé en 11 sections:
-1. **Section 1**: Chargement du dataset
-2. **Section 2**: Exploration des genres
-3. **Section 3**: Prétraitement du texte
-4. **Section 4**: Construction du vocabulaire
-5. **Section 5**: Encodage des données
-6. **Section 6**: Préparation train/validation (avec barre de progression)
-7. **Section 7**: Modèle neural network
-8. **Section 8**: Entraînement avec gradient descent (Loss, Accuracy, Perplexity)
-9. **Section 9**: Génération et tests
-10. **Section 10**: Visualisations et Statistiques (4 graphiques)
-11. **Section 11**: Sauvegarde du modèle
-
-**Chemin du modèle:** Automatiquement déterminé (même répertoire)
-**Chemin du dataset:** Automatiquement déterminé (même répertoire)
-**Graphiques:** Sauvegardés dans `training_stats.png`
-
-### infer_lyrics.py (Inférence)
-Script d'inférence pour générer des paroles avec le modèle entraîné.
-
-**Features:**
-- Interface CLI avec argparse
-- Support multi-échantillons
-- Contrôle température (créativité)
-- Lister les genres disponibles
-
-**Commandes:**
-```bash
-python3 infer_lyrics.py --genre GENRE [--samples N] [--length L] [--temperature T]
-```
-
-### requirements.txt
-Spécifie toutes les dépendances avec versions minimales.
-Utilisé par pip pour l'installation.
-
-### setup.sh (Linux/macOS)
-Script d'automatisation qui:
-- Vérifie Python3 et pip3
-- Installe les dépendances
-- Vérifie les fichiers requis
-- Teste les imports
-
-### test_project.py
-Suite de tests pour vérifier:
-- Importabilité des modules
-- Chargeabilité du dataset
-- Validité des fichiers
-- État du modèle
-
-## Dépannage
-
-### Python/pip non trouvé
-```bash
-# Ubuntu/Debian
-sudo apt-get install python3 python3-pip
-
-# macOS (avec brew)
-brew install python3
-
-# Windows
-# Télécharger depuis python.org
-```
-
-### Dépendances manquantes
-```bash
-pip3 install -r requirements.txt
-```
-
-### Dataset non trouvé
-Assurez-vous que `spotify_songs.csv` est dans le même répertoire que les scripts.
-
-### L'entraînement est trop lent
-- C'est normal sur CPU (5-15 min)
-- Réduisez le nombre d'epochs (ligne 300): `NUM_EPOCHS = 5`
-- Réduisez la taille du batch: `BATCH_SIZE = 64`
-
-### Pas assez de mémoire
-- Réduisez le batch size: `BATCH_SIZE = 32`
-- Réduisez le vocabulaire minimum: `MIN_FREQ = 5`
-
-## Structure des Chemins Dynamiques
-
-Les scripts utilisent des chemins **dynamiques et relatifs**:
-```python
-def get_project_root():
-    return os.path.dirname(os.path.abspath(__file__))
-
-def get_data_path(filename):
-    return os.path.join(get_project_root(), filename)
-```
-
-Cela signifie:
-- ✓ Fonctionne sur n'importe quel ordinateur
-- ✓ Fonctionne depuis n'importe quel répertoire
-- ✓ Le modèle est sauvegardé dans le même dossier que les scripts
-
-## Améliorations Possibles
-
-1. **Augmentation de données:** Ajouter des transformations textuelles
-2. **Meilleur modèle:** LSTM ou Transformers
-3. **Fine-tuning:** En fonction d'un genre spécifique
-4. **Visualisations:** Courbes de loss, embeddings t-SNE
-5. **API Web:** Flask ou FastAPI pour servir le modèle
-
-## Concepts Mathématiques Appliqués
-
-### Math utilisée:
-- **Embeddings:** $\text{embedding}(w) \in \mathbb{R}^d$
-- **Forward Pass:** $z = Wx + b$, $a = \text{ReLU}(z)$
-- **Softmax:** $\text{softmax}(z_i) = \frac{e^{z_i}}{\sum_j e^{z_j}}$
-- **Cross-Entropy:** $L = -\sum_i y_i \log(\hat{y}_i)$
-- **Backpropagation:** $\frac{\partial L}{\partial W} = \frac{\partial L}{\partial a} \cdot \frac{\partial a}{\partial W}$
-- **Gradient Descent:** $W \leftarrow W - \alpha \nabla L$
-
-## Résultats Attendus
-
-Après l'entraînement, vous devriez voir:
-- **Train Loss:** ~1.2 → ~0.6
-- **Validation Loss:** ~1.3 → ~0.7
-- **Génération:** Paroles lisibles mais simples (modèle basique)
-
-Exemple:
-```
-ROCK:
-  the day when you want to be with me i know...
-
-POP:  
-  love is in the air tonight feel the magic...
-```
-
-## Auteur & Licences
-
-Ce TP utilise:
-- Dataset Spotify (18,454 chansons avec paroles)
-- Techniques du cours de Machine Learning
-
-## Support
-
-Pour toute question, vérifiez:
-1. Les fichiers sont dans le bon répertoire
-2. Les dépendances sont installées
-3. Le dataset existe et n'est pas corrompu
-4. La version de Python est >= 3.7
+| Option | Défaut | Description |
+|--------|--------|-------------|
+| `--genre` | — | Genre musical (ex: `rock`, `pop`, `rap`) |
+| `--samples` | `1` | Nombre de générations |
+| `--length` | `50` | Nombre maximum de mots |
+| `--temperature` | `0.8` | Créativité (`< 1` = déterministe, `> 1` = aléatoire) |
+| `--list-genres` | — | Afficher les genres disponibles |
+| `--model` | `outputs/lyrics_model.pkl` | Chemin vers un modèle personnalisé |
 
 ---
 
-**Bon codage! 🎤🎵**
+## Paramètres & Configuration
+
+Tous les hyperparamètres sont dans `TP_Paroles_Code_Complet.py` et peuvent être surchargés via variables d'environnement.
+
+### Taille du dataset
+
+```python
+MAX_SAMPLES = None   # None = tout le dataset (~18 000 chansons)
+                     # 2000 = debug rapide (~2 min)
+                     # 5000 = bon compromis (~5 min)
+                     # 10000 = haute qualité (~10 min)
+```
+
+Sans modifier le code :
+
+```bash
+MAX_SAMPLES=3000 python3 TP_Paroles_Code_Complet.py
+```
+
+### Hyperparamètres d'entraînement
+
+| Paramètre | Défaut | Description |
+|-----------|--------|-------------|
+| `MAX_SAMPLES` | `None` | Entrées du dataset à utiliser (`None` = tout) |
+| `TOP_GENRES` | `5` | Nombre de genres à retenir |
+| `MAX_VOCAB_SIZE` | `20 000` | Taille maximale du vocabulaire |
+| `MIN_FREQ` | `2` | Fréquence minimale d'un mot pour être inclus |
+| `SEQ_LEN` | `10` | Longueur de la séquence d'entrée (tokens) |
+| `NUM_EPOCHS` | `10` | Nombre d'époques |
+| `BATCH_SIZE` | `128` | Taille du batch |
+| `LEARNING_RATE` | `0.001` | Taux d'apprentissage |
+| `EARLY_STOP_PATIENCE` | `3` | Arrêt anticipé si val_loss stagne |
+| `CHECKPOINT_EVERY` | `1` | Sauvegarde checkpoint toutes les N époques |
+| `GRAD_CLIP` | `5.0` | Seuil de gradient clipping |
+
+### Variables d'environnement
+
+| Variable | Valeurs possibles | Défaut |
+|----------|-------------------|--------|
+| `USE_GPU` | `1`, `true`, `auto`, `0` | `auto` |
+| `MAX_SAMPLES` | entier positif | non défini (= tout) |
+
+---
+
+## Architecture du Modèle
+
+### Pipeline complet
+
+```
+Dataset Spotify (18 454 chansons)
+        │
+        ▼
+  Nettoyage & Tokenisation
+  (lowercase, regex, <NEW_LINE>)
+        │
+        ▼
+  Vocabulaire (cap: 20 000 tokens, freq ≥ 2)
+  Tokens spéciaux : <PAD>  <UNK>  <BOS>  <EOS>
+        │
+        ▼
+  Paires (séquence → mot cible) + encodage genre
+        │
+        ▼
+  ┌─────────────────────────────────┐
+  │          MODÈLE NN              │
+  │                                 │
+  │  Word Embeddings  (SEQ_LEN×16D) │
+  │  Genre Embedding  (1×16D)       │
+  │         ↓ concatenation         │
+  │  Dense 1 : 176 → 32  (ReLU)    │
+  │  Dense 2 : 32 → vocab (Softmax) │
+  └─────────────────────────────────┘
+        │
+        ▼
+  Probabilités du prochain mot
+```
+
+### Concepts du cours appliqués
+
+| Concept | Application dans le projet |
+|---------|---------------------------|
+| **Embeddings** | Représentation vectorielle des mots et genres |
+| **Classification** | Prédiction du mot suivant parmi ~20k classes |
+| **Cross-Entropy** | Fonction de coût |
+| **Backpropagation** | Calcul des gradients par dérivation en chaîne |
+| **Gradient Descent** | Mise à jour des poids |
+| **Gradient Clipping** | Stabilisation (`GRAD_CLIP = 5.0`) |
+| **Early Stopping** | Arrêt si val_loss stagne (`patience = 3`) |
+
+---
+
+## Métriques & Suivi
+
+Affichage à chaque batch (500 itérations) :
+
+```
+Batch 500/3210 | Loss: 6.4321 | Acc: 0.0521 | Elapsed: 14.2s | ETA: 77s
+```
+
+Affichage à chaque époque :
+
+```
+Époque | Train Loss | Train Acc | Val Loss | Val Acc | Train PPL | Val PPL |   Time
+     1 |   6.432100 |    0.0521 | 6.721000 |  0.0498 |  621.4000 | 827.200 |  92.3s ✓ best
+     2 |   5.981200 |    0.0634 | 6.432000 |  0.0551 |  394.8000 | 621.400 |  88.7s ✓ best
+     3 |   5.760400 |    0.0710 | 6.432100 |  0.0548 |  317.8000 | 621.500 |  89.1s (patience 1/3)
+```
+
+### Métriques disponibles
+
+| Métrique | Formule | Interprétation |
+|----------|---------|----------------|
+| **Loss** | Cross-Entropy | Plus bas = meilleur |
+| **Accuracy** | % de mots corrects | Plus haut = meilleur |
+| **Perplexity** | exp(loss) | Plus bas = meilleur |
+
+### Graphiques produits (`outputs/training_stats.png`)
+
+1. **Loss** train vs validation par époque
+2. **Perplexity** train vs validation par époque
+3. **Distribution des genres** (bar chart annoté)
+4. **Distribution des longueurs de séquences** (histogramme avec moyenne/médiane)
+
+### Checkpoints automatiques
+
+```
+outputs/checkpoint_epoch1.pkl
+outputs/checkpoint_epoch2.pkl
+...
+outputs/lyrics_model.pkl   ← modèle final
+```
+
+Si l'entraînement plante à l'époque 8, les 7 checkpoints précédents sont préservés.
+
+---
+
+## Support GPU
+
+Le script détecte automatiquement un GPU CUDA via CuPy :
+
+```bash
+# Forcer GPU
+USE_GPU=1 python3 TP_Paroles_Code_Complet.py
+# → ✓ Backend: GPU (CuPy)
+
+# Forcer CPU
+USE_GPU=0 python3 TP_Paroles_Code_Complet.py
+# → ✓ Backend: CPU (NumPy)
+
+# Auto-détection (défaut)
+python3 TP_Paroles_Code_Complet.py
+# → ✓ Backend: GPU (CuPy)   si GPU disponible
+# → ✓ Backend: CPU (NumPy)  sinon (silencieux)
+```
+
+Si CuPy n'est pas installé ou si aucun GPU n'est détecté, le script continue sur CPU sans interruption.
+
+---
+
+## Structure des Fichiers
+
+```
+.
+├── TP_Paroles_Code_Complet.py    # Script principal (entraînement, 11 sections)
+├── infer_lyrics.py               # Génération de paroles (CLI)
+├── spotify_songs.csv             # Dataset (~18 454 chansons, ~42 MB)
+├── outputs/                      # Créé automatiquement
+│   ├── lyrics_model.pkl          # Modèle final
+│   ├── training_stats.png        # Graphiques d'entraînement
+│   ├── checkpoint_epoch1.pkl     # Checkpoints
+│   └── checkpoint_epochN.pkl
+├── requirements.txt              # Dépendances Python
+├── setup.sh                      # Installation automatique (Linux/macOS)
+├── test_project.py               # Tests de vérification
+└── README.md                     # Ce fichier
+```
+
+### Sections du script principal
+
+| # | Section | Description |
+|---|---------|-------------|
+| 1 | Chargement | Lecture CSV, nettoyage, filtrage, `MAX_SAMPLES` |
+| 2 | Genres | Sélection des `TOP_GENRES` genres dominants |
+| 3 | Prétraitement | Tokenisation, lowercase, regex |
+| 4 | Vocabulaire | Construction avec fréquence et cap |
+| 5 | Encodage | Séquences numériques + encodage genre |
+| 6 | Train/Val split | Génération des paires + progression + monitoring RAM |
+| 7 | Modèle | Définition de `LyricsGenerationModel` |
+| 8 | Entraînement | NaN guard, grad clipping, early stopping, checkpoints |
+| 9 | Génération | Tests de génération par genre |
+| 10 | Visualisations | 4 graphiques matplotlib sauvegardés |
+| 11 | Sauvegarde | Export `outputs/lyrics_model.pkl` avec fallback |
+
+---
+
+## Dépannage
+
+### Entraînement trop lent
+
+```bash
+MAX_SAMPLES=2000 python3 TP_Paroles_Code_Complet.py   # dataset réduit
+USE_GPU=1 python3 TP_Paroles_Code_Complet.py           # GPU
+```
+
+Ou dans le script :
+```python
+NUM_EPOCHS = 3
+BATCH_SIZE = 256
+```
+
+### Manque de mémoire RAM
+
+```bash
+MAX_SAMPLES=3000 python3 TP_Paroles_Code_Complet.py
+```
+
+Ou :
+```python
+MAX_VOCAB_SIZE = 10000
+BATCH_SIZE = 64
+MIN_FREQ = 5
+```
+
+### Loss NaN / entraînement instable
+
+Le script skippe automatiquement les batchs NaN (jusqu'à 5 consécutifs). Si le problème persiste :
+
+```python
+LEARNING_RATE = 0.0001
+GRAD_CLIP = 1.0
+```
+
+### Reprendre depuis un checkpoint
+
+```bash
+python3 infer_lyrics.py --model outputs/checkpoint_epoch5.pkl --genre rock
+```
+
+### Dataset non trouvé
+
+`spotify_songs.csv` doit être dans le même répertoire que les scripts. Les chemins sont calculés dynamiquement :
+
+```python
+def get_project_root():
+    return os.path.dirname(os.path.abspath(__file__))
+```
+
+Le script fonctionne depuis n'importe quel répertoire courant.
+
+### plt.show() plante (serveur sans affichage)
+
+Le script capture automatiquement cette erreur et continue. Les graphiques sont toujours sauvegardés dans `outputs/training_stats.png`.
+
+---
+
+## Concepts Mathématiques
+
+### Embeddings
+
+$$\text{embed}(w) \in \mathbb{R}^{16}, \quad \text{embed}(g) \in \mathbb{R}^{16}$$
+
+### Forward Pass
+
+$$z_1 = X W_1 + b_1, \quad a_1 = \text{ReLU}(z_1) = \max(0,\, z_1)$$
+$$z_2 = a_1 W_2 + b_2$$
+
+### Softmax
+
+$$\hat{y}_i = \frac{e^{z_i}}{\displaystyle\sum_j e^{z_j}}$$
+
+### Fonction de coût (Cross-Entropy)
+
+$$\mathcal{L} = -\frac{1}{N} \sum_{i=1}^{N} \log \hat{y}_{i,\, t_i}$$
+
+### Perplexité
+
+$$\text{PPL} = e^{\mathcal{L}}$$
+
+### Backpropagation & Gradient Descent
+
+$$\frac{\partial \mathcal{L}}{\partial W} = \frac{\partial \mathcal{L}}{\partial a} \cdot \frac{\partial a}{\partial W}, \qquad W \leftarrow W - \alpha\, \nabla_W \mathcal{L}$$
+
+### Gradient Clipping
+
+$$\text{si} \;\|W\| > \delta :\quad W \leftarrow W \cdot \frac{\delta}{\|W\| + \varepsilon}$$
+
+---
+
+## Dépendances
+
+| Package | Version min | Usage |
+|---------|-------------|-------|
+| `numpy` | ≥ 1.19.0 | Calcul numérique (backend CPU) |
+| `pandas` | ≥ 1.1.0 | Chargement et manipulation du dataset |
+| `scikit-learn` | ≥ 0.23.0 | `train_test_split`, `LabelEncoder` |
+| `matplotlib` | ≥ 3.3.0 | Graphiques et visualisations |
+| `cupy` | optionnel | Backend GPU (CUDA) |
+| `psutil` | optionnel | Monitoring mémoire RAM |
+
+```bash
+pip install -r requirements.txt
+
+# Optionnel
+pip install psutil cupy-cuda12x
+```
+
+---
+
+## Résultats Attendus
+
+| MAX_SAMPLES | Époques | Durée CPU | Train Loss | Val Perplexity |
+|-------------|---------|-----------|------------|----------------|
+| 2 000 | 10 | ~2 min | ~5.5 | ~250 |
+| 5 000 | 10 | ~5 min | ~5.0 | ~150 |
+| 18 000 (complet) | 10 | ~15 min | ~4.5 | ~90 |
+
+Exemple de génération :
+
+```
+ROCK:
+  the day when you want to be with me i know the way
+  we used to fall together in the fire and the rain
+
+POP:
+  love is in the air tonight feel the magic all around
+  baby you and i were made to dance under the lights
+```
+
+---
+
+**Bon entraînement ! 🎤🎵**
