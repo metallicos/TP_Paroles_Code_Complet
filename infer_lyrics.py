@@ -200,7 +200,7 @@ class LyricsGenerator:
         exp_logits = xp.exp(logits - xp.max(logits))
         return exp_logits / xp.sum(exp_logits)
 
-    def generate(self, genre, max_length=50, temperature=1.0, seed_tokens=None, top_k=40):
+    def generate(self, genre, max_length=50, temperature=1.0, seed_tokens=None, top_k=40, min_length=20):
         genre_idx = None
         genre_lower = genre.lower()
         
@@ -222,6 +222,8 @@ class LyricsGenerator:
             logits = self.model.forward(X_input, genres_input, self.weights)[0]
             probs = self._topk_probs(logits, temperature, top_k)
             probs_np = probs.get().astype(np.float64) if hasattr(probs, 'get') else np.asarray(probs, dtype=np.float64)
+            if min_length and (len(generated_tokens) - 1) < min_length:
+                probs_np[self.EOS_IDX] = 0.0
             probs_np = probs_np / probs_np.sum()  # ensure sums to 1 (float precision)
             next_token = int(np.random.choice(len(probs_np), p=probs_np))
             
@@ -246,13 +248,13 @@ class LyricsGenerator:
                 words.append(word)
         return ' '.join(words) if words else "(Paroles vides - essayez avec une autre température)"
     
-    def generate_multiple(self, genre, num_samples=3, max_length=50, temperature=0.8, top_k=40):
+    def generate_multiple(self, genre, num_samples=3, max_length=50, temperature=0.8, top_k=40, min_length=20):
         print(f"\n🎵 Génération de {num_samples} paroles pour le genre: {genre.upper()}")
         print("-" * 60)
         
         for i in range(num_samples):
             print(f"\n📝 Exemple {i+1}:")
-            lyrics = self.generate(genre, max_length, temperature, top_k=top_k)
+            lyrics = self.generate(genre, max_length, temperature, top_k=top_k, min_length=min_length)
             print(lyrics)
             print()
     
@@ -290,6 +292,9 @@ def main():
 
     parser.add_argument('--top-k', type=int, default=40,
                        help='Top-k sampling: limiter aux k tokens les plus probables (défaut: 40, 0=désactivé)')
+
+    parser.add_argument('--min-length', type=int, default=20,
+                       help='Nombre minimum de tokens avant d\'autoriser <EOS> (défaut: 20)')
 
     parser.add_argument('--csv', type=str, default=None,
                        help='Chemin vers spotify_songs.csv pour reconstruire le vocabulaire '
@@ -346,12 +351,25 @@ def main():
         return
     
     if args.samples > 1:
-        generator.generate_multiple(args.genre, args.samples, args.length, args.temperature, top_k=args.top_k)
+        generator.generate_multiple(
+            args.genre,
+            args.samples,
+            args.length,
+            args.temperature,
+            top_k=args.top_k,
+            min_length=args.min_length,
+        )
     else:
         print(f"\n🎵 Génération de paroles pour le genre: {args.genre.upper()}")
-        print(f"   (Température: {args.temperature}, Max tokens: {args.length}, Top-k: {args.top_k})")
+        print(f"   (Température: {args.temperature}, Max tokens: {args.length}, Top-k: {args.top_k}, Min length: {args.min_length})")
         print("-" * 60)
-        lyrics = generator.generate(args.genre, args.length, args.temperature, top_k=args.top_k)
+        lyrics = generator.generate(
+            args.genre,
+            args.length,
+            args.temperature,
+            top_k=args.top_k,
+            min_length=args.min_length,
+        )
         print(lyrics)
         print()
 
