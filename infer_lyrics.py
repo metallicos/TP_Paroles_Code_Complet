@@ -184,7 +184,18 @@ class LyricsGenerator:
         else:
             return seq[-max_len:]
     
-    def generate(self, genre, max_length=50, temperature=1.0, seed_tokens=None):
+    def _topk_probs(self, logits, temperature, top_k):
+        """Apply temperature + top-k filtering, return normalized probabilities."""
+        logits = logits / max(temperature, 1e-8)
+        if top_k and top_k > 0:
+            # Zero out everything except the top-k logits
+            top_k = min(top_k, len(logits))
+            threshold = xp.sort(logits)[-top_k]
+            logits = xp.where(logits >= threshold, logits, xp.full_like(logits, -1e9))
+        exp_logits = xp.exp(logits - xp.max(logits))
+        return exp_logits / xp.sum(exp_logits)
+
+    def generate(self, genre, max_length=50, temperature=1.0, seed_tokens=None, top_k=40):
         genre_idx = None
         genre_lower = genre.lower()
         
@@ -203,12 +214,11 @@ class LyricsGenerator:
             X_input = xp.array([self.pad_sequence(context_buffer, self.SEQ_LEN)], dtype=xp.int32)
             genres_input = xp.array([genre_idx], dtype=xp.int32)
             
-            logits = self.model.forward(X_input, genres_input, self.weights)
-            logits = logits[0] / temperature
-            
-            exp_logits = xp.exp(logits - xp.max(logits))
-            probs = exp_logits / xp.sum(exp_logits)
-            next_token = int(xp.random.choice(len(probs), p=probs))
+            logits = self.model.forward(X_input, genres_input, self.weights)[0]
+            probs = self._topk_probs(logits, temperature, top_k)
+            probs_np = np.array(probs, dtype=np.float64)
+            probs_np = probs_np / probs_np.sum()  # ensure sums to 1 (float precision)
+            next_token = int(np.random.choice(len(probs_np), p=probs_np))
             
             if next_token == self.EOS_IDX:
                 break
@@ -231,13 +241,13 @@ class LyricsGenerator:
                 words.append(word)
         return ' '.join(words) if words else "(Paroles vides - essayez avec une autre température)"
     
-    def generate_multiple(self, genre, num_samples=3, max_length=50, temperature=0.8):
+    def generate_multiple(self, genre, num_samples=3, max_length=50, temperature=0.8, top_k=40):
         print(f"\n🎵 Génération de {num_samples} paroles pour le genre: {genre.upper()}")
         print("-" * 60)
         
         for i in range(num_samples):
             print(f"\n📝 Exemple {i+1}:")
-            lyrics = self.generate(genre, max_length, temperature)
+            lyrics = self.generate(genre, max_length, temperature, top_k=top_k)
             print(lyrics)
             print()
     
@@ -272,6 +282,9 @@ def main():
     
     parser.add_argument('--list-genres', action='store_true',
                        help='Afficher les genres disponibles')
+
+    parser.add_argument('--top-k', type=int, default=40,
+                       help='Top-k sampling: limiter aux k tokens les plus probables (défaut: 40, 0=désactivé)')
 
     parser.add_argument('--csv', type=str, default=None,
                        help='Chemin vers spotify_songs.csv pour reconstruire le vocabulaire '
@@ -328,12 +341,12 @@ def main():
         return
     
     if args.samples > 1:
-        generator.generate_multiple(args.genre, args.samples, args.length, args.temperature)
+        generator.generate_multiple(args.genre, args.samples, args.length, args.temperature, top_k=args.top_k)
     else:
         print(f"\n🎵 Génération de paroles pour le genre: {args.genre.upper()}")
-        print(f"   (Température: {args.temperature}, Max tokens: {args.length})")
+        print(f"   (Température: {args.temperature}, Max tokens: {args.length}, Top-k: {args.top_k})")
         print("-" * 60)
-        lyrics = generator.generate(args.genre, args.length, args.temperature)
+        lyrics = generator.generate(args.genre, args.length, args.temperature, top_k=args.top_k)
         print(lyrics)
         print()
 
