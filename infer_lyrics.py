@@ -214,6 +214,7 @@ class LyricsGenerator:
         
         generated_tokens = [self.BOS_IDX]
         context_buffer = list(generated_tokens)
+        visible_word_count = 0
         
         for step in range(max_length):
             X_input = xp.array([self.pad_sequence(context_buffer, self.SEQ_LEN)], dtype=xp.int32)
@@ -222,15 +223,31 @@ class LyricsGenerator:
             logits = self.model.forward(X_input, genres_input, self.weights)[0]
             probs = self._topk_probs(logits, temperature, top_k)
             probs_np = probs.get().astype(np.float64) if hasattr(probs, 'get') else np.asarray(probs, dtype=np.float64)
-            if min_length and (len(generated_tokens) - 1) < min_length:
+
+            # Never sample non-lyric special tokens during generation
+            probs_np[self.PAD_IDX] = 0.0
+            probs_np[self.BOS_IDX] = 0.0
+            probs_np[self.UNK_IDX] = 0.0
+
+            # Enforce minimum number of visible words before allowing EOS
+            if min_length and visible_word_count < min_length:
                 probs_np[self.EOS_IDX] = 0.0
-            probs_np = probs_np / probs_np.sum()  # ensure sums to 1 (float precision)
+
+            probs_sum = probs_np.sum()
+            if probs_sum <= 0:
+                # Fallback: if filtering removed all mass, use original distribution
+                probs_np = probs.get().astype(np.float64) if hasattr(probs, 'get') else np.asarray(probs, dtype=np.float64)
+                probs_sum = probs_np.sum()
+
+            probs_np = probs_np / probs_sum  # ensure sums to 1 (float precision)
             next_token = int(np.random.choice(len(probs_np), p=probs_np))
             
             if next_token == self.EOS_IDX:
                 break
             
             generated_tokens.append(next_token)
+            if next_token not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
+                visible_word_count += 1
             context_buffer.append(next_token)
             
             if len(context_buffer) > self.SEQ_LEN:
