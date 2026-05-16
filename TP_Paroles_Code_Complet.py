@@ -612,7 +612,7 @@ def tokens_to_lyrics(token_indices):
     return ' '.join(words)
 
 print("\nGénération par genre:")
-for genre_idx, genre_name in enumerate(genre_encoder.classes_)
+for genre_idx, genre_name in enumerate(genre_encoder.classes_):
     tokens = generate_lyrics(model, genre_idx, max_length=40, temperature=0.8)
     lyrics = tokens_to_lyrics(tokens)
     print(f"\n{genre_name.upper()}:")
