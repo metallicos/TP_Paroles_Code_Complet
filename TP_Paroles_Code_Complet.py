@@ -9,6 +9,25 @@ from collections import Counter
 import re
 import pickle
 import time
+import traceback
+
+try:
+    import psutil
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
+
+
+def log_memory():
+    """Print current RAM usage if psutil is available."""
+    if HAS_PSUTIL:
+        mem = psutil.virtual_memory()
+        used_gb = (mem.total - mem.available) / 1024**3
+        total_gb = mem.total / 1024**3
+        pct = mem.percent
+        print(f"  [MEM] RAM: {used_gb:.1f}/{total_gb:.1f} GB ({pct:.1f}% used)")
+        if pct > 85:
+            print(f"  ⚠️  RAM usage high ({pct:.1f}%) — risk of crash!")
 
 
 def get_array_backend():
@@ -94,9 +113,14 @@ def preprocess_text(text):
 def tokenize(text):
     return text.split()
 
-df['lyrics_clean'] = df['lyrics'].apply(preprocess_text)
-df['tokens'] = df['lyrics_clean'].apply(tokenize)
-print(f"✓ Prétraitement: taille moyenne {df['tokens'].str.len().mean():.0f} tokens")
+try:
+    df['lyrics_clean'] = df['lyrics'].apply(preprocess_text)
+    df['tokens'] = df['lyrics_clean'].apply(tokenize)
+    print(f"✓ Prétraitement: taille moyenne {df['tokens'].str.len().mean():.0f} tokens")
+except Exception as e:
+    print(f"❌ Erreur prétraitement: {e}")
+    traceback.print_exc()
+    sys.exit(1)
 
 print("\n" + "="*60)
 print("SECTION 4: Construction du Vocabulaire")
@@ -163,17 +187,32 @@ X, y, genres_list = [], [], []
 
 total_rows = len(df_filtered)
 print(f"Création des paires (cela peut prendre du temps...)...")
+log_memory()
 
-for idx, (row_idx, row) in enumerate(df_filtered.iterrows()):
-    if (idx + 1) % 500 == 0:
-        print(f"  Progression: {idx + 1}/{total_rows}")
-    
-    tokens = row['encoded_tokens']
-    genre = row['genre_encoded']
-    for i in range(len(tokens) - 1):
-        X.append(tokens[:i+1])
-        y.append(tokens[i+1])
-        genres_list.append(genre)
+try:
+    pair_start = time.time()
+    for idx, (row_idx, row) in enumerate(df_filtered.iterrows()):
+        if (idx + 1) % 500 == 0:
+            elapsed = time.time() - pair_start
+            remaining = elapsed / (idx + 1) * (total_rows - idx - 1)
+            print(f"  Progression: {idx + 1}/{total_rows} | ETA: {remaining:.0f}s | Paires: {len(X):,}")
+            log_memory()
+        
+        tokens = row['encoded_tokens']
+        genre = row['genre_encoded']
+        for i in range(len(tokens) - 1):
+            X.append(tokens[:i+1])
+            y.append(tokens[i+1])
+            genres_list.append(genre)
+    print(f"  ✓ {len(X):,} paires créées en {time.time() - pair_start:.1f}s")
+except MemoryError:
+    print(f"❌ MemoryError lors de la création des paires ({len(X):,} paires créées)")
+    print("  💡 Conseil: Réduire MAX_VOCAB_SIZE ou TOP_GENRES")
+    sys.exit(1)
+except Exception as e:
+    print(f"❌ Erreur: {e}")
+    traceback.print_exc()
+    sys.exit(1)
 
 def pad_sequence(seq, max_len):
     if len(seq) == max_len:
@@ -285,42 +324,76 @@ genres_val = np.asarray(genres_val, dtype=np.int32)
 
 if USING_GPU:
     print("✓ Transfert des tenseurs vers GPU...")
-    X_train = xp.asarray(X_train)
-    X_val = xp.asarray(X_val)
-    y_train = xp.asarray(y_train)
-    y_val = xp.asarray(y_val)
-    genres_train = xp.asarray(genres_train)
-    genres_val = xp.asarray(genres_val)
+    try:
+        X_train = xp.asarray(X_train)
+        X_val = xp.asarray(X_val)
+        y_train = xp.asarray(y_train)
+        y_val = xp.asarray(y_val)
+        genres_train = xp.asarray(genres_train)
+        genres_val = xp.asarray(genres_val)
+        print("  ✓ Transfert GPU réussi")
+    except Exception as e:
+        print(f"  ⚠️  Transfert GPU échoué ({e}), repli sur CPU")
+        xp = np
+        USING_GPU = False
+
+GRAD_CLIP = 5.0  # max gradient norm before clipping
+
 
 def train_epoch(model, X_train, y_train, genres_train, batch_size=128, lr=0.01):
     total_loss = 0
     total_accuracy = 0
     num_batches = int(np.ceil(len(X_train) / batch_size))
     epoch_start = time.time()
-    
+    batch_times = []
+    nan_batches = 0
+
     for batch_idx in range(num_batches):
+        batch_t0 = time.time()
         start_idx = batch_idx * batch_size
         end_idx = min(start_idx + batch_size, len(X_train))
-        
+
         X_batch = X_train[start_idx:end_idx]
         y_batch = y_train[start_idx:end_idx]
         genres_batch = genres_train[start_idx:end_idx]
-        
-        logits, a1, combined = model.forward(X_batch, genres_batch)
-        loss, probs = model.compute_loss(logits, y_batch)
-        accuracy = compute_accuracy(logits, y_batch)
-        
-        model.backward(X_batch, genres_batch, y_batch, logits, a1, combined, probs, lr)
-        total_loss += loss
-        total_accuracy += accuracy
 
+        try:
+            logits, a1, combined = model.forward(X_batch, genres_batch)
+            loss, probs = model.compute_loss(logits, y_batch)
+
+            # NaN / Inf guard — skip bad batch
+            if np.isnan(loss) or np.isinf(loss):
+                nan_batches += 1
+                print(f"    ⚠️  NaN/Inf loss at batch {batch_idx + 1} — skipping")
+                if nan_batches >= 5:
+                    print("    ❌ Too many NaN batches — stopping epoch early")
+                    break
+                continue
+
+            accuracy = compute_accuracy(logits, y_batch)
+            model.backward(X_batch, genres_batch, y_batch, logits, a1, combined, probs, lr)
+
+            # Gradient clipping on weight matrices
+            for param in [model.W1, model.W2, model.b1, model.b2]:
+                norm = float(xp.linalg.norm(param).item())
+                if norm > GRAD_CLIP:
+                    param *= GRAD_CLIP / (norm + 1e-8)
+
+            total_loss += loss
+            total_accuracy += accuracy
+        except Exception as e:
+            print(f"    ⚠️  Erreur batch {batch_idx + 1}: {e}")
+            continue
+
+        batch_times.append(time.time() - batch_t0)
         if (batch_idx + 1) % 500 == 0 or (batch_idx + 1) == num_batches:
             elapsed = time.time() - epoch_start
-            print(f"    Batch {batch_idx + 1}/{num_batches} | elapsed: {elapsed:.1f}s")
-    
-    avg_loss = total_loss / num_batches
-    avg_accuracy = total_accuracy / num_batches
-    return avg_loss, avg_accuracy
+            avg_bt = np.mean(batch_times[-100:]) if batch_times else 0
+            eta = (num_batches - batch_idx - 1) * avg_bt
+            print(f"    Batch {batch_idx + 1}/{num_batches} | Loss: {loss:.4f} | Acc: {accuracy:.4f} | Elapsed: {elapsed:.1f}s | ETA: {eta:.0f}s")
+
+    valid_batches = max(num_batches - nan_batches, 1)
+    return total_loss / valid_batches, total_accuracy / valid_batches
 
 def evaluate(model, X_test, y_test, genres_test, batch_size=128):
     total_loss = 0
@@ -349,24 +422,85 @@ def evaluate(model, X_test, y_test, genres_test, batch_size=128):
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 0.001
+EARLY_STOP_PATIENCE = 3  # stop if val_loss doesn't improve for N epochs
+CHECKPOINT_EVERY = 1     # save checkpoint every N epochs
 
-print(f"Époque | Train Loss | Train Acc | Val Loss | Val Acc | Train PPL | Val PPL")
-print("-" * 80)
+print(f"Config: epochs={NUM_EPOCHS}, batch={BATCH_SIZE}, lr={LEARNING_RATE}, patience={EARLY_STOP_PATIENCE}")
+log_memory()
+print(f"\n{'Époque':>6} | {'Train Loss':>10} | {'Train Acc':>9} | {'Val Loss':>8} | {'Val Acc':>7} | {'Train PPL':>9} | {'Val PPL':>7} | {'Time':>6}")
+print("-" * 90)
+
+best_val_loss = float('inf')
+best_epoch = 0
+patience_counter = 0
+training_start = time.time()
 
 for epoch in range(NUM_EPOCHS):
+    epoch_start = time.time()
     print(f"\nEpoch {epoch + 1}/{NUM_EPOCHS}")
-    train_loss, train_acc = train_epoch(model, X_train, y_train, genres_train, BATCH_SIZE, LEARNING_RATE)
-    val_loss, val_acc = evaluate(model, X_val, y_val, genres_val, BATCH_SIZE)
-    
+    log_memory()
+    try:
+        train_loss, train_acc = train_epoch(model, X_train, y_train, genres_train, BATCH_SIZE, LEARNING_RATE)
+        val_loss, val_acc = evaluate(model, X_val, y_val, genres_val, BATCH_SIZE)
+    except Exception as e:
+        print(f"  ❌ Erreur epoch {epoch + 1}: {e}")
+        traceback.print_exc()
+        print("  ⚠️  Tentative de continuer avec l'époque suivante...")
+        continue
+
+    if np.isnan(train_loss) or np.isnan(val_loss):
+        print(f"  ❌ NaN détecté epoch {epoch + 1} — arrêt de l'entraînement")
+        break
+
     train_ppl = compute_perplexity(train_loss)
     val_ppl = compute_perplexity(val_loss)
-    
+    epoch_time = time.time() - epoch_start
+
     model.loss_history.append(train_loss)
     model.val_loss_history.append(val_loss)
-    
-    print(f"{epoch+1:5d} | {train_loss:.6f}  | {train_acc:.4f}  | {val_loss:.6f}  | {val_acc:.4f}  | {train_ppl:.4f}   | {val_ppl:.4f}")
 
-print(f"\n✓ Entraînement terminé!")
+    improved = val_loss < best_val_loss
+    if improved:
+        best_val_loss = val_loss
+        best_epoch = epoch + 1
+        patience_counter = 0
+        tag = " ✓ best"
+    else:
+        patience_counter += 1
+        tag = f" (patience {patience_counter}/{EARLY_STOP_PATIENCE})"
+
+    print(f"{epoch+1:6d} | {train_loss:10.6f} | {train_acc:9.4f} | {val_loss:8.6f} | {val_acc:7.4f} | {train_ppl:9.4f} | {val_ppl:7.4f} | {epoch_time:5.1f}s{tag}")
+
+    # Checkpoint save
+    if (epoch + 1) % CHECKPOINT_EVERY == 0:
+        ckpt_path = get_output_path(f'checkpoint_epoch{epoch+1}.pkl')
+        try:
+            ckpt_data = {
+                'epoch': epoch + 1,
+                'model_weights': {
+                    'word_embedding': model.word_embedding,
+                    'genre_embedding': model.genre_embedding,
+                    'W1': model.W1, 'b1': model.b1,
+                    'W2': model.W2, 'b2': model.b2,
+                },
+                'loss_history': model.loss_history,
+                'val_loss_history': model.val_loss_history,
+            }
+            with open(ckpt_path, 'wb') as f:
+                pickle.dump(ckpt_data, f)
+            print(f"  💾 Checkpoint sauvegardé: {ckpt_path}")
+        except Exception as e:
+            print(f"  ⚠️  Checkpoint échoué: {e}")
+
+    # Early stopping
+    if patience_counter >= EARLY_STOP_PATIENCE:
+        print(f"\n🛑 Early stopping: val_loss n'a pas amélioré depuis {EARLY_STOP_PATIENCE} époques")
+        print(f"   Meilleure val_loss: {best_val_loss:.6f} à l'époque {best_epoch}")
+        break
+
+total_time = time.time() - training_start
+print(f"\n✓ Entraînement terminé en {total_time:.1f}s ({total_time/60:.1f} min)")
+print(f"✓ Meilleure val_loss: {best_val_loss:.6f} (époque {best_epoch})")
 
 print("\n" + "="*60)
 print("SECTION 9: Génération de Paroles")
@@ -473,9 +607,15 @@ ax4.grid(True, alpha=0.3, axis='y')
 
 plt.tight_layout()
 plot_path = get_output_path('training_stats.png')
-plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-print(f"\n✓ Graphiques sauvegardés: {plot_path}")
-plt.show()
+try:
+    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+    print(f"\n✓ Graphiques sauvegardés: {plot_path}")
+except Exception as e:
+    print(f"  ⚠️  Impossible de sauvegarder les graphiques: {e}")
+try:
+    plt.show()
+except Exception:
+    print("  ℹ️  plt.show() ignoré (environnement sans affichage graphique)")
 
 print("\n📊 STATISTIQUES FINALES:")
 print(f"  • Meilleur Train Loss: {min(model.loss_history):.4f}")
@@ -521,11 +661,20 @@ inference_package = {
 }
 
 model_path = get_output_path('lyrics_model.pkl')
-with open(model_path, 'wb') as f:
-    pickle.dump(inference_package, f)
-
-print(f"✓ Modèle sauvegardé: {model_path}")
-print(f"✓ Taille: {os.path.getsize(model_path) / 1024:.1f} KB")
+try:
+    with open(model_path, 'wb') as f:
+        pickle.dump(inference_package, f)
+    print(f"✓ Modèle sauvegardé: {model_path}")
+    print(f"✓ Taille: {os.path.getsize(model_path) / 1024:.1f} KB")
+except Exception as e:
+    print(f"❌ Sauvegarde échouée: {e}")
+    fallback_path = os.path.join(get_project_root(), 'lyrics_model_backup.pkl')
+    try:
+        with open(fallback_path, 'wb') as f:
+            pickle.dump(inference_package, f)
+        print(f"  💾 Sauvegarde de secours: {fallback_path}")
+    except Exception as e2:
+        print(f"  ❌ Sauvegarde de secours aussi échouée: {e2}")
 
 print("\n" + "="*60)
 print("RÉSUMÉ DU TP")
