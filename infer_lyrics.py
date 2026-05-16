@@ -5,6 +5,22 @@ import sys
 import os
 
 
+def get_array_backend():
+    use_gpu = os.getenv("USE_GPU", "auto").lower()
+    if use_gpu in ("1", "true", "yes", "auto"):
+        try:
+            import cupy as cp
+            device_count = cp.cuda.runtime.getDeviceCount()
+            if device_count > 0:
+                return cp, True
+        except Exception:
+            pass
+    return np, False
+
+
+xp, USING_GPU = get_array_backend()
+
+
 def get_project_root():
     return os.path.dirname(os.path.abspath(__file__))
 
@@ -28,11 +44,11 @@ class LyricsGenerationModel:
         word_embeds = weights['word_embedding'][X_batch]
         word_embeds_flat = word_embeds.reshape(batch_size, -1)
         genre_embeds = weights['genre_embedding'][genres_batch]
-        combined = np.concatenate([word_embeds_flat, genre_embeds], axis=1)
+        combined = xp.concatenate([word_embeds_flat, genre_embeds], axis=1)
         
-        z1 = np.dot(combined, weights['W1']) + weights['b1']
-        a1 = np.maximum(z1, 0)
-        z2 = np.dot(a1, weights['W2']) + weights['b2']
+        z1 = xp.dot(combined, weights['W1']) + weights['b1']
+        a1 = xp.maximum(z1, 0)
+        z2 = xp.dot(a1, weights['W2']) + weights['b2']
         
         return z2
 
@@ -63,6 +79,9 @@ class LyricsGenerator:
             hidden_dim=self.config['hidden_dim'],
             num_genres=self.config['num_genres']
         )
+
+        if USING_GPU:
+            self.weights = {k: xp.asarray(v) for k, v in self.weights.items()}
         
         print("✓ Modèle chargé avec succès!")
         print(f"  Vocabulaire: {len(self.word2idx):,} mots")
@@ -93,15 +112,15 @@ class LyricsGenerator:
         context_buffer = list(generated_tokens)
         
         for step in range(max_length):
-            X_input = np.array([self.pad_sequence(context_buffer, self.SEQ_LEN)])
-            genres_input = np.array([genre_idx])
+            X_input = xp.array([self.pad_sequence(context_buffer, self.SEQ_LEN)], dtype=xp.int32)
+            genres_input = xp.array([genre_idx], dtype=xp.int32)
             
             logits = self.model.forward(X_input, genres_input, self.weights)
             logits = logits[0] / temperature
             
-            exp_logits = np.exp(logits - np.max(logits))
-            probs = exp_logits / np.sum(exp_logits)
-            next_token = np.random.choice(len(probs), p=probs)
+            exp_logits = xp.exp(logits - xp.max(logits))
+            probs = exp_logits / xp.sum(exp_logits)
+            next_token = int(xp.random.choice(len(probs), p=probs).item())
             
             if next_token == self.EOS_IDX:
                 break
@@ -167,6 +186,11 @@ def main():
                        help='Afficher les genres disponibles')
     
     args = parser.parse_args()
+
+    if USING_GPU:
+        print("✓ Backend: GPU (CuPy)")
+    else:
+        print("✓ Backend: CPU (NumPy)")
     
     model_path = args.model if args.model else get_output_path('lyrics_model.pkl')
     

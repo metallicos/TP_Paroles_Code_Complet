@@ -8,6 +8,23 @@ from sklearn.preprocessing import LabelEncoder
 from collections import Counter
 import re
 import pickle
+import time
+
+
+def get_array_backend():
+    use_gpu = os.getenv("USE_GPU", "auto").lower()
+    if use_gpu in ("1", "true", "yes", "auto"):
+        try:
+            import cupy as cp
+            device_count = cp.cuda.runtime.getDeviceCount()
+            if device_count > 0:
+                return cp, True
+        except Exception:
+            pass
+    return np, False
+
+
+xp, USING_GPU = get_array_backend()
 
 
 def get_project_root():
@@ -31,6 +48,11 @@ def get_output_path(filename):
 print("="*60)
 print("SECTION 1: Chargement du Dataset Spotify")
 print("="*60)
+
+if USING_GPU:
+    print("✓ Backend: GPU (CuPy)")
+else:
+    print("✓ Backend: CPU (NumPy)")
 
 csv_path = get_data_path('spotify_songs.csv')
 if not os.path.exists(csv_path):
@@ -86,7 +108,11 @@ for tokens_list in df['tokens']:
 
 word_freq = Counter(all_tokens)
 MIN_FREQ = 2
-vocab = {word: freq for word, freq in word_freq.items() if freq >= MIN_FREQ}
+MAX_VOCAB_SIZE = 20000
+filtered_tokens = [(word, freq) for word, freq in word_freq.items() if freq >= MIN_FREQ]
+filtered_tokens.sort(key=lambda item: item[1], reverse=True)
+filtered_tokens = filtered_tokens[:MAX_VOCAB_SIZE]
+vocab = {word: freq for word, freq in filtered_tokens}
 
 SPECIAL_TOKENS = ['<PAD>', '<UNK>', '<BOS>', '<EOS>']
 word2idx = {token: idx for idx, token in enumerate(SPECIAL_TOKENS)}
@@ -102,7 +128,7 @@ UNK_IDX = word2idx['<UNK>']
 BOS_IDX = word2idx['<BOS>']
 EOS_IDX = word2idx['<EOS>']
 
-print(f"✓ Vocabulaire: {len(word2idx)} tokens")
+print(f"✓ Vocabulaire: {len(word2idx)} tokens (cap: {MAX_VOCAB_SIZE})")
 
 print("\n" + "="*60)
 print("SECTION 5: Encodage des Données")
@@ -177,13 +203,13 @@ class LyricsGenerationModel:
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
         
-        np.random.seed(42)
-        self.word_embedding = np.random.randn(vocab_size, embedding_dim) * 0.01
-        self.genre_embedding = np.random.randn(num_genres, embedding_dim) * 0.01
-        self.W1 = np.random.randn(SEQ_LEN * embedding_dim + embedding_dim, hidden_dim) * 0.01
-        self.b1 = np.zeros((1, hidden_dim))
-        self.W2 = np.random.randn(hidden_dim, vocab_size) * 0.01
-        self.b2 = np.zeros((1, vocab_size))
+        xp.random.seed(42)
+        self.word_embedding = xp.random.randn(vocab_size, embedding_dim) * 0.01
+        self.genre_embedding = xp.random.randn(num_genres, embedding_dim) * 0.01
+        self.W1 = xp.random.randn(SEQ_LEN * embedding_dim + embedding_dim, hidden_dim) * 0.01
+        self.b1 = xp.zeros((1, hidden_dim))
+        self.W2 = xp.random.randn(hidden_dim, vocab_size) * 0.01
+        self.b2 = xp.zeros((1, vocab_size))
         
         self.loss_history = []
         self.val_loss_history = []
@@ -193,36 +219,36 @@ class LyricsGenerationModel:
         word_embeds = self.word_embedding[X_batch]
         word_embeds_flat = word_embeds.reshape(batch_size, -1)
         genre_embeds = self.genre_embedding[genres_batch]
-        combined = np.concatenate([word_embeds_flat, genre_embeds], axis=1)
+        combined = xp.concatenate([word_embeds_flat, genre_embeds], axis=1)
         
-        z1 = np.dot(combined, self.W1) + self.b1
-        a1 = np.maximum(z1, 0)
-        z2 = np.dot(a1, self.W2) + self.b2
+        z1 = xp.dot(combined, self.W1) + self.b1
+        a1 = xp.maximum(z1, 0)
+        z2 = xp.dot(a1, self.W2) + self.b2
         
         return z2, a1, combined
     
     def compute_loss(self, logits, y_batch):
         batch_size = logits.shape[0]
-        exp_logits = np.exp(logits - np.max(logits, axis=1, keepdims=True))
-        probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
-        correct_log_probs = -np.log(probs[np.arange(batch_size), y_batch])
-        loss = np.mean(correct_log_probs)
+        exp_logits = xp.exp(logits - xp.max(logits, axis=1, keepdims=True))
+        probs = exp_logits / xp.sum(exp_logits, axis=1, keepdims=True)
+        correct_log_probs = -xp.log(probs[xp.arange(batch_size), y_batch])
+        loss = float(correct_log_probs.mean().item())
         return loss, probs
     
     def backward(self, X_batch, genres_batch, y_batch, logits, a1, combined, probs, learning_rate=0.01):
         batch_size = X_batch.shape[0]
         d_logits = probs.copy()
-        d_logits[np.arange(batch_size), y_batch] -= 1
+        d_logits[xp.arange(batch_size), y_batch] -= 1
         d_logits /= batch_size
         
-        dW2 = np.dot(a1.T, d_logits)
-        db2 = np.sum(d_logits, axis=0, keepdims=True)
+        dW2 = xp.dot(a1.T, d_logits)
+        db2 = xp.sum(d_logits, axis=0, keepdims=True)
         
-        d_a1 = np.dot(d_logits, self.W2.T)
+        d_a1 = xp.dot(d_logits, self.W2.T)
         d_z1 = d_a1 * (a1 > 0)
         
-        dW1 = np.dot(combined.T, d_z1)
-        db1 = np.sum(d_z1, axis=0, keepdims=True)
+        dW1 = xp.dot(combined.T, d_z1)
+        db1 = xp.sum(d_z1, axis=0, keepdims=True)
         
         self.W2 -= learning_rate * dW2
         self.b2 -= learning_rate * db2
@@ -242,17 +268,35 @@ print("SECTION 8: Entraînement du Modèle")
 print("="*60)
 
 def compute_accuracy(logits, y_batch):
-    predictions = np.argmax(logits, axis=1)
-    accuracy = np.mean(predictions == y_batch)
+    predictions = xp.argmax(logits, axis=1)
+    accuracy = float((predictions == y_batch).mean().item())
     return accuracy
 
 def compute_perplexity(loss):
     return np.exp(loss)
 
+
+X_train = np.asarray(X_train, dtype=np.int32)
+X_val = np.asarray(X_val, dtype=np.int32)
+y_train = np.asarray(y_train, dtype=np.int32)
+y_val = np.asarray(y_val, dtype=np.int32)
+genres_train = np.asarray(genres_train, dtype=np.int32)
+genres_val = np.asarray(genres_val, dtype=np.int32)
+
+if USING_GPU:
+    print("✓ Transfert des tenseurs vers GPU...")
+    X_train = xp.asarray(X_train)
+    X_val = xp.asarray(X_val)
+    y_train = xp.asarray(y_train)
+    y_val = xp.asarray(y_val)
+    genres_train = xp.asarray(genres_train)
+    genres_val = xp.asarray(genres_val)
+
 def train_epoch(model, X_train, y_train, genres_train, batch_size=128, lr=0.01):
     total_loss = 0
     total_accuracy = 0
-    num_batches = len(X_train) // batch_size
+    num_batches = int(np.ceil(len(X_train) / batch_size))
+    epoch_start = time.time()
     
     for batch_idx in range(num_batches):
         start_idx = batch_idx * batch_size
@@ -269,6 +313,10 @@ def train_epoch(model, X_train, y_train, genres_train, batch_size=128, lr=0.01):
         model.backward(X_batch, genres_batch, y_batch, logits, a1, combined, probs, lr)
         total_loss += loss
         total_accuracy += accuracy
+
+        if (batch_idx + 1) % 500 == 0 or (batch_idx + 1) == num_batches:
+            elapsed = time.time() - epoch_start
+            print(f"    Batch {batch_idx + 1}/{num_batches} | elapsed: {elapsed:.1f}s")
     
     avg_loss = total_loss / num_batches
     avg_accuracy = total_accuracy / num_batches
@@ -277,7 +325,7 @@ def train_epoch(model, X_train, y_train, genres_train, batch_size=128, lr=0.01):
 def evaluate(model, X_test, y_test, genres_test, batch_size=128):
     total_loss = 0
     total_accuracy = 0
-    num_batches = len(X_test) // batch_size
+    num_batches = int(np.ceil(len(X_test) / batch_size))
     
     for batch_idx in range(num_batches):
         start_idx = batch_idx * batch_size
@@ -306,6 +354,7 @@ print(f"Époque | Train Loss | Train Acc | Val Loss | Val Acc | Train PPL | Val 
 print("-" * 80)
 
 for epoch in range(NUM_EPOCHS):
+    print(f"\nEpoch {epoch + 1}/{NUM_EPOCHS}")
     train_loss, train_acc = train_epoch(model, X_train, y_train, genres_train, BATCH_SIZE, LEARNING_RATE)
     val_loss, val_acc = evaluate(model, X_val, y_val, genres_val, BATCH_SIZE)
     
@@ -328,15 +377,15 @@ def generate_lyrics(model, genre_idx, max_length=50, temperature=1.0):
     context_buffer = generated_tokens[-SEQ_LEN:] if len(generated_tokens) >= 1 else generated_tokens
     
     for _ in range(max_length):
-        X_input = np.array([pad_sequence(context_buffer, SEQ_LEN)])
-        genres_input = np.array([genre_idx])
+        X_input = xp.array([pad_sequence(context_buffer, SEQ_LEN)], dtype=xp.int32)
+        genres_input = xp.array([genre_idx], dtype=xp.int32)
         
         logits, _, _ = model.forward(X_input, genres_input)
         logits = logits[0] / temperature
         
-        exp_logits = np.exp(logits - np.max(logits))
-        probs = exp_logits / np.sum(exp_logits)
-        next_token = np.random.choice(len(probs), p=probs)
+        exp_logits = xp.exp(logits - xp.max(logits))
+        probs = exp_logits / xp.sum(exp_logits)
+        next_token = int(xp.random.choice(len(probs), p=probs).item())
         
         if next_token == EOS_IDX:
             break
