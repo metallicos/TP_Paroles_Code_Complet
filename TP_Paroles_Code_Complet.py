@@ -86,6 +86,19 @@ df = df[df['lyrics'].notna()].copy()
 df = df[df['lyrics'].str.len() > 50].copy()
 df = df[df['lyrics'] != 'NA'].copy()
 
+# ──────────────────────────────────────────────────────────────
+# FILTRE LANGUE: English uniquement (colonne 'language' == 'en')
+# Évite le mélange espagnol/français/hollandais/italien dans le modèle
+# Désactiver: mettre LANG_FILTER = None
+# ──────────────────────────────────────────────────────────────
+LANG_FILTER = os.getenv("LANG_FILTER", "en").strip() or None
+if LANG_FILTER and 'language' in df.columns:
+    before = len(df)
+    df = df[df['language'] == LANG_FILTER].copy()
+    print(f"✓ Filtre langue '{LANG_FILTER}': {len(df):,} chansons (sur {before:,})")
+else:
+    print(f"ℹ️  Pas de filtre langue appliqué")
+
 print(f"✓ Après nettoyage: {len(df):,} chansons avec paroles valides")
 
 # ──────────────────────────────────────────────────────────────

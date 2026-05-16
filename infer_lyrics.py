@@ -55,6 +55,11 @@ def rebuild_vocab_from_csv(csv_path, max_samples=None):
     df = df[df['lyrics'].str.len() > 50].copy()
     df = df[df['lyrics'] != 'NA'].copy()
 
+    # Apply same language filter as training
+    lang_filter = os.getenv("LANG_FILTER", "en").strip() or None
+    if lang_filter and 'language' in df.columns:
+        df = df[df['language'] == lang_filter].copy()
+
     if max_samples and max_samples < len(df):
         df = df.sample(n=max_samples, random_state=42).reset_index(drop=True)
         print(f"  → MAX_SAMPLES={max_samples} appliqué")
