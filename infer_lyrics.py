@@ -192,13 +192,29 @@ def main():
     else:
         print("✓ Backend: CPU (NumPy)")
     
-    model_path = args.model if args.model else get_output_path('lyrics_model.pkl')
-    
+    if args.model:
+        model_path = args.model
+    else:
+        # Try final model first, then best checkpoint, then any checkpoint
+        candidates = [
+            get_output_path('lyrics_model.pkl'),
+            get_output_path('lyrics_model_best.pkl'),
+        ]
+        # Also look for the latest checkpoint
+        import glob
+        ckpts = sorted(glob.glob(get_output_path('checkpoint_epoch*.pkl')))
+        if ckpts:
+            candidates.append(ckpts[-1])
+        model_path = next((p for p in candidates if os.path.exists(p)), candidates[0])
+        if os.path.exists(model_path):
+            print(f"ℹ️  Modèle trouvé: {os.path.basename(model_path)}")
+
     try:
         generator = LyricsGenerator(model_path)
     except FileNotFoundError:
-        print(f"❌ Erreur: Le modèle n'existe pas à '{model_path}'")
-        print("   Entraînez d'abord le modèle avec TP_Paroles_Code_Complet.py")
+        print(f"❌ Erreur: Aucun modèle trouvé.")
+        print(f"   Cherché: lyrics_model.pkl, lyrics_model_best.pkl, checkpoint_epoch*.pkl")
+        print(f"   → Entraînez d'abord: python3 TP_Paroles_Code_Complet.py")
         sys.exit(1)
     
     if args.list_genres:
