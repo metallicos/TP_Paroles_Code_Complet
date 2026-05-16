@@ -125,7 +125,13 @@ print("="*60)
 
 X, y, genres_list = [], [], []
 
-for idx, row in df_filtered.iterrows():
+total_rows = len(df_filtered)
+print(f"Création des paires (cela peut prendre du temps...)...")
+
+for idx, (row_idx, row) in enumerate(df_filtered.iterrows()):
+    if (idx + 1) % 500 == 0:
+        print(f"  Progression: {idx + 1}/{total_rows}")
+    
     tokens = row['encoded_tokens']
     genre = row['genre_encoded']
     for i in range(len(tokens) - 1):
@@ -225,8 +231,17 @@ print("\n" + "="*60)
 print("SECTION 8: Entraînement du Modèle")
 print("="*60)
 
+def compute_accuracy(logits, y_batch):
+    predictions = np.argmax(logits, axis=1)
+    accuracy = np.mean(predictions == y_batch)
+    return accuracy
+
+def compute_perplexity(loss):
+    return np.exp(loss)
+
 def train_epoch(model, X_train, y_train, genres_train, batch_size=128, lr=0.01):
     total_loss = 0
+    total_accuracy = 0
     num_batches = len(X_train) // batch_size
     
     for batch_idx in range(num_batches):
@@ -239,13 +254,19 @@ def train_epoch(model, X_train, y_train, genres_train, batch_size=128, lr=0.01):
         
         logits, a1, combined = model.forward(X_batch, genres_batch)
         loss, probs = model.compute_loss(logits, y_batch)
+        accuracy = compute_accuracy(logits, y_batch)
+        
         model.backward(X_batch, genres_batch, y_batch, logits, a1, combined, probs, lr)
         total_loss += loss
+        total_accuracy += accuracy
     
-    return total_loss / num_batches
+    avg_loss = total_loss / num_batches
+    avg_accuracy = total_accuracy / num_batches
+    return avg_loss, avg_accuracy
 
 def evaluate(model, X_test, y_test, genres_test, batch_size=128):
     total_loss = 0
+    total_accuracy = 0
     num_batches = len(X_test) // batch_size
     
     for batch_idx in range(num_batches):
@@ -258,25 +279,33 @@ def evaluate(model, X_test, y_test, genres_test, batch_size=128):
         
         logits, _, _ = model.forward(X_batch, genres_batch)
         loss, _ = model.compute_loss(logits, y_batch)
+        accuracy = compute_accuracy(logits, y_batch)
+        
         total_loss += loss
+        total_accuracy += accuracy
     
-    return total_loss / num_batches
+    avg_loss = total_loss / num_batches
+    avg_accuracy = total_accuracy / num_batches
+    return avg_loss, avg_accuracy
 
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 0.001
 
-print(f"Époque | Train Loss | Val Loss")
-print("-" * 35)
+print(f"Époque | Train Loss | Train Acc | Val Loss | Val Acc | Train PPL | Val PPL")
+print("-" * 80)
 
 for epoch in range(NUM_EPOCHS):
-    train_loss = train_epoch(model, X_train, y_train, genres_train, BATCH_SIZE, LEARNING_RATE)
-    val_loss = evaluate(model, X_val, y_val, genres_val, BATCH_SIZE)
+    train_loss, train_acc = train_epoch(model, X_train, y_train, genres_train, BATCH_SIZE, LEARNING_RATE)
+    val_loss, val_acc = evaluate(model, X_val, y_val, genres_val, BATCH_SIZE)
+    
+    train_ppl = compute_perplexity(train_loss)
+    val_ppl = compute_perplexity(val_loss)
     
     model.loss_history.append(train_loss)
     model.val_loss_history.append(val_loss)
     
-    print(f"{epoch+1:5d} | {train_loss:.6f}  | {val_loss:.6f}")
+    print(f"{epoch+1:5d} | {train_loss:.6f}  | {train_acc:.4f}  | {val_loss:.6f}  | {val_acc:.4f}  | {train_ppl:.4f}   | {val_ppl:.4f}")
 
 print(f"\n✓ Entraînement terminé!")
 
@@ -372,5 +401,9 @@ print(f"✓ Dataset: {len(df_filtered)} chansons")
 print(f"✓ Vocabulaire: {len(word2idx):,} tokens")
 print(f"✓ Genres: {NUM_GENRES}")
 print(f"✓ Exemples: {len(X_train):,} train / {len(X_val):,} val")
-print(f"✓ Loss final: {model.val_loss_history[-1]:.4f}")
+print(f"\nMÉTRIQUES FINALES:")
+print(f"✓ Train Loss: {model.loss_history[-1]:.4f}")
+print(f"✓ Val Loss: {model.val_loss_history[-1]:.4f}")
+print(f"✓ Train Perplexity: {compute_perplexity(model.loss_history[-1]):.4f}")
+print(f"✓ Val Perplexity: {compute_perplexity(model.val_loss_history[-1]):.4f}")
 print("="*60)
