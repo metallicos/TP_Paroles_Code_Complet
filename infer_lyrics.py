@@ -3,6 +3,8 @@ import numpy as np
 import argparse
 import sys
 import os
+import re
+from collections import Counter
 
 
 def get_array_backend():
@@ -33,6 +35,79 @@ def get_output_path(filename):
     return os.path.join(get_project_root(), 'outputs', filename)
 
 
+def rebuild_vocab_from_csv(csv_path, max_samples=None):
+    """Reconstruct vocab/config/constants from the original CSV.
+    Must use the same hyperparameters as the training script."""
+    import pandas as pd
+    from sklearn.preprocessing import LabelEncoder
+
+    MIN_FREQ = 2
+    MAX_VOCAB_SIZE = 20000
+    TOP_GENRES = 5
+    SEQ_LEN = 10
+    EMBED_DIM = 16
+    HIDDEN_DIM = 32
+    SPECIAL_TOKENS = ['<PAD>', '<UNK>', '<BOS>', '<EOS>']
+
+    print(f"  → Reconstruction du vocabulaire depuis: {os.path.basename(csv_path)}")
+    df = pd.read_csv(csv_path)
+    df = df[df['lyrics'].notna()].copy()
+    df = df[df['lyrics'].str.len() > 50].copy()
+    df = df[df['lyrics'] != 'NA'].copy()
+
+    if max_samples and max_samples < len(df):
+        df = df.sample(n=max_samples, random_state=42).reset_index(drop=True)
+        print(f"  → MAX_SAMPLES={max_samples} appliqué")
+
+    def preprocess_text(text):
+        text = text.lower()
+        text = text.replace('\n', ' <NEW_LINE> ')
+        text = re.sub(r"[^a-z0-9\s\'\-,.:!?()]", '', text)
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
+
+    df['tokens'] = df['lyrics'].apply(lambda t: preprocess_text(t).split())
+
+    all_tokens = []
+    for tl in df['tokens']:
+        all_tokens.extend(tl)
+    word_freq = Counter(all_tokens)
+    filtered = [(w, f) for w, f in word_freq.items() if f >= MIN_FREQ]
+    filtered.sort(key=lambda x: x[1], reverse=True)
+    filtered = filtered[:MAX_VOCAB_SIZE]
+    vocab_words = {w for w, _ in filtered}
+
+    word2idx = {tok: i for i, tok in enumerate(SPECIAL_TOKENS)}
+    for idx_w, word in enumerate(sorted(vocab_words), start=len(SPECIAL_TOKENS)):
+        word2idx[word] = idx_w
+    idx2word = {i: w for w, i in word2idx.items()}
+
+    top_genres = df['playlist_genre'].value_counts().head(TOP_GENRES).index.tolist()
+    df_filtered = df[df['playlist_genre'].isin(top_genres)].copy()
+    genre_encoder = LabelEncoder()
+    genre_encoder.fit(df_filtered['playlist_genre'])
+    num_genres = len(genre_encoder.classes_)
+
+    PAD_IDX = word2idx['<PAD>']
+    UNK_IDX = word2idx['<UNK>']
+    BOS_IDX = word2idx['<BOS>']
+    EOS_IDX = word2idx['<EOS>']
+
+    print(f"  → Vocabulaire: {len(word2idx):,} tokens | Genres: {list(genre_encoder.classes_)}")
+    return {
+        'vocab': {'word2idx': word2idx, 'idx2word': idx2word},
+        'config': {
+            'embedding_dim': EMBED_DIM, 'hidden_dim': HIDDEN_DIM,
+            'seq_len': SEQ_LEN, 'num_genres': num_genres,
+            'genres': list(genre_encoder.classes_),
+        },
+        'constants': {
+            'PAD_IDX': PAD_IDX, 'UNK_IDX': UNK_IDX,
+            'BOS_IDX': BOS_IDX, 'EOS_IDX': EOS_IDX,
+        },
+    }
+
+
 class LyricsGenerationModel:
     def __init__(self, vocab_size, embedding_dim=16, hidden_dim=32, num_genres=5):
         self.vocab_size = vocab_size
@@ -54,7 +129,7 @@ class LyricsGenerationModel:
 
 
 class LyricsGenerator:
-    def __init__(self, model_path):
+    def __init__(self, model_path, csv_path=None, max_samples=None):
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Modèle non trouvé: {model_path}")
         
@@ -62,11 +137,17 @@ class LyricsGenerator:
             pkg = pickle.load(f)
         
         if 'vocab' not in pkg:
-            raise KeyError(
-                f"Le fichier '{os.path.basename(model_path)}' est un ancien checkpoint sans vocabulaire.\n"
-                "  → Utilisez outputs/lyrics_model_best.pkl ou relancez l'entraînement "
-                "(les nouveaux checkpoints incluent le vocabulaire)."
-            )
+            if csv_path:
+                print(f"  ⚠️  Ancien checkpoint détecté — reconstruction du vocabulaire depuis le CSV...")
+                rebuilt = rebuild_vocab_from_csv(csv_path, max_samples)
+                pkg.update(rebuilt)
+            else:
+                raise KeyError(
+                    f"Le fichier '{os.path.basename(model_path)}' est un ancien checkpoint sans vocabulaire.\n"
+                    "  → Option 1: ajoutez --csv spotify_songs.csv pour reconstruire le vocabulaire automatiquement.\n"
+                    "  → Option 2: utilisez outputs/lyrics_model_best.pkl\n"
+                    "  → Option 3: relancez l'entraînement (les nouveaux checkpoints incluent le vocabulaire)."
+                )
 
         self.weights = pkg['model_weights']
         self.word2idx = pkg['vocab']['word2idx']
@@ -191,7 +272,14 @@ def main():
     
     parser.add_argument('--list-genres', action='store_true',
                        help='Afficher les genres disponibles')
-    
+
+    parser.add_argument('--csv', type=str, default=None,
+                       help='Chemin vers spotify_songs.csv pour reconstruire le vocabulaire '
+                            "d'un ancien checkpoint (ex: --csv spotify_songs.csv)")
+
+    parser.add_argument('--max-samples', type=int, default=None,
+                       help='MAX_SAMPLES utilisé pendant l\'entraînement (pour reproduire le même vocabulaire)')
+
     args = parser.parse_args()
 
     if USING_GPU:
@@ -216,12 +304,20 @@ def main():
         if os.path.exists(model_path):
             print(f"ℹ️  Modèle trouvé: {os.path.basename(model_path)}")
 
+    csv_path = args.csv
+    if csv_path and not os.path.isabs(csv_path):
+        # Resolve relative to project root
+        csv_path = os.path.join(get_project_root(), csv_path)
+
     try:
-        generator = LyricsGenerator(model_path)
+        generator = LyricsGenerator(model_path, csv_path=csv_path, max_samples=args.max_samples)
     except FileNotFoundError:
         print(f"❌ Erreur: Aucun modèle trouvé.")
         print(f"   Cherché: lyrics_model.pkl, lyrics_model_best.pkl, checkpoint_epoch*.pkl")
         print(f"   → Entraînez d'abord: python3 TP_Paroles_Code_Complet.py")
+        sys.exit(1)
+    except KeyError as e:
+        print(f"❌ {e}")
         sys.exit(1)
     
     if args.list_genres:
