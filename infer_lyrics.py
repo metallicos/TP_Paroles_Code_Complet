@@ -189,8 +189,8 @@ class LyricsGenerator:
         else:
             return seq[-max_len:]
     
-    def _topk_probs(self, logits, temperature, top_k):
-        """Apply temperature + top-k filtering, return normalized probabilities."""
+    def _sample_probs(self, logits, temperature, top_k, top_p):
+        """Apply temperature + top-k/top-p filtering, return normalized probabilities."""
         logits = logits / max(temperature, 1e-8)
         if top_k and top_k > 0:
             # Zero out everything except the top-k logits
@@ -198,10 +198,28 @@ class LyricsGenerator:
             threshold = xp.sort(logits)[-top_k]
             logits = xp.where(logits >= threshold, logits, xp.full_like(logits, -1e9))
         exp_logits = xp.exp(logits - xp.max(logits))
-        return exp_logits / xp.sum(exp_logits)
+        probs = exp_logits / xp.sum(exp_logits)
+
+        if top_p and 0.0 < top_p < 1.0:
+            probs_np = probs.get().astype(np.float64) if hasattr(probs, 'get') else np.asarray(probs, dtype=np.float64)
+            sorted_idx = np.argsort(probs_np)[::-1]
+            sorted_probs = probs_np[sorted_idx]
+            cumulative = np.cumsum(sorted_probs)
+
+            cutoff = np.searchsorted(cumulative, top_p, side='left') + 1
+            keep_idx = sorted_idx[:cutoff]
+
+            filtered = np.zeros_like(probs_np)
+            filtered[keep_idx] = probs_np[keep_idx]
+            filtered_sum = filtered.sum()
+            if filtered_sum > 0:
+                filtered /= filtered_sum
+                return filtered
+
+        return probs
 
     def generate(self, genre, max_length=50, temperature=1.0, seed_tokens=None, top_k=40, min_length=20,
-                 repeat_penalty=1.2, no_repeat_window=12, no_repeat_ngram=3):
+                 repeat_penalty=1.2, no_repeat_window=12, no_repeat_ngram=3, top_p=0.9):
         genre_idx = None
         genre_lower = genre.lower()
         
@@ -222,7 +240,7 @@ class LyricsGenerator:
             genres_input = xp.array([genre_idx], dtype=xp.int32)
             
             logits = self.model.forward(X_input, genres_input, self.weights)[0]
-            probs = self._topk_probs(logits, temperature, top_k)
+            probs = self._sample_probs(logits, temperature, top_k, top_p)
             probs_np = probs.get().astype(np.float64) if hasattr(probs, 'get') else np.asarray(probs, dtype=np.float64)
 
             # Never sample non-lyric special tokens during generation
@@ -286,7 +304,7 @@ class LyricsGenerator:
         return ' '.join(words) if words else "(Paroles vides - essayez avec une autre température)"
     
     def generate_multiple(self, genre, num_samples=3, max_length=50, temperature=0.8, top_k=40, min_length=20,
-                          repeat_penalty=1.2, no_repeat_window=12, no_repeat_ngram=3):
+                          repeat_penalty=1.2, no_repeat_window=12, no_repeat_ngram=3, top_p=0.9):
         print(f"\n🎵 Génération de {num_samples} paroles pour le genre: {genre.upper()}")
         print("-" * 60)
         
@@ -301,6 +319,7 @@ class LyricsGenerator:
                 repeat_penalty=repeat_penalty,
                 no_repeat_window=no_repeat_window,
                 no_repeat_ngram=no_repeat_ngram,
+                top_p=top_p,
             )
             print(lyrics)
             print()
@@ -339,6 +358,9 @@ def main():
 
     parser.add_argument('--top-k', type=int, default=40,
                        help='Top-k sampling: limiter aux k tokens les plus probables (défaut: 40, 0=désactivé)')
+
+    parser.add_argument('--top-p', type=float, default=0.9,
+                       help='Top-p (nucleus) sampling: conserve la masse cumulée p (défaut: 0.9, 0=désactivé)')
 
     parser.add_argument('--min-length', type=int, default=20,
                        help='Nombre minimum de tokens avant d\'autoriser <EOS> (défaut: 20)')
@@ -417,10 +439,11 @@ def main():
             repeat_penalty=args.repeat_penalty,
             no_repeat_window=args.no_repeat_window,
             no_repeat_ngram=args.no_repeat_ngram,
+            top_p=args.top_p,
         )
     else:
         print(f"\n🎵 Génération de paroles pour le genre: {args.genre.upper()}")
-        print(f"   (Température: {args.temperature}, Max tokens: {args.length}, Top-k: {args.top_k}, Min length: {args.min_length}, Repeat penalty: {args.repeat_penalty}, Window: {args.no_repeat_window}, No-repeat ngram: {args.no_repeat_ngram})")
+        print(f"   (Température: {args.temperature}, Max tokens: {args.length}, Top-k: {args.top_k}, Top-p: {args.top_p}, Min length: {args.min_length}, Repeat penalty: {args.repeat_penalty}, Window: {args.no_repeat_window}, No-repeat ngram: {args.no_repeat_ngram})")
         print("-" * 60)
         lyrics = generator.generate(
             args.genre,
@@ -431,6 +454,7 @@ def main():
             repeat_penalty=args.repeat_penalty,
             no_repeat_window=args.no_repeat_window,
             no_repeat_ngram=args.no_repeat_ngram,
+            top_p=args.top_p,
         )
         print(lyrics)
         print()

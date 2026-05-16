@@ -289,7 +289,7 @@ class LyricsGenerationModel:
         self.loss_history = []
         self.val_loss_history = []
     
-    def forward(self, X_batch, genres_batch):
+    def forward(self, X_batch, genres_batch, training=False, dropout_rate=0.0):
         batch_size = X_batch.shape[0]
         word_embeds = self.word_embedding[X_batch]
         word_embeds_flat = word_embeds.reshape(batch_size, -1)
@@ -297,30 +297,53 @@ class LyricsGenerationModel:
         combined = xp.concatenate([word_embeds_flat, genre_embeds], axis=1)
         
         z1 = xp.dot(combined, self.W1) + self.b1
+        relu_mask = (z1 > 0)
         a1 = xp.maximum(z1, 0)
+        dropout_mask = None
+        if training and dropout_rate > 0.0:
+            keep_prob = 1.0 - dropout_rate
+            dropout_mask = (xp.random.rand(*a1.shape) < keep_prob).astype(a1.dtype) / max(keep_prob, 1e-8)
+            a1 = a1 * dropout_mask
         z2 = xp.dot(a1, self.W2) + self.b2
         
-        return z2, a1, combined
+        return z2, a1, combined, relu_mask, dropout_mask
     
-    def compute_loss(self, logits, y_batch):
+    def compute_loss(self, logits, y_batch, label_smoothing=0.0):
         batch_size = logits.shape[0]
         exp_logits = xp.exp(logits - xp.max(logits, axis=1, keepdims=True))
         probs = exp_logits / xp.sum(exp_logits, axis=1, keepdims=True)
-        correct_log_probs = -xp.log(probs[xp.arange(batch_size), y_batch])
-        loss = float(correct_log_probs.mean().item())
+        probs = xp.clip(probs, 1e-12, 1.0)
+
+        if label_smoothing and label_smoothing > 0.0:
+            smooth = float(label_smoothing)
+            target = xp.full_like(probs, smooth / max(self.vocab_size - 1, 1))
+            target[xp.arange(batch_size), y_batch] = 1.0 - smooth
+            loss = float((-xp.sum(target * xp.log(probs), axis=1)).mean().item())
+        else:
+            correct_log_probs = -xp.log(probs[xp.arange(batch_size), y_batch])
+            loss = float(correct_log_probs.mean().item())
         return loss, probs
     
-    def backward(self, X_batch, genres_batch, y_batch, logits, a1, combined, probs, learning_rate=0.01):
+    def backward(self, X_batch, genres_batch, y_batch, logits, a1, combined, relu_mask, dropout_mask, probs,
+                 learning_rate=0.01, label_smoothing=0.0):
         batch_size = X_batch.shape[0]
-        d_logits = probs.copy()
-        d_logits[xp.arange(batch_size), y_batch] -= 1
+        if label_smoothing and label_smoothing > 0.0:
+            smooth = float(label_smoothing)
+            target = xp.full_like(probs, smooth / max(self.vocab_size - 1, 1))
+            target[xp.arange(batch_size), y_batch] = 1.0 - smooth
+            d_logits = probs - target
+        else:
+            d_logits = probs.copy()
+            d_logits[xp.arange(batch_size), y_batch] -= 1
         d_logits /= batch_size
         
         dW2 = xp.dot(a1.T, d_logits)
         db2 = xp.sum(d_logits, axis=0, keepdims=True)
         
         d_a1 = xp.dot(d_logits, self.W2.T)
-        d_z1 = d_a1 * (a1 > 0)
+        if dropout_mask is not None:
+            d_a1 = d_a1 * dropout_mask
+        d_z1 = d_a1 * relu_mask
         
         dW1 = xp.dot(combined.T, d_z1)
         db1 = xp.sum(d_z1, axis=0, keepdims=True)
@@ -397,8 +420,13 @@ def train_epoch(model, X_train, y_train, genres_train, batch_size=128, lr=0.01):
         genres_batch = genres_train[start_idx:end_idx]
 
         try:
-            logits, a1, combined = model.forward(X_batch, genres_batch)
-            loss, probs = model.compute_loss(logits, y_batch)
+            logits, a1, combined, relu_mask, dropout_mask = model.forward(
+                X_batch,
+                genres_batch,
+                training=True,
+                dropout_rate=DROPOUT_RATE,
+            )
+            loss, probs = model.compute_loss(logits, y_batch, label_smoothing=LABEL_SMOOTHING)
 
             # NaN / Inf guard — skip bad batch
             if np.isnan(loss) or np.isinf(loss):
@@ -410,7 +438,19 @@ def train_epoch(model, X_train, y_train, genres_train, batch_size=128, lr=0.01):
                 continue
 
             accuracy = compute_accuracy(logits, y_batch)
-            model.backward(X_batch, genres_batch, y_batch, logits, a1, combined, probs, lr)
+            model.backward(
+                X_batch,
+                genres_batch,
+                y_batch,
+                logits,
+                a1,
+                combined,
+                relu_mask,
+                dropout_mask,
+                probs,
+                lr,
+                label_smoothing=LABEL_SMOOTHING,
+            )
 
             # Gradient clipping on weight matrices
             for param in [model.W1, model.W2, model.b1, model.b2]:
@@ -447,8 +487,8 @@ def evaluate(model, X_test, y_test, genres_test, batch_size=128):
         y_batch = y_test[start_idx:end_idx]
         genres_batch = genres_test[start_idx:end_idx]
         
-        logits, _, _ = model.forward(X_batch, genres_batch)
-        loss, _ = model.compute_loss(logits, y_batch)
+        logits, _, _, _, _ = model.forward(X_batch, genres_batch, training=False, dropout_rate=0.0)
+        loss, _ = model.compute_loss(logits, y_batch, label_smoothing=0.0)
         accuracy = compute_accuracy(logits, y_batch)
         
         total_loss += loss
@@ -463,13 +503,15 @@ BATCH_SIZE = int(os.getenv("BATCH_SIZE", "128"))
 LEARNING_RATE = float(os.getenv("LEARNING_RATE", "0.0008"))
 LR_DECAY = float(os.getenv("LR_DECAY", "0.97"))
 MIN_LEARNING_RATE = float(os.getenv("MIN_LEARNING_RATE", "0.0001"))
+DROPOUT_RATE = float(os.getenv("DROPOUT_RATE", "0.15"))
+LABEL_SMOOTHING = float(os.getenv("LABEL_SMOOTHING", "0.05"))
 EARLY_STOP_PATIENCE = 3  # stop if val_loss doesn't improve for N epochs
 CHECKPOINT_EVERY = 1     # save checkpoint every N epochs
 
 resume_from = os.getenv("RESUME_FROM", "").strip()
 start_epoch = 0
 
-print(f"Config: epochs={NUM_EPOCHS}, batch={BATCH_SIZE}, lr={LEARNING_RATE}, decay={LR_DECAY}, patience={EARLY_STOP_PATIENCE}")
+print(f"Config: epochs={NUM_EPOCHS}, batch={BATCH_SIZE}, lr={LEARNING_RATE}, decay={LR_DECAY}, dropout={DROPOUT_RATE}, label_smoothing={LABEL_SMOOTHING}, patience={EARLY_STOP_PATIENCE}")
 log_memory()
 print(f"\n{'Époque':>6} | {'Train Loss':>10} | {'Train Acc':>9} | {'Val Loss':>8} | {'Val Acc':>7} | {'Train PPL':>9} | {'Val PPL':>7} | {'Time':>6}")
 print("-" * 90)
