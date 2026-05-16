@@ -61,6 +61,13 @@ class LyricsGenerator:
         with open(model_path, 'rb') as f:
             pkg = pickle.load(f)
         
+        if 'vocab' not in pkg:
+            raise KeyError(
+                f"Le fichier '{os.path.basename(model_path)}' est un ancien checkpoint sans vocabulaire.\n"
+                "  → Utilisez outputs/lyrics_model_best.pkl ou relancez l'entraînement "
+                "(les nouveaux checkpoints incluent le vocabulaire)."
+            )
+
         self.weights = pkg['model_weights']
         self.word2idx = pkg['vocab']['word2idx']
         self.idx2word = pkg['vocab']['idx2word']

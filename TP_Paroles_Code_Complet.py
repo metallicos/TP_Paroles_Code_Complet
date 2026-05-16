@@ -486,6 +486,32 @@ for epoch in range(NUM_EPOCHS):
         best_epoch = epoch + 1
         patience_counter = 0
         tag = " ✓ best"
+        # Save best model with full inference package
+        try:
+            best_pkg = {
+                'model_weights': {
+                    'word_embedding': model.word_embedding,
+                    'genre_embedding': model.genre_embedding,
+                    'W1': model.W1, 'b1': model.b1,
+                    'W2': model.W2, 'b2': model.b2,
+                },
+                'vocab': {'word2idx': word2idx, 'idx2word': idx2word},
+                'config': {
+                    'embedding_dim': 16, 'hidden_dim': 32,
+                    'seq_len': SEQ_LEN, 'num_genres': NUM_GENRES,
+                    'genres': list(genre_encoder.classes_),
+                },
+                'constants': {
+                    'PAD_IDX': PAD_IDX, 'UNK_IDX': UNK_IDX,
+                    'BOS_IDX': BOS_IDX, 'EOS_IDX': EOS_IDX,
+                },
+                'epoch': epoch + 1,
+            }
+            best_path = get_output_path('lyrics_model_best.pkl')
+            with open(best_path, 'wb') as f:
+                pickle.dump(best_pkg, f)
+        except Exception as e:
+            print(f"  ⚠️  Best model save échoué: {e}")
     else:
         patience_counter += 1
         tag = f" (patience {patience_counter}/{EARLY_STOP_PATIENCE})"
@@ -503,6 +529,16 @@ for epoch in range(NUM_EPOCHS):
                     'genre_embedding': model.genre_embedding,
                     'W1': model.W1, 'b1': model.b1,
                     'W2': model.W2, 'b2': model.b2,
+                },
+                'vocab': {'word2idx': word2idx, 'idx2word': idx2word},
+                'config': {
+                    'embedding_dim': 16, 'hidden_dim': 32,
+                    'seq_len': SEQ_LEN, 'num_genres': NUM_GENRES,
+                    'genres': list(genre_encoder.classes_),
+                },
+                'constants': {
+                    'PAD_IDX': PAD_IDX, 'UNK_IDX': UNK_IDX,
+                    'BOS_IDX': BOS_IDX, 'EOS_IDX': EOS_IDX,
                 },
                 'loss_history': model.loss_history,
                 'val_loss_history': model.val_loss_history,
