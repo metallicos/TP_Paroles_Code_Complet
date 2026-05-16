@@ -18,6 +18,16 @@ def get_data_path(filename):
     return os.path.join(get_project_root(), filename)
 
 
+def get_outputs_dir():
+    output_dir = os.path.join(get_project_root(), 'outputs')
+    os.makedirs(output_dir, exist_ok=True)
+    return output_dir
+
+
+def get_output_path(filename):
+    return os.path.join(get_outputs_dir(), filename)
+
+
 print("="*60)
 print("SECTION 1: Chargement du Dataset Spotify")
 print("="*60)
@@ -356,7 +366,81 @@ for genre_idx, genre_name in enumerate(genre_encoder.classes_):
     print(f"  {lyrics[:150]}...")
 
 print("\n" + "="*60)
-print("SECTION 10: Sauvegarde du Modèle")
+print("SECTION 10: Visualisations et Statistiques")
+print("="*60)
+
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+fig.suptitle('Statistiques du Modèle de Génération de Paroles', fontsize=16, fontweight='bold')
+
+epochs_range = range(1, len(model.loss_history) + 1)
+
+ax1 = axes[0, 0]
+ax1.plot(epochs_range, model.loss_history, 'b-o', label='Train', linewidth=2, markersize=6)
+ax1.plot(epochs_range, model.val_loss_history, 'r-s', label='Validation', linewidth=2, markersize=6)
+ax1.set_xlabel('Epoch', fontsize=11, fontweight='bold')
+ax1.set_ylabel('Loss (Cross-Entropy)', fontsize=11, fontweight='bold')
+ax1.set_title('Loss: Train vs Validation', fontsize=12, fontweight='bold')
+ax1.legend()
+ax1.grid(True, alpha=0.3)
+
+train_ppl = [compute_perplexity(loss) for loss in model.loss_history]
+val_ppl = [compute_perplexity(loss) for loss in model.val_loss_history]
+
+ax2 = axes[0, 1]
+ax2.plot(epochs_range, train_ppl, 'g-o', label='Train', linewidth=2, markersize=6)
+ax2.plot(epochs_range, val_ppl, 'orange', marker='s', label='Validation', linewidth=2, markersize=6)
+ax2.set_xlabel('Epoch', fontsize=11, fontweight='bold')
+ax2.set_ylabel('Perplexity', fontsize=11, fontweight='bold')
+ax2.set_title('Perplexity: Train vs Validation', fontsize=12, fontweight='bold')
+ax2.legend()
+ax2.grid(True, alpha=0.3)
+
+genre_counts = df_filtered['playlist_genre'].value_counts()
+ax3 = axes[1, 0]
+colors = plt.cm.Set3(range(len(genre_counts)))
+bars = ax3.bar(range(len(genre_counts)), genre_counts.values, color=colors, edgecolor='black', linewidth=1.5)
+ax3.set_xticks(range(len(genre_counts)))
+ax3.set_xticklabels(genre_counts.index, rotation=45, ha='right')
+ax3.set_ylabel('Nombre de Chansons', fontsize=11, fontweight='bold')
+ax3.set_title('Distribution des Genres', fontsize=12, fontweight='bold')
+ax3.grid(True, alpha=0.3, axis='y')
+
+for bar in bars:
+    height = bar.get_height()
+    ax3.text(bar.get_x() + bar.get_width()/2., height,
+            f'{int(height):,}',
+            ha='center', va='bottom', fontsize=10, fontweight='bold')
+
+seq_lengths = df_filtered['tokens'].str.len()
+ax4 = axes[1, 1]
+ax4.hist(seq_lengths, bins=50, color='purple', edgecolor='black', alpha=0.7)
+ax4.axvline(seq_lengths.mean(), color='red', linestyle='--', linewidth=2, label=f'Mean: {seq_lengths.mean():.1f}')
+ax4.axvline(seq_lengths.median(), color='green', linestyle='--', linewidth=2, label=f'Median: {seq_lengths.median():.1f}')
+ax4.set_xlabel('Longueur de Séquence (tokens)', fontsize=11, fontweight='bold')
+ax4.set_ylabel('Fréquence', fontsize=11, fontweight='bold')
+ax4.set_title(f'Distribution des Longueurs (Total: {len(X_train):,} paires)', fontsize=12, fontweight='bold')
+ax4.legend()
+ax4.grid(True, alpha=0.3, axis='y')
+
+plt.tight_layout()
+plot_path = get_output_path('training_stats.png')
+plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+print(f"\n✓ Graphiques sauvegardés: {plot_path}")
+plt.show()
+
+print("\n📊 STATISTIQUES FINALES:")
+print(f"  • Meilleur Train Loss: {min(model.loss_history):.4f}")
+print(f"  • Meilleur Val Loss: {min(model.val_loss_history):.4f}")
+print(f"  • Train Perplexity (epoch 1): {compute_perplexity(model.loss_history[0]):.4f}")
+print(f"  • Val Perplexity (epoch 1): {compute_perplexity(model.val_loss_history[0]):.4f}")
+print(f"  • Train Perplexity (final): {compute_perplexity(model.loss_history[-1]):.4f}")
+print(f"  • Val Perplexity (final): {compute_perplexity(model.val_loss_history[-1]):.4f}")
+print(f"  • Longueur moyenne paroles: {seq_lengths.mean():.1f} tokens")
+print(f"  • Longueur max paroles: {seq_lengths.max():.0f} tokens")
+print(f"  • Total paires (input, target): {len(X_train) + len(X_val):,}")
+
+print("\n" + "="*60)
+print("SECTION 11: Sauvegarde du Modèle")
 print("="*60)
 
 inference_package = {
@@ -387,7 +471,7 @@ inference_package = {
     }
 }
 
-model_path = get_data_path('lyrics_model.pkl')
+model_path = get_output_path('lyrics_model.pkl')
 with open(model_path, 'wb') as f:
     pickle.dump(inference_package, f)
 
@@ -401,9 +485,11 @@ print(f"✓ Dataset: {len(df_filtered)} chansons")
 print(f"✓ Vocabulaire: {len(word2idx):,} tokens")
 print(f"✓ Genres: {NUM_GENRES}")
 print(f"✓ Exemples: {len(X_train):,} train / {len(X_val):,} val")
-print(f"\nMÉTRIQUES FINALES:")
+print(f"\n📊 MÉTRIQUES FINALES:")
 print(f"✓ Train Loss: {model.loss_history[-1]:.4f}")
 print(f"✓ Val Loss: {model.val_loss_history[-1]:.4f}")
 print(f"✓ Train Perplexity: {compute_perplexity(model.loss_history[-1]):.4f}")
 print(f"✓ Val Perplexity: {compute_perplexity(model.val_loss_history[-1]):.4f}")
+print(f"\n📈 Graphiques sauvegardés: {plot_path}")
+print(f"💾 Modèle sauvegardé: {model_path}")
 print("="*60)

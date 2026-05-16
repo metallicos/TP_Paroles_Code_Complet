@@ -83,7 +83,11 @@ def test_model_existance():
     print("=" * 60)
     
     project_root = get_project_root()
-    model_path = os.path.join(project_root, 'lyrics_model.pkl')
+    model_path = os.path.join(project_root, 'outputs', 'lyrics_model.pkl')
+    legacy_model_path = os.path.join(project_root, 'lyrics_model.pkl')
+    
+    if not os.path.exists(model_path) and os.path.exists(legacy_model_path):
+        model_path = legacy_model_path
     
     if os.path.exists(model_path):
         size_kb = os.path.getsize(model_path) / 1024

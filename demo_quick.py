@@ -15,7 +15,7 @@ def get_project_root():
 
 def test_quick_demo():
     project_root = get_project_root()
-    model_path = os.path.join(project_root, 'lyrics_model.pkl')
+    model_path = os.path.join(project_root, 'outputs', 'lyrics_model.pkl')
     
     print("\n" + "="*60)
     print("DEMO RAPIDE - Génération de Paroles")

@@ -13,6 +13,10 @@ def get_data_path(filename):
     return os.path.join(get_project_root(), filename)
 
 
+def get_output_path(filename):
+    return os.path.join(get_project_root(), 'outputs', filename)
+
+
 class LyricsGenerationModel:
     def __init__(self, vocab_size, embedding_dim=16, hidden_dim=32, num_genres=5):
         self.vocab_size = vocab_size
@@ -141,7 +145,7 @@ def main():
     
     parser.add_argument('--model', type=str, 
                        default=None,
-                       help='Chemin du modèle (par défaut: lyrics_model.pkl)')
+                       help='Chemin du modèle (par défaut: outputs/lyrics_model.pkl)')
     
     parser.add_argument('--genre', type=str,
                        required=True,
@@ -164,7 +168,7 @@ def main():
     
     args = parser.parse_args()
     
-    model_path = args.model if args.model else get_data_path('lyrics_model.pkl')
+    model_path = args.model if args.model else get_output_path('lyrics_model.pkl')
     
     try:
         generator = LyricsGenerator(model_path)

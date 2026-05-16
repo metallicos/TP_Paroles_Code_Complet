@@ -36,7 +36,9 @@ python test_project.py
 ├── TP_Paroles_Code_Complet.py    # Script d'entraînement (main)
 ├── infer_lyrics.py                # Script d'inférence (génération)
 ├── spotify_songs.csv              # Dataset (18,454 chansons)
-├── lyrics_model.pkl               # Modèle entraîné (créé après étape 1)
+├── outputs/                        # Sorties générées automatiquement
+│   ├── lyrics_model.pkl            # Modèle entraîné
+│   └── training_stats.png          # Graphiques d'entraînement
 ├── requirements.txt               # Dépendances Python
 ├── setup.sh                        # Script d'initialisation (Linux/macOS)
 ├── test_project.py                # Tests de vérification
@@ -56,7 +58,8 @@ Cela va:
 - Prétraiter les paroles (tokenization, nettoyage)
 - Créer un vocabulaire de ~15k mots
 - Entraîner un réseau de neurones pendant 10 epochs
-- Sauvegarder le modèle dans `lyrics_model.pkl`
+- Sauvegarder le modèle dans `outputs/lyrics_model.pkl`
+- Sauvegarder les graphes dans `outputs/training_stats.png`
 
 **Durée estimée:** 5-15 minutes selon votre machine
 
@@ -144,20 +147,22 @@ Vérifiera:
 ## Fichiers Explicités
 
 ### TP_Paroles_Code_Complet.py (Principal)
-Script d'entraînement complet divisé en 10 sections:
+Script d'entraînement complet divisé en 11 sections:
 1. **Section 1**: Chargement du dataset
 2. **Section 2**: Exploration des genres
 3. **Section 3**: Prétraitement du texte
 4. **Section 4**: Construction du vocabulaire
 5. **Section 5**: Encodage des données
-6. **Section 6**: Préparation train/validation
+6. **Section 6**: Préparation train/validation (avec barre de progression)
 7. **Section 7**: Modèle neural network
-8. **Section 8**: Entraînement avec gradient descent
+8. **Section 8**: Entraînement avec gradient descent (Loss, Accuracy, Perplexity)
 9. **Section 9**: Génération et tests
-10. **Section 10**: Sauvegarde du modèle
+10. **Section 10**: Visualisations et Statistiques (4 graphiques)
+11. **Section 11**: Sauvegarde du modèle
 
 **Chemin du modèle:** Automatiquement déterminé (même répertoire)
 **Chemin du dataset:** Automatiquement déterminé (même répertoire)
+**Graphiques:** Sauvegardés dans `training_stats.png`
 
 ### infer_lyrics.py (Inférence)
 Script d'inférence pour générer des paroles avec le modèle entraîné.
