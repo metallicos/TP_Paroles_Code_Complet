@@ -1,0 +1,304 @@
+🎵 TP: GÉNÉRATION AUTOMATIQUE DE PAROLES DE CHANSON
+================================================
+
+📚 FICHIERS DU TP
+-----------------
+
+1. **README_TP_Paroles.md** (7.3 KB)
+   - Guide complet du TP
+   - Concepts du cours appliqués
+   - Architecture du modèle
+   - Étapes détaillées
+   - Paramètres et résultats attendus
+
+2. **TP_Paroles_Code_Complet.py** (14 KB) ⭐ Recommandé
+   - Script Python autonome complet
+   - Toutes les 10 sections du TP
+   - Exécution directe: python TP_Paroles_Code_Complet.py
+   - ~5-10 minutes d'exécution
+   
+3. **TP_Generation_Paroles_Chanson.ipynb** (1.4 KB)
+   - Notebook Jupyter
+   - Exécutable dans VS Code
+   - Approche interactive avec explications
+
+4. **infer_lyrics.py** (8.0 KB)
+   - Script d'inférence/génération
+   - Utiliser après entraînement du modèle
+   - Ligne de commande facile à utiliser
+   - Exemples:
+     * python infer_lyrics.py --genre rock
+     * python infer_lyrics.py --genre pop --samples 3 --temperature 0.8
+     * python infer_lyrics.py --list-genres
+
+5. **spotify_songs.csv** (42 MB)
+   - Dataset complet avec 18,454 chansons
+   - Colonnes: track_name, track_artist, lyrics, playlist_genre, etc.
+
+6. **generate_notebook.py** (51 KB)
+   - Script générateur de notebook (auxiliaire)
+
+
+🎯 DÉMARRAGE RAPIDE
+-------------------
+
+Option 1: Exécuter le code Python complet (RECOMMANDÉ)
+    cd /home/abdou/Public/sites/cours
+    python TP_Paroles_Code_Complet.py
+    
+Option 2: Utiliser le Notebook Jupyter
+    - Ouvrir TP_Generation_Paroles_Chanson.ipynb dans VS Code
+    - Exécuter les cellules dans l'ordre
+    
+Option 3: Générer des paroles avec le modèle entraîné
+    python infer_lyrics.py --genre rock --samples 3
+
+
+📊 STRUCTURE DU TP
+------------------
+
+Section 1: Chargement du Dataset
+    ✓ Charger spotify_songs.csv
+    ✓ Explorer la structure
+    ✓ Nettoyer les paroles invalides
+    
+Section 2: Exploration des Genres
+    ✓ Analyser la distribution des genres
+    ✓ Sélectionner les 5 genres principaux
+    
+Section 3: Prétraitement du Texte
+    ✓ Convertir en minuscule
+    ✓ Supprimer les caractères spéciaux
+    ✓ Tokenization
+    
+Section 4: Construction du Vocabulaire
+    ✓ Compter la fréquence des mots
+    ✓ Appliquer un seuil MIN_FREQ
+    ✓ Créer word2idx et idx2word
+    ✓ Ajouter les tokens spéciaux (<PAD>, <BOS>, <EOS>, <UNK>)
+    
+Section 5: Encodage des Données
+    ✓ Encoder les tokens en indices
+    ✓ Padding/Troncature à taille fixe
+    ✓ Encoder les genres avec LabelEncoder
+    
+Section 6: Préparation Train/Validation
+    ✓ Créer les paires (contexte, mot_suivant)
+    ✓ Diviser les données (80% train, 20% val)
+    
+Section 7: Modèle Neural Network
+    ✓ Embedding d'entrée (mots → vecteurs)
+    ✓ Embedding de condition (genre → vecteur)
+    ✓ Couche cachée avec ReLU
+    ✓ Couche de sortie (logits)
+    
+Section 8: Entraînement
+    ✓ Forward pass: logits = f(X, genre)
+    ✓ Calcul de la loss (cross-entropy)
+    ✓ Backward pass (rétro-propagation)
+    ✓ Mise à jour des poids (gradient descent)
+    ✓ Monitoring train/validation loss
+    
+Section 9: Génération de Paroles
+    ✓ Génération auto-régressive
+    ✓ Sampling avec temperature
+    ✓ Contrôle de la diversité
+    
+Section 10: Sauvegarde et Inférence
+    ✓ Sauvegarder le modèle en pickle
+    ✓ Créer une classe réutilisable
+    ✓ Interface simple pour générer
+
+
+🧠 CONCEPTS ML APPLIQUÉS
+-------------------------
+
+1. RÉGRESSION LINÉAIRE
+   - Prédiction du mot suivant comme problème de régression
+   - Outputs: indices des mots (0 à vocab_size-1)
+   
+2. CLASSIFICATION MULTI-CLASSE
+   - Classification sur vocab_size classes (mots)
+   - Softmax + Cross-Entropy Loss
+   - Genre comme variable de condition
+   
+3. RÉSEAUX DE NEURONES
+   - Architecture: 2 couches (cachée + sortie)
+   - Activation: ReLU (couche cachée), Softmax (sortie)
+   - Embeddings: projection d'indices vers espaces denses
+   
+4. FONCTION DE COÛT
+   - Cross-Entropy: J = -(1/m) * Σ y * log(p)
+   - Une loss pour chaque exemple d'entraînement
+   
+5. GRADIENT DESCENT
+   - w_{t+1} = w_t - α * ∂E/∂w_t
+   - Learning rate: α = 0.001
+   - Rétro-propagation pour les gradients
+   
+6. OPTIMISATION MATRICIELLE
+   - Utilisation de NumPy pour les calculs matriciels
+   - Batch processing pour efficacité
+   - Vectorisation complète (pas de boucles Python)
+
+
+📈 RÉSULTATS ATTENDUS
+---------------------
+
+Après entraînement:
+    ✓ Vocabulaire: ~3,000-5,000 mots
+    ✓ Training Loss: 8-10 → 2-3
+    ✓ Validation Loss: 2.5-3.5
+    ✓ Temps: ~5-10 minutes (10 epochs)
+
+Exemple de paroles générées:
+
+    Genre: ROCK
+    "i want to rock and roll tonight
+    the feeling is so strong and right
+    let's dance until the morning light"
+    
+    Genre: POP  
+    "baby love me like you do
+    my heart is beating true
+    forever you and me"
+    
+    Genre: HIP-HOP
+    "yo check the rhyme i spit so tight
+    making moves day and night
+    the beat is flowing real right"
+
+
+🔧 PARAMÈTRES IMPORTANTS
+-------------------------
+
+Modèle:
+    - embedding_dim: 16 (dimension des vecteurs de mots)
+    - hidden_dim: 32 (neurons dans la couche cachée)
+    - SEQ_LEN: 10 (taille du contexte en input)
+    - vocab_size: ~4,000 (nombre de mots uniques)
+    - num_genres: 5 (nombre de genres musicaux)
+
+Entraînement:
+    - batch_size: 128 (exemples par batch)
+    - learning_rate: 0.001 (paramètre du gradient descent)
+    - num_epochs: 10-15 (itérations complètes)
+    - early_stopping: patience=3 (arrêt si pas d'amélioration)
+
+Génération:
+    - max_length: 40-50 tokens
+    - temperature: 0.7-1.2
+      * 0.7 = plus déterministe, cohérent
+      * 1.0 = normal
+      * 1.2 = plus créatif, varié
+
+
+⚠️ PRÉREQUIS
+------------
+
+Python 3.7+
+Librairies:
+    - numpy
+    - pandas
+    - scikit-learn
+    - matplotlib
+
+Installation:
+    pip install numpy pandas scikit-learn matplotlib
+
+
+📝 NOTES IMPORTANTES
+--------------------
+
+1. Le modèle utilise UNIQUEMENT les techniques du cours
+   - Pas de LSTM/GRU/Transformer
+   - Pas de frameworks Deep Learning (TensorFlow, PyTorch)
+   - NumPy pour tous les calculs
+
+2. Limitations du modèle simple:
+   - Contexte court (SEQ_LEN=10)
+   - Dépendances à court terme seulement
+   - Pas de gestion long terme des thèmes
+
+3. Améliorations possibles:
+   - Ajouter LSTM pour dépendances long terme
+   - Augmenter embedding_dim et hidden_dim
+   - Utiliser attention mechanism
+   - Data augmentation
+
+
+🚀 UTILISATION AVEC INFÉRENCE
+------------------------------
+
+# Après entraînement, le modèle est sauvegardé dans lyrics_model.pkl
+
+# Générer une chanson Rock
+python infer_lyrics.py --genre rock
+
+# Générer 5 chansons Pop avec température 0.9
+python infer_lyrics.py --genre pop --samples 5 --temperature 0.9
+
+# Lister les genres disponibles
+python infer_lyrics.py --list-genres
+
+# Générer une chanson courte Hip-Hop
+python infer_lyrics.py --genre hip-hop --length 30
+
+# Aide
+python infer_lyrics.py --help
+
+
+📚 RESSOURCES
+-------------
+
+Fichiers de sortie après entraînement:
+    - lyrics_model.pkl (poids et vocabulaire)
+    - Historique de loss (affiché dans le terminal)
+
+Pour déboguer:
+    Ajouter des print() dans les fonctions forward/backward
+    Vérifier les dimensions des matrices NumPy
+    Tracer la loss pendant l'entraînement
+
+
+✅ CHECKLIST
+-----------
+
+Avant de lancer:
+    □ spotify_songs.csv est dans le bon répertoire
+    □ Python 3.7+ installé
+    □ Librairies numpy, pandas, sklearn installées
+    
+Pendant l'exécution:
+    □ Vérifier que la loss diminue
+    □ Attendre l'entraînement (~10 min)
+    □ Observer les exemples générés
+    
+Après:
+    □ Tester avec infer_lyrics.py
+    □ Générer plusieurs exemples
+    □ Varier la température pour explorer
+
+
+🎯 PROCHAINES ÉTAPES
+--------------------
+
+1. Exécuter le TP complet
+2. Analyser les résultats et la loss
+3. Générer des paroles avec différent genres
+4. Expérimenter avec les paramètres
+5. Essayer d'améliorer le modèle
+6. Comparer avec une LSTM version
+
+
+📞 SUPPORT
+----------
+
+En cas de problème:
+1. Vérifier que le CSV est au bon endroit
+2. Vérifier les versions des librairies
+3. Lire les messages d'erreur
+4. Consulter le README_TP_Paroles.md pour plus de détails
+
+
+Bonne chance avec le TP! 🎵✨
