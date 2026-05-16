@@ -10,6 +10,7 @@ import re
 import pickle
 import time
 import traceback
+import glob
 
 try:
     import psutil
@@ -459,6 +460,9 @@ LEARNING_RATE = 0.001
 EARLY_STOP_PATIENCE = 3  # stop if val_loss doesn't improve for N epochs
 CHECKPOINT_EVERY = 1     # save checkpoint every N epochs
 
+resume_from = os.getenv("RESUME_FROM", "").strip()
+start_epoch = 0
+
 print(f"Config: epochs={NUM_EPOCHS}, batch={BATCH_SIZE}, lr={LEARNING_RATE}, patience={EARLY_STOP_PATIENCE}")
 log_memory()
 print(f"\n{'Époque':>6} | {'Train Loss':>10} | {'Train Acc':>9} | {'Val Loss':>8} | {'Val Acc':>7} | {'Train PPL':>9} | {'Val PPL':>7} | {'Time':>6}")
@@ -469,7 +473,41 @@ best_epoch = 0
 patience_counter = 0
 training_start = time.time()
 
-for epoch in range(NUM_EPOCHS):
+if resume_from:
+    if resume_from.lower() == "latest":
+        ckpts = sorted(glob.glob(get_output_path('checkpoint_epoch*.pkl')))
+        resume_path = ckpts[-1] if ckpts else ""
+    elif os.path.isabs(resume_from):
+        resume_path = resume_from
+    else:
+        resume_path = get_output_path(resume_from)
+
+    if resume_path and os.path.exists(resume_path):
+        try:
+            with open(resume_path, 'rb') as f:
+                ckpt = pickle.load(f)
+
+            weights = ckpt.get('model_weights', {})
+            for key in ['word_embedding', 'genre_embedding', 'W1', 'b1', 'W2', 'b2']:
+                if key in weights:
+                    setattr(model, key, xp.asarray(weights[key]))
+
+            model.loss_history = ckpt.get('loss_history', [])
+            model.val_loss_history = ckpt.get('val_loss_history', [])
+
+            start_epoch = int(ckpt.get('epoch', 0))
+            if model.val_loss_history:
+                best_val_loss = min(model.val_loss_history)
+                best_epoch = int(np.argmin(model.val_loss_history)) + 1
+
+            print(f"✓ Reprise depuis: {resume_path} (epoch {start_epoch})")
+        except Exception as e:
+            print(f"⚠️  Reprise échouée ({e}) — démarrage depuis epoch 1")
+            start_epoch = 0
+    else:
+        print(f"⚠️  Checkpoint introuvable: {resume_from} — démarrage depuis epoch 1")
+
+for epoch in range(start_epoch, NUM_EPOCHS):
     epoch_start = time.time()
     print(f"\nEpoch {epoch + 1}/{NUM_EPOCHS}")
     log_memory()
