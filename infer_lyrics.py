@@ -41,12 +41,12 @@ def rebuild_vocab_from_csv(csv_path, max_samples=None):
     import pandas as pd
     from sklearn.preprocessing import LabelEncoder
 
-    MIN_FREQ = 2
-    MAX_VOCAB_SIZE = 20000
+    MIN_FREQ = int(os.getenv("MIN_FREQ", "5"))
+    MAX_VOCAB_SIZE = int(os.getenv("MAX_VOCAB_SIZE", "12000"))
     TOP_GENRES = 5
-    SEQ_LEN = 10
-    EMBED_DIM = 16
-    HIDDEN_DIM = 32
+    SEQ_LEN = int(os.getenv("SEQ_LEN", "20"))
+    EMBED_DIM = int(os.getenv("EMBEDDING_DIM", "32"))
+    HIDDEN_DIM = int(os.getenv("HIDDEN_DIM", "128"))
     SPECIAL_TOKENS = ['<PAD>', '<UNK>', '<BOS>', '<EOS>']
 
     print(f"  → Reconstruction du vocabulaire depuis: {os.path.basename(csv_path)}")
@@ -200,7 +200,8 @@ class LyricsGenerator:
         exp_logits = xp.exp(logits - xp.max(logits))
         return exp_logits / xp.sum(exp_logits)
 
-    def generate(self, genre, max_length=50, temperature=1.0, seed_tokens=None, top_k=40, min_length=20):
+    def generate(self, genre, max_length=50, temperature=1.0, seed_tokens=None, top_k=40, min_length=20,
+                 repeat_penalty=1.2, no_repeat_window=12):
         genre_idx = None
         genre_lower = genre.lower()
         
@@ -232,6 +233,13 @@ class LyricsGenerator:
             # Enforce minimum number of visible words before allowing EOS
             if min_length and visible_word_count < min_length:
                 probs_np[self.EOS_IDX] = 0.0
+
+            # Penalize recently used tokens to reduce loops like "i you the"
+            if repeat_penalty and repeat_penalty > 1.0 and no_repeat_window and no_repeat_window > 0:
+                recent_tokens = generated_tokens[-no_repeat_window:]
+                for tok in set(recent_tokens):
+                    if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
+                        probs_np[tok] = probs_np[tok] / repeat_penalty
 
             probs_sum = probs_np.sum()
             if probs_sum <= 0:
@@ -265,13 +273,22 @@ class LyricsGenerator:
                 words.append(word)
         return ' '.join(words) if words else "(Paroles vides - essayez avec une autre température)"
     
-    def generate_multiple(self, genre, num_samples=3, max_length=50, temperature=0.8, top_k=40, min_length=20):
+    def generate_multiple(self, genre, num_samples=3, max_length=50, temperature=0.8, top_k=40, min_length=20,
+                          repeat_penalty=1.2, no_repeat_window=12):
         print(f"\n🎵 Génération de {num_samples} paroles pour le genre: {genre.upper()}")
         print("-" * 60)
         
         for i in range(num_samples):
             print(f"\n📝 Exemple {i+1}:")
-            lyrics = self.generate(genre, max_length, temperature, top_k=top_k, min_length=min_length)
+            lyrics = self.generate(
+                genre,
+                max_length,
+                temperature,
+                top_k=top_k,
+                min_length=min_length,
+                repeat_penalty=repeat_penalty,
+                no_repeat_window=no_repeat_window,
+            )
             print(lyrics)
             print()
     
@@ -312,6 +329,12 @@ def main():
 
     parser.add_argument('--min-length', type=int, default=20,
                        help='Nombre minimum de tokens avant d\'autoriser <EOS> (défaut: 20)')
+
+    parser.add_argument('--repeat-penalty', type=float, default=1.2,
+                       help='Pénalité de répétition (>1 réduit les boucles de mots, défaut: 1.2)')
+
+    parser.add_argument('--no-repeat-window', type=int, default=12,
+                       help='Fenêtre récente de tokens pénalisés (défaut: 12)')
 
     parser.add_argument('--csv', type=str, default=None,
                        help='Chemin vers spotify_songs.csv pour reconstruire le vocabulaire '
@@ -375,10 +398,12 @@ def main():
             args.temperature,
             top_k=args.top_k,
             min_length=args.min_length,
+            repeat_penalty=args.repeat_penalty,
+            no_repeat_window=args.no_repeat_window,
         )
     else:
         print(f"\n🎵 Génération de paroles pour le genre: {args.genre.upper()}")
-        print(f"   (Température: {args.temperature}, Max tokens: {args.length}, Top-k: {args.top_k}, Min length: {args.min_length})")
+        print(f"   (Température: {args.temperature}, Max tokens: {args.length}, Top-k: {args.top_k}, Min length: {args.min_length}, Repeat penalty: {args.repeat_penalty}, Window: {args.no_repeat_window})")
         print("-" * 60)
         lyrics = generator.generate(
             args.genre,
@@ -386,6 +411,8 @@ def main():
             args.temperature,
             top_k=args.top_k,
             min_length=args.min_length,
+            repeat_penalty=args.repeat_penalty,
+            no_repeat_window=args.no_repeat_window,
         )
         print(lyrics)
         print()

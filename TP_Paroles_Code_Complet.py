@@ -166,8 +166,8 @@ for tokens_list in df['tokens']:
     all_tokens.extend(tokens_list)
 
 word_freq = Counter(all_tokens)
-MIN_FREQ = 2
-MAX_VOCAB_SIZE = 20000
+MIN_FREQ = int(os.getenv("MIN_FREQ", "5"))
+MAX_VOCAB_SIZE = int(os.getenv("MAX_VOCAB_SIZE", "12000"))
 filtered_tokens = [(word, freq) for word, freq in word_freq.items() if freq >= MIN_FREQ]
 filtered_tokens.sort(key=lambda item: item[1], reverse=True)
 filtered_tokens = filtered_tokens[:MAX_VOCAB_SIZE]
@@ -194,16 +194,17 @@ print("SECTION 5: Encodage des Données")
 print("="*60)
 
 def encode_tokens(tokens, word2idx, max_len=None):
-    encoded = [word2idx.get(token, UNK_IDX) for token in tokens]
+    encoded = [BOS_IDX] + [word2idx.get(token, UNK_IDX) for token in tokens] + [EOS_IDX]
     if max_len:
         if len(encoded) > max_len:
             encoded = encoded[:max_len]
+            encoded[-1] = EOS_IDX
         else:
             encoded += [PAD_IDX] * (max_len - len(encoded))
     return encoded
 
 MAX_SEQ_LEN = int(np.percentile(df['tokens'].str.len(), 90))
-SEQ_LEN = 10
+SEQ_LEN = int(os.getenv("SEQ_LEN", "20"))
 
 df['encoded_tokens'] = df['tokens'].apply(lambda x: encode_tokens(x, word2idx, MAX_SEQ_LEN))
 df_filtered = df[df['playlist_genre'].isin(top_genres)].copy()
@@ -272,7 +273,7 @@ print("SECTION 7: Modèle Neural Network")
 print("="*60)
 
 class LyricsGenerationModel:
-    def __init__(self, vocab_size, embedding_dim=16, hidden_dim=32, num_genres=5):
+    def __init__(self, vocab_size, embedding_dim=32, hidden_dim=128, num_genres=5):
         self.vocab_size = vocab_size
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
@@ -329,10 +330,13 @@ class LyricsGenerationModel:
         self.W1 -= learning_rate * dW1
         self.b1 -= learning_rate * db1
 
+EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "32"))
+HIDDEN_DIM = int(os.getenv("HIDDEN_DIM", "128"))
+
 model = LyricsGenerationModel(
     vocab_size=len(word2idx),
-    embedding_dim=16,
-    hidden_dim=32,
+    embedding_dim=EMBEDDING_DIM,
+    hidden_dim=HIDDEN_DIM,
     num_genres=NUM_GENRES
 )
 print(f"✓ Modèle créé")
@@ -454,16 +458,18 @@ def evaluate(model, X_test, y_test, genres_test, batch_size=128):
     avg_accuracy = total_accuracy / num_batches
     return avg_loss, avg_accuracy
 
-NUM_EPOCHS = 10
-BATCH_SIZE = 128
-LEARNING_RATE = 0.001
+NUM_EPOCHS = int(os.getenv("NUM_EPOCHS", "15"))
+BATCH_SIZE = int(os.getenv("BATCH_SIZE", "128"))
+LEARNING_RATE = float(os.getenv("LEARNING_RATE", "0.0008"))
+LR_DECAY = float(os.getenv("LR_DECAY", "0.97"))
+MIN_LEARNING_RATE = float(os.getenv("MIN_LEARNING_RATE", "0.0001"))
 EARLY_STOP_PATIENCE = 3  # stop if val_loss doesn't improve for N epochs
 CHECKPOINT_EVERY = 1     # save checkpoint every N epochs
 
 resume_from = os.getenv("RESUME_FROM", "").strip()
 start_epoch = 0
 
-print(f"Config: epochs={NUM_EPOCHS}, batch={BATCH_SIZE}, lr={LEARNING_RATE}, patience={EARLY_STOP_PATIENCE}")
+print(f"Config: epochs={NUM_EPOCHS}, batch={BATCH_SIZE}, lr={LEARNING_RATE}, decay={LR_DECAY}, patience={EARLY_STOP_PATIENCE}")
 log_memory()
 print(f"\n{'Époque':>6} | {'Train Loss':>10} | {'Train Acc':>9} | {'Val Loss':>8} | {'Val Acc':>7} | {'Train PPL':>9} | {'Val PPL':>7} | {'Time':>6}")
 print("-" * 90)
@@ -509,10 +515,11 @@ if resume_from:
 
 for epoch in range(start_epoch, NUM_EPOCHS):
     epoch_start = time.time()
-    print(f"\nEpoch {epoch + 1}/{NUM_EPOCHS}")
+    effective_lr = max(LEARNING_RATE * (LR_DECAY ** epoch), MIN_LEARNING_RATE)
+    print(f"\nEpoch {epoch + 1}/{NUM_EPOCHS} | lr={effective_lr:.6f}")
     log_memory()
     try:
-        train_loss, train_acc = train_epoch(model, X_train, y_train, genres_train, BATCH_SIZE, LEARNING_RATE)
+        train_loss, train_acc = train_epoch(model, X_train, y_train, genres_train, BATCH_SIZE, effective_lr)
         val_loss, val_acc = evaluate(model, X_val, y_val, genres_val, BATCH_SIZE)
     except Exception as e:
         print(f"  ❌ Erreur epoch {epoch + 1}: {e}")
@@ -548,7 +555,7 @@ for epoch in range(start_epoch, NUM_EPOCHS):
                 },
                 'vocab': {'word2idx': word2idx, 'idx2word': idx2word},
                 'config': {
-                    'embedding_dim': 16, 'hidden_dim': 32,
+                    'embedding_dim': EMBEDDING_DIM, 'hidden_dim': HIDDEN_DIM,
                     'seq_len': SEQ_LEN, 'num_genres': NUM_GENRES,
                     'genres': list(genre_encoder.classes_),
                 },
@@ -583,7 +590,7 @@ for epoch in range(start_epoch, NUM_EPOCHS):
                 },
                 'vocab': {'word2idx': word2idx, 'idx2word': idx2word},
                 'config': {
-                    'embedding_dim': 16, 'hidden_dim': 32,
+                    'embedding_dim': EMBEDDING_DIM, 'hidden_dim': HIDDEN_DIM,
                     'seq_len': SEQ_LEN, 'num_genres': NUM_GENRES,
                     'genres': list(genre_encoder.classes_),
                 },
@@ -756,8 +763,8 @@ inference_package = {
         'idx2word': idx2word,
     },
     'config': {
-        'embedding_dim': 16,
-        'hidden_dim': 32,
+        'embedding_dim': EMBEDDING_DIM,
+        'hidden_dim': HIDDEN_DIM,
         'seq_len': SEQ_LEN,
         'num_genres': NUM_GENRES,
         'genres': list(genre_encoder.classes_),
