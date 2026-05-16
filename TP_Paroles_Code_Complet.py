@@ -88,6 +88,27 @@ df = df[df['lyrics'] != 'NA'].copy()
 
 print(f"✓ Après nettoyage: {len(df):,} chansons avec paroles valides")
 
+# ──────────────────────────────────────────────────────────────
+# PARAMÈTRE: Nombre maximum d'entrées à utiliser
+#   None  → utiliser tout le dataset
+#   2000  → rapide pour tester / debug
+#   5000  → équilibre vitesse/qualité
+#   None  → entraînement complet (~18 000 chansons)
+# Peut aussi être surchargé via la variable d'environnement MAX_SAMPLES
+# Ex: MAX_SAMPLES=3000 python3 TP_Paroles_Code_Complet.py
+# ──────────────────────────────────────────────────────────────
+_env_max = os.getenv("MAX_SAMPLES", "").strip()
+MAX_SAMPLES = int(_env_max) if _env_max.isdigit() else None  # None = tout le dataset
+
+if MAX_SAMPLES is not None:
+    if MAX_SAMPLES >= len(df):
+        print(f"ℹ️  MAX_SAMPLES={MAX_SAMPLES} >= dataset ({len(df):,}) — utilisation complète")
+    else:
+        df = df.sample(n=MAX_SAMPLES, random_state=42).reset_index(drop=True)
+        print(f"✂️  Dataset réduit à {MAX_SAMPLES:,} entrées (sur {len(df) + MAX_SAMPLES - MAX_SAMPLES:,} originales)")
+else:
+    print(f"ℹ️  MAX_SAMPLES=None — utilisation du dataset complet ({len(df):,} entrées)")
+
 print("\n" + "="*60)
 print("SECTION 2: Exploration des Genres")
 print("="*60)
