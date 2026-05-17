@@ -379,6 +379,12 @@ class LyricsGenerationModel:
     def backward(self, X_batch, genres_batch, y_batch, logits, a1, combined, relu_mask, dropout_mask, probs,
                  learning_rate=0.01, label_smoothing=0.0, grad_clip=None):
         batch_size = X_batch.shape[0]
+        # Mask out PAD targets — they must not contribute gradients
+        valid_mask = (y_batch != PAD_IDX)
+        valid_count = int(valid_mask.sum().item()) if hasattr(valid_mask.sum(), 'item') else int(valid_mask.sum())
+        if valid_count == 0:
+            return
+
         if label_smoothing and label_smoothing > 0.0:
             smooth = float(label_smoothing)
             target = xp.full_like(probs, smooth / max(self.vocab_size - 1, 1))
@@ -387,7 +393,9 @@ class LyricsGenerationModel:
         else:
             d_logits = probs.copy()
             d_logits[xp.arange(batch_size), y_batch] -= 1
-        d_logits /= batch_size
+        # Zero out gradients for PAD-target rows and divide by valid_count only
+        d_logits[~valid_mask] = 0.0
+        d_logits /= max(valid_count, 1)
         
         dW2 = xp.dot(a1.T, d_logits)
         db2 = xp.sum(d_logits, axis=0, keepdims=True)
