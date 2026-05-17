@@ -225,8 +225,6 @@ def encode_tokens(tokens, word2idx, max_len=None):
         if len(encoded) > max_len:
             encoded = encoded[:max_len]
             encoded[-1] = EOS_IDX
-        else:
-            encoded += [PAD_IDX] * (max_len - len(encoded))
     return encoded
 
 MAX_SEQ_LEN = int(np.percentile(df['tokens'].str.len(), 90))
@@ -360,14 +358,20 @@ class LyricsGenerationModel:
         probs = exp_logits / xp.sum(exp_logits, axis=1, keepdims=True)
         probs = xp.clip(probs, 1e-12, 1.0)
 
+        valid_mask = (y_batch != PAD_IDX)
+        valid_count = int(valid_mask.sum().item()) if hasattr(valid_mask.sum(), 'item') else int(valid_mask.sum())
+        if valid_count == 0:
+            return 0.0, probs
+
         if label_smoothing and label_smoothing > 0.0:
             smooth = float(label_smoothing)
             target = xp.full_like(probs, smooth / max(self.vocab_size - 1, 1))
             target[xp.arange(batch_size), y_batch] = 1.0 - smooth
-            loss = float((-xp.sum(target * xp.log(probs), axis=1)).mean().item())
+            per_sample_loss = -xp.sum(target * xp.log(probs), axis=1)
+            loss = float(per_sample_loss[valid_mask].mean().item())
         else:
             correct_log_probs = -xp.log(probs[xp.arange(batch_size), y_batch])
-            loss = float(correct_log_probs.mean().item())
+            loss = float(correct_log_probs[valid_mask].mean().item())
         return loss, probs
     
     def backward(self, X_batch, genres_batch, y_batch, logits, a1, combined, relu_mask, dropout_mask, probs,
@@ -416,7 +420,11 @@ print("="*60)
 
 def compute_accuracy(logits, y_batch):
     predictions = xp.argmax(logits, axis=1)
-    accuracy = float((predictions == y_batch).mean().item())
+    valid_mask = (y_batch != PAD_IDX)
+    valid_count = int(valid_mask.sum().item()) if hasattr(valid_mask.sum(), 'item') else int(valid_mask.sum())
+    if valid_count == 0:
+        return 0.0
+    accuracy = float((predictions[valid_mask] == y_batch[valid_mask]).mean().item())
     return accuracy
 
 def compute_perplexity(loss):
