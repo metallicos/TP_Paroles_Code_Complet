@@ -209,10 +209,11 @@ class LyricsGenerator:
             cutoff = np.searchsorted(cumulative, top_p, side='left') + 1
             keep_idx = sorted_idx[:cutoff]
 
+            probs_np = np.nan_to_num(probs_np, nan=0.0, posinf=0.0, neginf=0.0)
             filtered = np.zeros_like(probs_np)
             filtered[keep_idx] = probs_np[keep_idx]
             filtered_sum = filtered.sum()
-            if filtered_sum > 0:
+            if np.isfinite(filtered_sum) and filtered_sum > 0:
                 filtered /= filtered_sum
                 return filtered
 
@@ -271,11 +272,29 @@ class LyricsGenerator:
                     if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
                         probs_np[tok] = 0.0
 
+            probs_np = np.nan_to_num(probs_np, nan=0.0, posinf=0.0, neginf=0.0)
             probs_sum = probs_np.sum()
-            if probs_sum <= 0:
+            if (not np.isfinite(probs_sum)) or probs_sum <= 0:
                 # Fallback: if filtering removed all mass, use original distribution
                 probs_np = probs.get().astype(np.float64) if hasattr(probs, 'get') else np.asarray(probs, dtype=np.float64)
+                probs_np = np.nan_to_num(probs_np, nan=0.0, posinf=0.0, neginf=0.0)
                 probs_sum = probs_np.sum()
+
+            if (not np.isfinite(probs_sum)) or probs_sum <= 0:
+                # Final fallback: uniform over allowed tokens
+                probs_np = np.zeros_like(probs_np, dtype=np.float64)
+                allowed = np.ones_like(probs_np, dtype=bool)
+                allowed[self.PAD_IDX] = False
+                allowed[self.BOS_IDX] = False
+                allowed[self.UNK_IDX] = False
+                if min_length and visible_word_count < min_length:
+                    allowed[self.EOS_IDX] = False
+
+                allowed_indices = np.where(allowed)[0]
+                if len(allowed_indices) == 0:
+                    allowed_indices = np.array([self.EOS_IDX], dtype=np.int64)
+                probs_np[allowed_indices] = 1.0 / len(allowed_indices)
+                probs_sum = 1.0
 
             probs_np = probs_np / probs_sum  # ensure sums to 1 (float precision)
             next_token = int(np.random.choice(len(probs_np), p=probs_np))
