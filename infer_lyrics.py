@@ -220,7 +220,8 @@ class LyricsGenerator:
         return probs
 
     def generate(self, genre, max_length=50, temperature=1.0, seed_tokens=None, top_k=40, min_length=20,
-                 repeat_penalty=1.2, no_repeat_window=12, no_repeat_ngram=3, top_p=0.9):
+                 repeat_penalty=1.2, no_repeat_window=12, no_repeat_ngram=3, top_p=0.9,
+                 presence_penalty=1.15, frequency_penalty=0.08):
         genre_idx = None
         genre_lower = genre.lower()
         
@@ -235,6 +236,7 @@ class LyricsGenerator:
         generated_tokens = [self.BOS_IDX]
         context_buffer = list(generated_tokens)
         visible_word_count = 0
+        token_counts = {}
         
         for step in range(max_length):
             X_input = xp.array([self.pad_sequence(context_buffer, self.SEQ_LEN)], dtype=xp.int32)
@@ -259,6 +261,17 @@ class LyricsGenerator:
                 for tok in set(recent_tokens):
                     if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
                         probs_np[tok] = probs_np[tok] / repeat_penalty
+
+            # Global penalties across the whole generated text
+            if presence_penalty and presence_penalty > 1.0:
+                for tok in token_counts.keys():
+                    if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
+                        probs_np[tok] = probs_np[tok] / presence_penalty
+
+            if frequency_penalty and frequency_penalty > 0.0:
+                for tok, count in token_counts.items():
+                    if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX) and count > 0:
+                        probs_np[tok] = probs_np[tok] / (1.0 + frequency_penalty * count)
 
             # Block repeated n-grams (e.g. prevents "i i i" or recurring short fragments)
             if no_repeat_ngram and no_repeat_ngram >= 2 and len(generated_tokens) >= no_repeat_ngram - 1:
@@ -305,6 +318,7 @@ class LyricsGenerator:
             generated_tokens.append(next_token)
             if next_token not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
                 visible_word_count += 1
+                token_counts[next_token] = token_counts.get(next_token, 0) + 1
             context_buffer.append(next_token)
             
             if len(context_buffer) > self.SEQ_LEN:
@@ -323,7 +337,8 @@ class LyricsGenerator:
         return ' '.join(words) if words else "(Paroles vides - essayez avec une autre température)"
     
     def generate_multiple(self, genre, num_samples=3, max_length=50, temperature=0.8, top_k=40, min_length=20,
-                          repeat_penalty=1.2, no_repeat_window=12, no_repeat_ngram=3, top_p=0.9):
+                          repeat_penalty=1.2, no_repeat_window=12, no_repeat_ngram=3, top_p=0.9,
+                          presence_penalty=1.15, frequency_penalty=0.08):
         print(f"\n🎵 Génération de {num_samples} paroles pour le genre: {genre.upper()}")
         print("-" * 60)
         
@@ -339,6 +354,8 @@ class LyricsGenerator:
                 no_repeat_window=no_repeat_window,
                 no_repeat_ngram=no_repeat_ngram,
                 top_p=top_p,
+                presence_penalty=presence_penalty,
+                frequency_penalty=frequency_penalty,
             )
             print(lyrics)
             print()
@@ -392,6 +409,12 @@ def main():
 
     parser.add_argument('--no-repeat-ngram', type=int, default=3,
                        help='Interdit la répétition des n-grammes (défaut: 3, 0=désactivé)')
+
+    parser.add_argument('--presence-penalty', type=float, default=1.15,
+                       help='Pénalité globale si un token a déjà été utilisé (>1, défaut: 1.15)')
+
+    parser.add_argument('--frequency-penalty', type=float, default=0.08,
+                       help='Pénalité proportionnelle à la fréquence d\'un token (défaut: 0.08)')
 
     parser.add_argument('--csv', type=str, default=None,
                        help='Chemin vers spotify_songs.csv pour reconstruire le vocabulaire '
@@ -459,10 +482,12 @@ def main():
             no_repeat_window=args.no_repeat_window,
             no_repeat_ngram=args.no_repeat_ngram,
             top_p=args.top_p,
+            presence_penalty=args.presence_penalty,
+            frequency_penalty=args.frequency_penalty,
         )
     else:
         print(f"\n🎵 Génération de paroles pour le genre: {args.genre.upper()}")
-        print(f"   (Température: {args.temperature}, Max tokens: {args.length}, Top-k: {args.top_k}, Top-p: {args.top_p}, Min length: {args.min_length}, Repeat penalty: {args.repeat_penalty}, Window: {args.no_repeat_window}, No-repeat ngram: {args.no_repeat_ngram})")
+        print(f"   (Température: {args.temperature}, Max tokens: {args.length}, Top-k: {args.top_k}, Top-p: {args.top_p}, Min length: {args.min_length}, Repeat penalty: {args.repeat_penalty}, Presence penalty: {args.presence_penalty}, Frequency penalty: {args.frequency_penalty}, Window: {args.no_repeat_window}, No-repeat ngram: {args.no_repeat_ngram})")
         print("-" * 60)
         lyrics = generator.generate(
             args.genre,
@@ -474,6 +499,8 @@ def main():
             no_repeat_window=args.no_repeat_window,
             no_repeat_ngram=args.no_repeat_ngram,
             top_p=args.top_p,
+            presence_penalty=args.presence_penalty,
+            frequency_penalty=args.frequency_penalty,
         )
         print(lyrics)
         print()
