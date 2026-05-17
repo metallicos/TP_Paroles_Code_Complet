@@ -189,6 +189,50 @@ class LyricsGenerator:
         else:
             return seq[-max_len:]
     
+    def _apply_logit_penalties(self, logits_np, generated_tokens, token_counts,
+                                repeat_penalty, no_repeat_window, no_repeat_ngram,
+                                presence_penalty, frequency_penalty,
+                                visible_word_count, min_length):
+        """Apply all penalties in logit space (before softmax) for proper effectiveness."""
+        # Block special tokens
+        logits_np[self.PAD_IDX] = -1e9
+        logits_np[self.BOS_IDX] = -1e9
+        logits_np[self.UNK_IDX] = -1e9
+        if min_length and visible_word_count < min_length:
+            logits_np[self.EOS_IDX] = -1e9
+
+        # Repeat penalty: subtract log(penalty) from recently seen tokens
+        if repeat_penalty and repeat_penalty > 1.0 and no_repeat_window and no_repeat_window > 0:
+            recent = set(generated_tokens[-no_repeat_window:])
+            penalty_val = float(np.log(repeat_penalty))
+            for tok in recent:
+                if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
+                    logits_np[tok] -= penalty_val
+
+        # Presence penalty: flat penalty per unique token seen
+        if presence_penalty and presence_penalty > 0.0:
+            for tok in token_counts:
+                if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
+                    logits_np[tok] -= presence_penalty
+
+        # Frequency penalty: grows with count — suppresses repeated words strongly
+        if frequency_penalty and frequency_penalty > 0.0:
+            for tok, count in token_counts.items():
+                if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
+                    logits_np[tok] -= frequency_penalty * count
+
+        # No-repeat-ngram: hard-block tokens that would continue a repeated n-gram
+        if no_repeat_ngram and no_repeat_ngram >= 2 and len(generated_tokens) >= no_repeat_ngram - 1:
+            n = int(no_repeat_ngram)
+            prefix = tuple(generated_tokens[-(n - 1):])
+            for idx in range(len(generated_tokens) - n + 1):
+                if tuple(generated_tokens[idx:idx + n - 1]) == prefix:
+                    banned = generated_tokens[idx + n - 1]
+                    if banned not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
+                        logits_np[banned] = -1e9
+
+        return logits_np
+
     def _sample_probs(self, logits, temperature, top_k, top_p):
         """Apply temperature + top-k/top-p filtering, return normalized probabilities."""
         logits = logits / max(temperature, 1e-8)
@@ -243,47 +287,22 @@ class LyricsGenerator:
             genres_input = xp.array([genre_idx], dtype=xp.int32)
             
             logits = self.model.forward(X_input, genres_input, self.weights)[0]
-            probs = self._sample_probs(logits, temperature, top_k, top_p)
+            logits_np = logits.get().astype(np.float64) if hasattr(logits, 'get') else np.asarray(logits[0], dtype=np.float64)
+            if logits_np.ndim > 1:
+                logits_np = logits_np[0]
+
+            # Apply all penalties in logit space before softmax
+            logits_np = self._apply_logit_penalties(
+                logits_np, generated_tokens, token_counts,
+                repeat_penalty, no_repeat_window, no_repeat_ngram,
+                presence_penalty, frequency_penalty,
+                visible_word_count, min_length,
+            )
+
+            # Convert back to xp array for _sample_probs
+            logits_xp = xp.array(logits_np)
+            probs = self._sample_probs(logits_xp, temperature, top_k, top_p)
             probs_np = probs.get().astype(np.float64) if hasattr(probs, 'get') else np.asarray(probs, dtype=np.float64)
-
-            # Never sample non-lyric special tokens during generation
-            probs_np[self.PAD_IDX] = 0.0
-            probs_np[self.BOS_IDX] = 0.0
-            probs_np[self.UNK_IDX] = 0.0
-
-            # Enforce minimum number of visible words before allowing EOS
-            if min_length and visible_word_count < min_length:
-                probs_np[self.EOS_IDX] = 0.0
-
-            # Penalize recently used tokens to reduce loops like "i you the"
-            if repeat_penalty and repeat_penalty > 1.0 and no_repeat_window and no_repeat_window > 0:
-                recent_tokens = generated_tokens[-no_repeat_window:]
-                for tok in set(recent_tokens):
-                    if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
-                        probs_np[tok] = probs_np[tok] / repeat_penalty
-
-            # Global penalties across the whole generated text
-            if presence_penalty and presence_penalty > 1.0:
-                for tok in token_counts.keys():
-                    if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
-                        probs_np[tok] = probs_np[tok] / presence_penalty
-
-            if frequency_penalty and frequency_penalty > 0.0:
-                for tok, count in token_counts.items():
-                    if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX) and count > 0:
-                        probs_np[tok] = probs_np[tok] / (1.0 + frequency_penalty * count)
-
-            # Block repeated n-grams (e.g. prevents "i i i" or recurring short fragments)
-            if no_repeat_ngram and no_repeat_ngram >= 2 and len(generated_tokens) >= no_repeat_ngram - 1:
-                n = int(no_repeat_ngram)
-                prefix = tuple(generated_tokens[-(n - 1):])
-                banned_next_tokens = set()
-                for idx in range(0, len(generated_tokens) - n + 1):
-                    if tuple(generated_tokens[idx:idx + n - 1]) == prefix:
-                        banned_next_tokens.add(generated_tokens[idx + n - 1])
-                for tok in banned_next_tokens:
-                    if tok not in (self.PAD_IDX, self.BOS_IDX, self.EOS_IDX, self.UNK_IDX):
-                        probs_np[tok] = 0.0
 
             probs_np = np.nan_to_num(probs_np, nan=0.0, posinf=0.0, neginf=0.0)
             probs_sum = probs_np.sum()
