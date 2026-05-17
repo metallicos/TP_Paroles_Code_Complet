@@ -657,6 +657,126 @@ plt.tight_layout()
 save(fig, 'model_comparison.png')
 
 # ══════════════════════════════════════════════════════════════════════════════
+# 7. GPT-2 TRAINING CURVE  (parse gpt2_finetune.log)
+# ══════════════════════════════════════════════════════════════════════════════
+print("\n[7/7] GPT-2 training curve …")
+
+GPT2_LOG = ROOT / 'graphs+logs' / 'gpt2_finetune.log'
+
+# Parse train-step losses and eval-epoch losses from the log
+gpt2_step_epochs, gpt2_step_losses = [], []
+gpt2_eval_epochs, gpt2_eval_losses = [], []
+
+if GPT2_LOG.exists():
+    train_re = re.compile(r"\{'loss':\s*'([0-9.]+)'.*?'epoch':\s*'([0-9.]+)'\}")
+    eval_re  = re.compile(r"\{'eval_loss':\s*'([0-9.]+)'.*?'epoch':\s*'([0-9.]+)'\}")
+    with open(GPT2_LOG, encoding='utf-8', errors='ignore') as f:
+        for line in f:
+            line = line.strip()
+            m = eval_re.search(line)
+            if m:
+                gpt2_eval_losses.append(float(m.group(1)))
+                gpt2_eval_epochs.append(float(m.group(2)))
+                continue
+            m = train_re.search(line)
+            if m:
+                gpt2_step_losses.append(float(m.group(1)))
+                gpt2_step_epochs.append(float(m.group(2)))
+else:
+    # Fallback: hardcoded from real log
+    gpt2_step_epochs = [0.1111, 0.2222, 0.3333, 0.4444, 0.5556, 0.6667, 0.7778, 0.8889,
+                        1.0, 1.111, 1.222, 1.333, 1.444, 1.556, 1.667, 1.778, 1.889,
+                        2.0, 2.111, 2.222, 2.333, 2.444, 2.556, 2.667, 2.778, 2.889, 3.0]
+    gpt2_step_losses = [2.965, 2.726, 2.744, 2.750, 2.771, 2.657, 2.658, 2.532,
+                        2.617, 2.486, 2.559, 2.429, 2.572, 2.501, 2.472, 2.489, 2.489,
+                        2.481, 2.433, 2.510, 2.480, 2.461, 2.470, 2.452, 2.461, 2.471, 2.481]
+    gpt2_eval_epochs  = [1.0, 2.0, 3.0]
+    gpt2_eval_losses  = [2.562, 2.532, 2.527]
+
+gpt2_eval_ppls = [float(np.exp(l)) for l in gpt2_eval_losses]
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5.5))
+fig.suptitle('GPT-2 Fine-tuning — Courbes d\'Entraînement (3 époques)',
+             fontsize=15, fontweight='bold', color='#ffffff', y=1.01)
+
+# ── Left : Loss ──────────────────────────────────────────────────────────────
+ax = axes[0]
+if gpt2_step_epochs:
+    ax.plot(gpt2_step_epochs, gpt2_step_losses,
+            color=PALETTE['gpt2'], alpha=0.45, linewidth=1.2, label='Train Loss (par step)')
+    # Smooth train with rolling average (window=3)
+    if len(gpt2_step_losses) >= 3:
+        smoothed = np.convolve(gpt2_step_losses, np.ones(3)/3, mode='valid')
+        ax.plot(gpt2_step_epochs[1:-1], smoothed,
+                color=PALETTE['gpt2'], linewidth=2.2, label='Train Loss (lissé)')
+
+if gpt2_eval_epochs:
+    ax.plot(gpt2_eval_epochs, gpt2_eval_losses,
+            color='#ff6b6b', linewidth=2.5, marker='o', markersize=9,
+            markerfacecolor='#ff6b6b', markeredgecolor='#ffffff', markeredgewidth=1.5,
+            label='Val Loss (fin époque)', zorder=5)
+    for ex, el in zip(gpt2_eval_epochs, gpt2_eval_losses):
+        ax.annotate(f'{el:.3f}', (ex, el),
+                    textcoords='offset points', xytext=(8, 6),
+                    fontsize=9.5, color='#ff6b6b', fontweight='bold')
+
+# epoch boundary lines
+for e in [1, 2, 3]:
+    ax.axvline(e, color='#555577', linestyle=':', linewidth=1.0, alpha=0.7)
+    ax.text(e + 0.03, 2.90, f'ep {e}', color='#888888', fontsize=8.5)
+
+ax.set_xlabel('Époque', fontsize=11)
+ax.set_ylabel('Loss (Cross-Entropie) ↓', fontsize=11)
+ax.set_title('Train Loss & Val Loss ↓', fontsize=12, fontweight='bold')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.35)
+
+# ── Right : Val PPL ──────────────────────────────────────────────────────────
+ax2 = axes[1]
+if gpt2_eval_epochs:
+    ax2.plot(gpt2_eval_epochs, gpt2_eval_ppls,
+             color='#f39c12', linewidth=2.8, marker='D', markersize=10,
+             markerfacecolor='#f39c12', markeredgecolor='#ffffff', markeredgewidth=1.5,
+             label='Val PPL (fin époque)', zorder=5)
+    for ex, ep in zip(gpt2_eval_epochs, gpt2_eval_ppls):
+        ax2.annotate(f'{ep:.2f}', (ex, ep),
+                     textcoords='offset points', xytext=(8, 6),
+                     fontsize=10, color='#f39c12', fontweight='bold')
+
+    # Custom baseline
+    ax2.axhline(220.81, color=PALETTE['custom'], linestyle='--', linewidth=1.6,
+                alpha=0.8, label='Custom FF (PPL=220.81)')
+    ax2.text(0.15, 222, 'Custom FF ▶ PPL=220.81',
+             color=PALETTE['custom'], fontsize=8.5, alpha=0.9)
+
+    ax2.set_ylim(0, 240)
+    ax2.fill_between(gpt2_eval_epochs, gpt2_eval_ppls, 0,
+                     color='#f39c12', alpha=0.12)
+
+for e in [1, 2, 3]:
+    ax2.axvline(e, color='#555577', linestyle=':', linewidth=1.0, alpha=0.7)
+
+ax2.set_xlabel('Époque', fontsize=11)
+ax2.set_ylabel('Val Perplexité ↓', fontsize=11)
+ax2.set_title('Val Perplexité ↓  (GPT-2 vs Custom)', fontsize=12, fontweight='bold')
+ax2.legend(fontsize=9)
+ax2.grid(True, alpha=0.35)
+
+# Stats box
+stats_text = (
+    f"GPT-2 (small)  •  124.4 M params\n"
+    f"3 époques  •  58.3 sec total\n"
+    f"Val Loss final : 2.527\n"
+    f"Val PPL final  : 12.52\n"
+    f"LR : 5e-5  •  Batch : 4  •  fp16"
+)
+fig.text(0.5, -0.04, stats_text, ha='center', fontsize=9.5,
+         color='#aaaaaa', style='italic')
+
+plt.tight_layout()
+save(fig, 'gpt2_training_curve.png')
+
+# ══════════════════════════════════════════════════════════════════════════════
 print(f"\n✅ Tous les graphiques sauvegardés dans: {GRAPHS_DIR}")
 print("   Fichiers:")
 for f in sorted(GRAPHS_DIR.glob('*.png')):
