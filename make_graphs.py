@@ -743,35 +743,46 @@ if gpt2_eval_epochs:
                      textcoords='offset points', xytext=(8, 6),
                      fontsize=10, color='#f39c12', fontweight='bold')
 
-    # Custom baseline
-    ax2.axhline(220.81, color=PALETTE['custom'], linestyle='--', linewidth=1.6,
-                alpha=0.8, label='Custom FF (PPL=220.81)')
-    ax2.text(0.15, 222, 'Custom FF ▶ PPL=220.81',
-             color=PALETTE['custom'], fontsize=8.5, alpha=0.9)
+    # Show Custom FF PPL as annotation, not as a line (avoids crushing scale)
+    ax2.annotate(
+        'Custom FF  PPL = 220.81  (hors échelle ↗)',
+        xy=(2.5, gpt2_eval_ppls[-1] + 1.5),
+        fontsize=9, color=PALETTE['custom'],
+        style='italic',
+        arrowprops=dict(arrowstyle='->', color=PALETTE['custom'], lw=1.4),
+        xytext=(1.1, gpt2_eval_ppls[-1] + 4),
+    )
 
-    ax2.set_ylim(0, 240)
-    ax2.fill_between(gpt2_eval_epochs, gpt2_eval_ppls, 0,
-                     color='#f39c12', alpha=0.12)
+    ax2.fill_between(gpt2_eval_epochs, gpt2_eval_ppls,
+                     min(gpt2_eval_ppls) - 1,
+                     color='#f39c12', alpha=0.18)
+
+    # Tight y-axis around GPT-2 values
+    ppl_min = min(gpt2_eval_ppls)
+    ppl_max = max(gpt2_eval_ppls)
+    margin = (ppl_max - ppl_min) * 0.8 + 1.5
+    ax2.set_ylim(ppl_min - margin, ppl_max + margin * 3)
 
 for e in [1, 2, 3]:
     ax2.axvline(e, color='#555577', linestyle=':', linewidth=1.0, alpha=0.7)
 
 ax2.set_xlabel('Époque', fontsize=11)
-ax2.set_ylabel('Val Perplexité ↓', fontsize=11)
-ax2.set_title('Val Perplexité ↓  (GPT-2 vs Custom)', fontsize=12, fontweight='bold')
+ax2.set_ylabel('Val Perplexité ↓ (zoom GPT-2)', fontsize=11)
+ax2.set_title('Val Perplexité ↓  (GPT-2, zoom)', fontsize=12, fontweight='bold')
 ax2.legend(fontsize=9)
 ax2.grid(True, alpha=0.35)
 
-# Stats box
+# Stats box — placed inside right axes to avoid overlap
 stats_text = (
-    f"GPT-2 (small)  •  124.4 M params\n"
-    f"3 époques  •  58.3 sec total\n"
-    f"Val Loss final : 2.527\n"
-    f"Val PPL final  : 12.52\n"
-    f"LR : 5e-5  •  Batch : 4  •  fp16"
+    "GPT-2 (small)  •  124.4 M params\n"
+    "3 époques  •  58.3 sec total\n"
+    "Val Loss final : 2.527  •  Val PPL : 12.52\n"
+    "LR : 5e-5  •  Batch : 4  •  fp16"
 )
-fig.text(0.5, -0.04, stats_text, ha='center', fontsize=9.5,
-         color='#aaaaaa', style='italic')
+ax2.text(0.97, 0.97, stats_text, transform=ax2.transAxes,
+         ha='right', va='top', fontsize=8.5, color='#aaaaaa',
+         style='italic', linespacing=1.6,
+         bbox=dict(boxstyle='round,pad=0.4', facecolor='#1a1d27', edgecolor='#3a3d4d', alpha=0.85))
 
 plt.tight_layout()
 save(fig, 'gpt2_training_curve.png')
