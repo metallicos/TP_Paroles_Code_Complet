@@ -671,7 +671,7 @@ def generate_lyrics(model, genre_idx, max_length=50, temperature=1.0):
         X_input = xp.array([pad_sequence(context_buffer, SEQ_LEN)], dtype=xp.int32)
         genres_input = xp.array([genre_idx], dtype=xp.int32)
         
-        logits, _, _ = model.forward(X_input, genres_input)
+        logits, _, _, _, _ = model.forward(X_input, genres_input, training=False, dropout_rate=0.0)
         logits = logits[0] / temperature
         
         exp_logits = xp.exp(logits - xp.max(logits))
