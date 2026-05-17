@@ -206,7 +206,13 @@ ax.set_ylabel('Accuracy (%)')
 ax.legend()
 ax.grid(True)
 ax.set_xticks(epochs)
+ax.set_ylim(0, max(max(a*100 for a in train_acc), max(a*100 for a in val_acc)) * 1.25)
 ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:.1f}%'))
+# Annotate final accuracy values
+ax.annotate(f"Train: {train_acc[-1]*100:.1f}%", xy=(epochs[-1], train_acc[-1]*100),
+            xytext=(-30, 8), textcoords='offset points', color=PALETTE['train'], fontsize=9, fontweight='bold')
+ax.annotate(f"Val: {val_acc[-1]*100:.1f}%", xy=(epochs[-1], val_acc[-1]*100),
+            xytext=(-30, -14), textcoords='offset points', color=PALETTE['val'], fontsize=9, fontweight='bold')
 
 # 1d — Val Loss improvement per epoch (positive bars = model improved)
 improvements = [0] + [val_loss[i-1] - val_loss[i] for i in range(1, len(val_loss))]
