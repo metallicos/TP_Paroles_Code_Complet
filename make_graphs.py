@@ -113,27 +113,29 @@ if MODEL_PATH.exists():
 # (from the console output pasted by user — 15 epochs)
 # Real epoch-by-epoch values extracted directly from custom_training.log
 EPOCH_DATA = [
-    # epoch, train_loss, val_loss
-    (1,  6.852659, 6.224521),
-    (2,  6.364096, 6.013772),
-    (3,  6.201519, 5.874646),
-    (4,  6.088671, 5.778401),
-    (5,  6.005936, 5.705616),
-    (6,  5.940786, 5.647806),
-    (7,  5.887522, 5.600662),
-    (8,  5.842990, 5.561297),
-    (9,  5.804566, 5.527726),
-    (10, 5.771507, 5.498614),
-    (11, 5.742548, 5.473164),
-    (12, 5.716566, 5.450793),
-    (13, 5.693530, 5.431165),
-    (14, 5.673271, 5.413323),
-    (15, 5.654216, 5.397285),
+    # epoch, train_loss, val_loss, train_acc, val_acc
+    (1,  6.852659, 6.224521, 0.0631, 0.0788),
+    (2,  6.364096, 6.013772, 0.0871, 0.0959),
+    (3,  6.201519, 5.874646, 0.1007, 0.1073),
+    (4,  6.088671, 5.778401, 0.1107, 0.1152),
+    (5,  6.005936, 5.705616, 0.1175, 0.1206),
+    (6,  5.940786, 5.647806, 0.1229, 0.1253),
+    (7,  5.887522, 5.600662, 0.1272, 0.1289),
+    (8,  5.842990, 5.561297, 0.1308, 0.1322),
+    (9,  5.804566, 5.527726, 0.1342, 0.1349),
+    (10, 5.771507, 5.498614, 0.1369, 0.1370),
+    (11, 5.742548, 5.473164, 0.1393, 0.1390),
+    (12, 5.716566, 5.450793, 0.1414, 0.1408),
+    (13, 5.693530, 5.431165, 0.1435, 0.1422),
+    (14, 5.673271, 5.413323, 0.1452, 0.1438),
+    (15, 5.654216, 5.397285, 0.1467, 0.1450),
 ]
 
 epochs      = [r[0] for r in EPOCH_DATA]
 train_loss  = [r[1] for r in EPOCH_DATA]
 val_loss    = [r[2] for r in EPOCH_DATA]
+train_acc   = [r[3] for r in EPOCH_DATA]
+val_acc     = [r[4] for r in EPOCH_DATA]
 train_ppl   = [np.exp(l) for l in train_loss]
 val_ppl     = [np.exp(l) for l in val_loss]
 gap_loss    = [v - t for t, v in zip(train_loss, val_loss)]   # negative = val better
@@ -174,7 +176,7 @@ ax = axes[0, 0]
 ax.plot(epochs, train_loss, color=PALETTE['train'], linewidth=2.5, marker='o', markersize=5, label='Train Loss')
 ax.plot(epochs, val_loss,   color=PALETTE['val'],   linewidth=2.5, marker='s', markersize=5, label='Val Loss')
 ax.fill_between(epochs, train_loss, val_loss, alpha=0.12, color=PALETTE['gap'], label='Gap généralisation (Val < Train ✓)')
-ax.set_title('Cross-Entropie Loss')
+ax.set_title('Cross-Entropie Loss ↓ = mieux')
 ax.set_xlabel('Époque')
 ax.set_ylabel('Loss')
 ax.legend()
@@ -185,30 +187,38 @@ ax.set_xticks(epochs)
 ax = axes[0, 1]
 ax.plot(epochs, train_ppl, color=PALETTE['train'], linewidth=2.5, marker='o', markersize=5, label='Train PPL')
 ax.plot(epochs, val_ppl,   color=PALETTE['val'],   linewidth=2.5, marker='s', markersize=5, label='Val PPL')
-ax.set_title('Perplexité (PPL = e^Loss)')
+ax.set_title('Perplexité (PPL = e^Loss) ↓ = mieux')
 ax.set_xlabel('Époque')
 ax.set_ylabel('PPL')
 ax.legend()
 ax.grid(True)
 ax.set_xticks(epochs)
 
-# 1c — LR schedule
-lrs = [max(0.01 * (0.95 ** (e-1)), 0.0001) for e in epochs]
+# 1c — Accuracy (goes UP — model is learning)
 ax = axes[1, 0]
-ax.plot(epochs, lrs, color='#ffcc80', linewidth=2.5, marker='D', markersize=5)
-ax.set_title('Learning Rate Schedule (decay=0.95)')
+ax.plot(epochs, [a * 100 for a in train_acc], color=PALETTE['train'], linewidth=2.5, marker='o', markersize=5, label='Train Acc')
+ax.plot(epochs, [a * 100 for a in val_acc],   color=PALETTE['val'],   linewidth=2.5, marker='s', markersize=5, label='Val Acc')
+ax.fill_between(epochs, [a*100 for a in train_acc], [a*100 for a in val_acc],
+                alpha=0.10, color=PALETTE['gap'])
+ax.set_title('Accuracy (% tokens corrects) ↑ = mieux')
 ax.set_xlabel('Époque')
-ax.set_ylabel('Learning Rate')
+ax.set_ylabel('Accuracy (%)')
+ax.legend()
 ax.grid(True)
 ax.set_xticks(epochs)
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:.1f}%'))
 
-# 1d — Val Loss improvement per epoch
+# 1d — Val Loss improvement per epoch (positive bars = model improved)
 improvements = [0] + [val_loss[i-1] - val_loss[i] for i in range(1, len(val_loss))]
 colors_bar = [PALETTE['train'] if v >= 0 else PALETTE['val'] for v in improvements]
 ax = axes[1, 1]
 bars = ax.bar(epochs, improvements, color=colors_bar, edgecolor='#333', linewidth=0.5)
+for bar, v in zip(bars, improvements):
+    if v > 0:
+        ax.text(bar.get_x() + bar.get_width()/2, v + 0.001,
+                f'+{v:.3f}', ha='center', va='bottom', fontsize=7, color='#b0e0b0')
 ax.axhline(0, color='white', linewidth=0.8, linestyle='--')
-ax.set_title('Amélioration Val Loss par Époque (Δ)')
+ax.set_title('Amélioration Val Loss par Époque (Δ) ↑ = mieux')
 ax.set_xlabel('Époque')
 ax.set_ylabel('Δ Val Loss (positif = amélioration)')
 ax.grid(True, axis='y')
