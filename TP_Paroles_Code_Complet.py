@@ -323,11 +323,13 @@ class LyricsGenerationModel:
         self.hidden_dim = hidden_dim
         
         xp.random.seed(42)
-        self.word_embedding = xp.random.randn(vocab_size, embedding_dim) * 0.01
-        self.genre_embedding = xp.random.randn(num_genres, embedding_dim) * 0.01
-        self.W1 = xp.random.randn(SEQ_LEN * embedding_dim + embedding_dim, hidden_dim) * 0.01
+        # He initialization for hidden layer, Xavier for output, 0.1 for embeddings
+        input_dim = SEQ_LEN * embedding_dim + embedding_dim
+        self.word_embedding = xp.random.randn(vocab_size, embedding_dim) * 0.1
+        self.genre_embedding = xp.random.randn(num_genres, embedding_dim) * 0.1
+        self.W1 = xp.random.randn(input_dim, hidden_dim) * float(np.sqrt(2.0 / input_dim))
         self.b1 = xp.zeros((1, hidden_dim))
-        self.W2 = xp.random.randn(hidden_dim, vocab_size) * 0.01
+        self.W2 = xp.random.randn(hidden_dim, vocab_size) * float(np.sqrt(1.0 / hidden_dim))
         self.b2 = xp.zeros((1, vocab_size))
         
         self.loss_history = []
