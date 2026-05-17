@@ -9,15 +9,16 @@
 ## 📋 Table des Matières
 
 1. [Introduction & Objectifs](#1-introduction--objectifs)
-2. [Dataset Spotify](#2-dataset-spotify)
-3. [Architecture 1 — Modèle Feed-Forward Custom](#3-architecture-1--modèle-feed-forward-custom)
-4. [Pipeline d'Entraînement](#4-pipeline-dentraînement)
-5. [Résultats & Métriques](#5-résultats--métriques)
-6. [Architecture 2 — GPT-2 Fine-tuné (HuggingFace)](#6-architecture-2--gpt-2-fine-tuné-huggingface)
-7. [Comparaison des Deux Approches](#7-comparaison-des-deux-approches)
-8. [Exemples de Paroles Générées](#8-exemples-de-paroles-générées)
-9. [Difficultés Rencontrées & Solutions Apportées](#9-difficultés-rencontrées--solutions-apportées)
-10. [Conclusion & Perspectives](#10-conclusion--perspectives)
+2. [Pourquoi ces Choix Architecturaux ?](#2-pourquoi-ces-choix-architecturaux-)
+3. [Dataset Spotify](#3-dataset-spotify)
+4. [Architecture 1 — Modèle Feed-Forward Custom](#4-architecture-1--modèle-feed-forward-custom)
+5. [Pipeline d'Entraînement](#5-pipeline-dentraînement)
+6. [Résultats & Métriques](#6-résultats--métriques)
+7. [Architecture 2 — GPT-2 Fine-tuné (HuggingFace)](#7-architecture-2--gpt-2-fine-tuné-huggingface)
+8. [Comparaison des Deux Approches](#8-comparaison-des-deux-approches)
+9. [Exemples de Paroles Générées](#9-exemples-de-paroles-générées)
+10. [Difficultés Rencontrées & Solutions Apportées](#10-difficultés-rencontrées--solutions-apportées)
+11. [Conclusion & Perspectives](#11-conclusion--perspectives)
 
 ---
 
@@ -43,7 +44,63 @@
 
 ---
 
-## 2. Dataset Spotify
+## 2. Pourquoi ces Choix Architecturaux ?
+
+### Pourquoi un Modèle Feed-Forward Custom ?
+
+Notre premier modèle est un réseau de neurones entièrement implémenté **from scratch** avec NumPy — sans PyTorch, sans TensorFlow, sans aucun framework de haut niveau.
+
+**Raisons pédagogiques :**
+
+| Raison | Explication |
+|---|---|
+| 🔬 Comprendre la backprop | Implémenter `dL/dW2`, `dL/dW1`, `scatter_add` à la main force une compréhension profonde de la chaîne de dérivation |
+| 🐛 Debugging profond | Chaque bug trouvé (initialisation, PAD masking, gradient embedding) a renforcé notre compréhension des mécanismes internes |
+| 🎛️ Contrôle total | Chaque composant est transparent, modifiable, instrospectable — aucune "magie" cachée |
+| ⚡ Sans dépendances lourdes | Fonctionne avec NumPy uniquement (~1 MB), portable et reproductible |
+| 🧠 Architecture explicite | La structure Feed-Forward avec embeddings de genre représente la **brique de base** du NLP moderne |
+
+> Ce modèle ne vise pas à battre GPT-2. Il vise à **comprendre** comment un modèle de langage fonctionne réellement, de l'embedding jusqu'au softmax.
+
+---
+
+### Pourquoi GPT-2 comme Référence ?
+
+GPT-2 (OpenAI, 2019) est le choix naturel pour une **comparaison de référence** dans ce contexte.
+
+**Raisons du choix :**
+
+| Raison | Explication |
+|---|---|
+| 📏 Standard de l'industrie | GPT-2 est l'un des modèles de langage les plus étudiés et documentés — idéal comme baseline |
+| 🤗 Accessible via HuggingFace | `GPT2LMHeadModel.from_pretrained('gpt2')` — 3 lignes de code pour charger 124.4 M de paramètres pré-entraînés |
+| ⚡ Fine-tuning ultra-rapide | 58.3 secondes seulement pour 3 époques sur GPU — démontre la puissance du transfer learning |
+| 🏗️ Architecture Transformer | Mécanisme d'attention multi-têtes — représente l'évolution fondamentale par rapport au Feed-Forward |
+| 📚 Pré-entraîné sur 40 GB | Déjà capable de produire de l'anglais grammaticalement correct avant même le fine-tuning |
+| 🔍 Contraste clair | La différence FFN → Transformer illustre parfaitement pourquoi "Attention is All You Need" (Vaswani et al., 2017) a révolutionné le NLP |
+
+---
+
+### Pourquoi Comparer les Deux ?
+
+La valeur de ce TP réside précisément dans cette **dualité** :
+
+```
+  Modèle Custom           GPT-2
+  ─────────────           ──────
+  4.2 M params       vs   124.4 M params
+  from scratch       vs   pre-trained
+  NumPy uniquement   vs   PyTorch + HuggingFace
+  PPL = 220.81       vs   PPL = 12.52  (×17.6 meilleur)
+  39.2 min           vs   58.3 secondes
+  pédagogique ✓      vs   performant ✓
+```
+
+> **Conclusion :** Le modèle custom nous apprend *comment* ça marche. GPT-2 nous montre *à quel point* ça peut être meilleur avec les bonnes architectures. Les deux sont indispensables pour ce TP.
+
+---
+
+## 3. Dataset Spotify
 
 ### Description
 - **Source :** Kaggle — Spotify Song Attributes + Lyrics
@@ -59,6 +116,8 @@
 | R&B | ~550 | Riches en émotions, rythme soul |
 | Rap | ~500 | Flux rapide, argot, rimes complexes |
 | Rock | ~495 | Intensité, rébellion, narration |
+
+![Distribution des genres dans le dataset](graphs+logs/dataset_distribution.png)
 
 ### Prétraitement du Texte
 ```
@@ -88,9 +147,11 @@ Paires générées :
 
 **Total : 5 547 617 paires** (4 449 959 train / 1 097 658 val)
 
+![Fréquence des mots dans le vocabulaire](graphs+logs/vocab_frequency.png)
+
 ---
 
-## 3. Architecture 1 — Modèle Feed-Forward Custom
+## 4. Architecture 1 — Modèle Feed-Forward Custom
 
 ### Vue d'Ensemble
 ```
@@ -153,7 +214,7 @@ word_embedding = randn(vocab_size, embed_dim) * 0.1
 
 ---
 
-## 4. Pipeline d'Entraînement
+## 5. Pipeline d'Entraînement
 
 ### Hyperparamètres (Configuration Finale)
 ```json
@@ -211,7 +272,7 @@ $$\text{lr}_{\text{epoch}} = \max(\text{lr}_0 \times 0.95^{\text{epoch}}, \text{
 
 ---
 
-## 5. Résultats & Métriques
+## 6. Résultats & Métriques
 
 ### Évolution de l'Entraînement
 
@@ -223,6 +284,8 @@ $$\text{lr}_{\text{epoch}} = \max(\text{lr}_0 \times 0.95^{\text{epoch}}, \text{
 | 5 | 6.006 | 5.706 | 301 | ✓ |
 | 10 | 5.772 | 5.499 | 244 | ✓ |
 | **15** | **5.654** | **5.397** | **221** | **✓** |
+
+![Courbes d'entraînement — Loss, Perplexité, Accuracy, Écart Val-Train](graphs+logs/training_curves.png)
 
 > **Perplexité** = e^(val_loss) : nombre moyen de mots entre lesquels le modèle hésite.  
 > Une PPL de 220.81 signifie que le modèle choisit parmi ~221 mots plausibles à chaque étape — contre ~12 004 (distribution uniforme initiale) (**amélioration ×54**).
@@ -245,9 +308,13 @@ $$\text{lr}_{\text{epoch}} = \max(\text{lr}_0 \times 0.95^{\text{epoch}}, \text{
 
 > R&B montre plus de répétitions — ce genre musical utilise naturellement beaucoup de refrains répétés.
 
+![Qualité de génération par genre](graphs+logs/generation_quality.png)
+
+![Écart Validation − Train (surapprentissage)](graphs+logs/overfitting_gap.png)
+
 ---
 
-## 6. Architecture 2 — GPT-2 Fine-tuné (HuggingFace)
+## 7. Architecture 2 — GPT-2 Fine-tuné (HuggingFace)
 
 ### Qu'est-ce que GPT-2 ?
 GPT-2 (Generative Pre-trained Transformer 2) est un modèle de langage développé par **OpenAI** en 2019. Il repose sur l'architecture **Transformer** avec mécanisme d'**attention multi-têtes**.
@@ -321,7 +388,7 @@ trainer.train()
 
 ---
 
-## 7. Comparaison des Deux Approches
+## 8. Comparaison des Deux Approches
 
 ### Tableau Comparatif Complet
 
@@ -371,9 +438,11 @@ Val Loss
 3. **BPE Tokenizer** : gère les mots rares, les suffixes, les contractions
 4. **124.4 M paramètres** : capacité de représentation sans commune mesure
 
+![Comparaison des deux modèles — PPL, Loss, vitesse, paramètres](graphs+logs/model_comparison.png)
+
 ---
 
-## 8. Exemples de Paroles Générées
+## 9. Exemples de Paroles Générées
 
 ### Modèle Feed-Forward Custom — Genre ROCK
 
@@ -418,7 +487,7 @@ Puis → **Top-K (K=60)** → **Top-P nucleus (p=0.92)** → **sampling**
 
 ---
 
-## 9. Difficultés Rencontrées & Solutions Apportées
+## 10. Difficultés Rencontrées & Solutions Apportées
 
 ### Bug 1 — Initialisation des Poids (`* 0.01`)
 | | Détail |
@@ -458,7 +527,7 @@ Puis → **Top-K (K=60)** → **Top-P nucleus (p=0.92)** → **sampling**
 
 ---
 
-## 10. Conclusion & Perspectives
+## 11. Conclusion & Perspectives
 
 ### Ce que Nous Avons Appris
 - **Backpropagation from scratch** : chain rule, masking PAD, scatter-add pour embeddings
