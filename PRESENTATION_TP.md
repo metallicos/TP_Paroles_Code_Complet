@@ -284,7 +284,7 @@ Architecture GPT-2 (version small) :
 | Architecture | FC + ReLU | Transformer + Self-Attention |
 | Contexte (mémoire) | 20 tokens (fenêtre fixe) | **1 024 tokens** |
 | Pré-entraînement | Aucun | 40 GB de texte web (WebText) |
-| Temps fine-tuning | N/A | ~5–10 min (3 époques, GPU) |
+| Temps fine-tuning | N/A | **56 secondes (3 époques, GPU)** |
 | Vocabulaire | 12 004 (construit) | 50 257 (BPE pré-défini) |
 | Mécanisme clé | Embedding + Dense | **Self-Attention** |
 
@@ -327,9 +327,10 @@ trainer.train()
 
 | Critère | Feed-Forward Custom | GPT-2 Fine-tuné |
 |---|:---:|:---:|
-| **Val Perplexity** | 433 | ~50–80 (estimé) |
+| **Val Perplexity** | 433 | **12.52** |
+| **Val Loss** | 6.07 | **2.53** |
 | **Paramètres** | 4.2 M | 117 M |
-| **Temps d'entraînement** | 7.6 min (15 epochs) | ~5–10 min (3 epochs) |
+| **Temps d'entraînement** | 7.6 min (15 epochs) | **56 sec (3 epochs)** |
 | **Cohérence grammaticale** | Faible | **Bonne** |
 | **Diversité lexicale** | Moyenne | **Élevée** |
 | **Mémoire du contexte** | 20 tokens | 1 024 tokens |
@@ -352,7 +353,7 @@ Val Loss
       │
   6.1 │                    ●  ← Epoch 15 (final)
       │
-  ?   │ ════════════════════════ GPT-2 (estimé ~4.5)
+  2.5 │ ════════════════════════ GPT-2 fine-tuné (réel)
       └──────────────────────────────── Epochs
 ```
 
@@ -382,15 +383,26 @@ Val Loss
 **Exemple 2 :**
 > *i all yeah get to your the in of been and on my you but a it be what there's you, is our love it's just at me not for this so long can i'm like to keep if oh, from they go right up and you're through it look with me when we will are an 'cause i want*
 
-### Analyse de la Qualité
-| Aspect | Observation |
-|---|---|
-| ✅ Mots reconnaissables | Vocabulaire anglais courant |
-| ✅ Pas de boucles | Pénalités logit-space efficaces |
-| ✅ Diversité lexicale | Ratio unique 0.68–0.75 |
-| ⚠️ Grammaire | Faible — pas de mémoire syntaxique |
-| ⚠️ Cohérence narrative | Limitée — fenêtre de 20 tokens |
-| ⚠️ Tokens `<UNK>` | Quelques mots hors vocabulaire |
+### GPT-2 Fine-tuné — Genre POP
+
+**Exemple 1 :**
+> *no, i don't like it popout the lights down 'cause you gotta have a drink now so that we can get out there sing along all night (don't know what to say) oh baby when will ya take my breath away? doin' shit on your head and body for free! yeah if they're gonna come over tonight or tomorrow cause one of us got high just tryna*
+
+**Exemple 2 :**
+> *hey, let's go grab some water and run 'round to the beach or just ride on our old horses now i see you've got a bottle of wine in your hand tell me if this time is different we'll do it right with love again don't be shy about saying what matters when things are good at heart baby talk like an animal without any emotions so listen up (oh-oo)*
+
+**Exemple 3 :**
+> *to your heart, i think it's gone now you're a lost cause oh-oh uh... and no need for my love the only thing that matters is not getting older just one more weekend with another drink 'cause we've been through hell together but sometimes (yeah) when things get tough there are always lessons left undone these days if nothing else can make us stronger at times even worse than they*
+
+### Analyse Comparative
+| Aspect | Feed-Forward Custom | GPT-2 Fine-tuné |
+|---|---|---|
+| ✅ Mots reconnaissables | Vocabulaire anglais courant | ✅ Naturel, contractions (`'cause`, `ain't`) |
+| ✅ Pas de boucles | Pénalités logit-space | ✅ `no_repeat_ngram_size=3` |
+| ✅ Diversité lexicale | Ratio unique 0.68–0.75 | ✅ Très élevée |
+| ⚠️ Grammaire | Faible — pas de mémoire syntaxique | ✅ **Bonne** — Transformer 12 couches |
+| ⚠️ Cohérence narrative | Limitée — fenêtre de 20 tokens | ✅ **Bonne** — 1024 tokens de contexte |
+| ⚠️ Émotions / images | Absentes | ✅ Présentes (`"you're a lost cause"`) |
 
 ### Inférence — Stratégie d'Échantillonnage
 
@@ -470,7 +482,7 @@ Puis → **Top-K (K=60)** → **Top-P nucleus (p=0.92)** → **sampling**
 
 ### GPT-2 — La Comparaison Qui Illustre le Fossé
 
-Notre modèle custom avec 4.2M paramètres et une architecture simple montre les **limites fondamentales** d'une approche sans attention. GPT-2, avec ses 117M paramètres et 12 couches Transformer, produit des textes beaucoup plus fluides grâce à sa capacité à **modéliser les dépendances à longue distance**.
+Notre modèle custom avec 4.2M paramètres et une architecture simple montre les **limites fondamentales** d'une approche sans attention. GPT-2, avec ses 117M paramètres et 12 couches Transformer, atteint une **PPL de 12.52 contre 433** — soit **×35 plus précis** — en seulement 56 secondes de fine-tuning.
 
 > Cette comparaison illustre parfaitement pourquoi les Transformers ont révolutionné le NLP depuis 2017 (Vaswani et al., "Attention is All You Need").
 
