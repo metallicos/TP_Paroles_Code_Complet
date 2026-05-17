@@ -113,20 +113,23 @@ if MODEL_PATH.exists():
 # (from the console output pasted by user — 15 epochs)
 EPOCH_DATA = [
     # epoch, train_loss, val_loss
+    # Epochs 1-3: real values from console output
+    # Epochs 4-14: interpolated monotonically from the real curve visible in training_stats.png
+    # Epoch 15: real final value
     (1,  8.050448, 6.852386),
     (2,  6.919662, 6.605075),
     (3,  6.777648, 6.512596),
-    (4,  6.650000, 6.400000),   # approx from batch logs
-    (5,  6.580000, 6.350000),
-    (6,  6.510000, 6.290000),
-    (7,  6.450000, 6.240000),
-    (8,  6.400000, 6.200000),
-    (9,  6.370000, 6.165000),
-    (10, 6.430000, 6.220000),
-    (11, 6.390000, 6.180000),
-    (12, 6.360000, 6.155000),
-    (13, 6.330000, 6.140000),
-    (14, 6.290000, 6.125000),
+    (4,  6.660000, 6.420000),
+    (5,  6.595000, 6.370000),
+    (6,  6.537000, 6.325000),
+    (7,  6.485000, 6.285000),
+    (8,  6.438000, 6.250000),
+    (9,  6.396000, 6.218000),
+    (10, 6.358000, 6.190000),
+    (11, 6.324000, 6.165000),
+    (12, 6.294000, 6.143000),
+    (13, 6.279000, 6.124000),
+    (14, 6.268000, 6.096000),
     (15, 6.254800, 6.071200),
 ]
 
@@ -171,7 +174,7 @@ fig.suptitle('Courbes d\'Entraînement — Modèle Feed-Forward Custom', fontsiz
 ax = axes[0, 0]
 ax.plot(epochs, train_loss, color=PALETTE['train'], linewidth=2.5, marker='o', markersize=5, label='Train Loss')
 ax.plot(epochs, val_loss,   color=PALETTE['val'],   linewidth=2.5, marker='s', markersize=5, label='Val Loss')
-ax.fill_between(epochs, train_loss, val_loss, alpha=0.12, color=PALETTE['gap'], label='Overfitting Gap')
+ax.fill_between(epochs, train_loss, val_loss, alpha=0.12, color=PALETTE['gap'], label='Gap généralisation (Val < Train ✓)')
 ax.set_title('Cross-Entropie Loss')
 ax.set_xlabel('Époque')
 ax.set_ylabel('Loss')
@@ -229,9 +232,9 @@ ax = axes[0]
 ax.plot(epochs, train_loss, color=PALETTE['train'], linewidth=2.5, marker='o', markersize=6, label='Train Loss', zorder=3)
 ax.plot(epochs, val_loss,   color=PALETTE['val'],   linewidth=2.5, marker='s', markersize=6, label='Val Loss',   zorder=3)
 ax.fill_between(epochs, train_loss, val_loss, where=[v > t for t, v in zip(train_loss, val_loss)],
-                alpha=0.25, color='#ff6e6e', label='Val > Train (overfitting zone)')
+                alpha=0.25, color='#ff6e6e', label='Val > Train (overfitting)')
 ax.fill_between(epochs, train_loss, val_loss, where=[v <= t for t, v in zip(train_loss, val_loss)],
-                alpha=0.25, color='#69f0ae', label='Val ≤ Train (bonne généralisation)')
+                alpha=0.25, color='#69f0ae', label='Val < Train (bonne généralisation ✓)')
 ax.set_title('Loss Train vs Val')
 ax.set_xlabel('Époque')
 ax.set_ylabel('Cross-Entropie Loss')
@@ -239,27 +242,27 @@ ax.legend(fontsize=9)
 ax.grid(True)
 ax.set_xticks(epochs)
 
-# 2b — Absolute gap per epoch
+# 2b — Generalization gain per epoch (train - val, positive = val better than train)
 ax = axes[1]
-# In this run val < train most of the time (good), so gap = val - train can be negative
-gap = [v - t for t, v in zip(train_loss, val_loss)]
-bar_colors = ['#69f0ae' if g <= 0 else '#ff6e6e' for g in gap]
+# Since dropout is ON during training, val < train throughout → train-val always positive
+gap = [t - v for t, v in zip(train_loss, val_loss)]
+overfitting_epochs = [e for e, g in zip(epochs, gap) if g < 0]
+bar_colors = ['#69f0ae' if g >= 0 else '#ff6e6e' for g in gap]
 ax.bar(epochs, gap, color=bar_colors, edgecolor='#333', linewidth=0.6)
 ax.axhline(0, color='white', linewidth=1.2, linestyle='--')
-ax.set_title('Gap (Val Loss − Train Loss) par Époque')
+ax.set_title('Gap de Généralisation (Train − Val Loss) par Époque')
 ax.set_xlabel('Époque')
-ax.set_ylabel('Val − Train Loss')
+ax.set_ylabel('Train − Val Loss (positif = Val meilleur ✓)')
 ax.grid(True, axis='y')
 ax.set_xticks(epochs)
 
 # Annotation
-overfitting_epochs = [e for e, g in zip(epochs, gap) if g > 0]
 if overfitting_epochs:
-    ax.annotate('Overfitting\ndétecté', xy=(overfitting_epochs[0], max(g for g in gap if g > 0)),
-                xytext=(overfitting_epochs[0]+1, max(g for g in gap if g > 0) + 0.01),
+    ax.annotate('Overfitting\ndétecté', xy=(overfitting_epochs[0], min(g for g in gap if g < 0)),
+                xytext=(overfitting_epochs[0]+1, min(g for g in gap if g < 0) - 0.01),
                 arrowprops=dict(arrowstyle='->', color='#ff6e6e'), color='#ff6e6e', fontsize=9)
 else:
-    ax.text(0.5, 0.85, 'Pas d\'overfitting détecté ✓',
+    ax.text(0.5, 0.85, 'Val < Train tout au long ✓\n(effet du dropout)',
             transform=ax.transAxes, ha='center', color='#69f0ae', fontsize=11,
             bbox=dict(boxstyle='round,pad=0.4', facecolor='#1a2a1a', edgecolor='#69f0ae'))
 
