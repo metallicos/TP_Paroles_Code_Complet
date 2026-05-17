@@ -600,8 +600,8 @@ def evaluate(model, X_test, y_test, genres_test, batch_size=128):
 
 NUM_EPOCHS = int(os.getenv("NUM_EPOCHS", "15"))
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "128"))
-LEARNING_RATE = float(os.getenv("LEARNING_RATE", "0.0008"))
-LR_DECAY = float(os.getenv("LR_DECAY", "0.97"))
+LEARNING_RATE = float(os.getenv("LEARNING_RATE", "0.01"))
+LR_DECAY = float(os.getenv("LR_DECAY", "0.95"))
 MIN_LEARNING_RATE = float(os.getenv("MIN_LEARNING_RATE", "0.0001"))
 DROPOUT_RATE = float(os.getenv("DROPOUT_RATE", "0.15"))
 LABEL_SMOOTHING = float(os.getenv("LABEL_SMOOTHING", "0.05"))
