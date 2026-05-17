@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR" || exit 1
+
 echo "╔════════════════════════════════════════════════════════════════════╗"
 echo "║                                                                    ║"
 echo "║  🎵 TP: GÉNÉRATION AUTOMATIQUE DE PAROLES DE CHANSON 🎵           ║"
@@ -10,7 +13,7 @@ echo "║                                                                    ║
 echo "╚════════════════════════════════════════════════════════════════════╝"
 
 echo ""
-echo "📂 Répertoire du TP: /home/abdou/Public/sites/cours/"
+echo "📂 Répertoire du TP: $SCRIPT_DIR"
 echo ""
 
 # Vérifier les prérequis
@@ -24,15 +27,15 @@ fi
 echo "  ✓ spotify_songs.csv trouvé ($(du -h spotify_songs.csv | cut -f1))"
 
 # Vérifier Python
-if ! command -v python &> /dev/null; then
-    echo "❌ ERREUR: Python non trouvé"
+if ! command -v python3 &> /dev/null; then
+    echo "❌ ERREUR: python3 non trouvé"
     exit 1
 fi
-echo "  ✓ Python: $(python --version)"
+echo "  ✓ Python: $(python3 --version)"
 
 # Vérifier les librairies
 echo "  ✓ Vérification des librairies..."
-python << 'PYEOF'
+python3 << 'PYEOF'
 try:
     import numpy as np
     import pandas as pd
@@ -60,7 +63,7 @@ echo "════════════════════════�
 echo ""
 echo "1. TP_Paroles_Code_Complet.py (Recommandé) ⭐"
 echo "   → Script Python autonome complet"
-echo "   → Exécution: python TP_Paroles_Code_Complet.py"
+echo "   → Exécution: python3 TP_Paroles_Code_Complet.py"
 echo "   → Durée: ~5-10 minutes"
 echo ""
 echo "2. TP_Generation_Paroles_Chanson.ipynb"
@@ -69,7 +72,7 @@ echo "   → Exécution interactive avec explications"
 echo ""
 echo "3. infer_lyrics.py"
 echo "   → Génération de paroles après entraînement"
-echo "   → Usage: python infer_lyrics.py --genre rock --samples 3"
+echo "   → Usage: python3 infer_lyrics.py --genre rock --samples 3"
 echo ""
 echo "4. README_TP_Paroles.md"
 echo "   → Documentation complète du TP"
@@ -94,7 +97,7 @@ case $choice in
         echo "🚀 Lancement du TP complet..."
         echo "════════════════════════════════════════════════════════════════════"
         echo ""
-        python TP_Paroles_Code_Complet.py
+        python3 TP_Paroles_Code_Complet.py
         ;;
     2)
         echo ""
@@ -114,13 +117,13 @@ case $choice in
         read -p "Nombre d'exemples (défaut: 1): " samples
         samples=${samples:-1}
         
-        if [ ! -f "lyrics_model.pkl" ]; then
-            echo "❌ ERREUR: lyrics_model.pkl non trouvé"
+        if [ ! -f "outputs/lyrics_model.pkl" ] && [ ! -f "outputs/lyrics_model_best.pkl" ]; then
+            echo "❌ ERREUR: outputs/lyrics_model.pkl (ou lyrics_model_best.pkl) non trouvé"
             echo "   Veuillez d'abord entraîner le modèle avec l'option 1"
             exit 1
         fi
         
-        python infer_lyrics.py --genre "$genre" --samples "$samples"
+        python3 infer_lyrics.py --genre "$genre" --samples "$samples"
         ;;
     4)
         echo ""

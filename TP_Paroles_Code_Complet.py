@@ -11,6 +11,8 @@ import pickle
 import time
 import traceback
 import glob
+import json
+import subprocess
 
 try:
     import psutil
@@ -63,6 +65,30 @@ def get_outputs_dir():
 
 def get_output_path(filename):
     return os.path.join(get_outputs_dir(), filename)
+
+
+def load_config_defaults():
+    """Load optional config/train_config.json and apply values as env defaults.
+    Existing environment variables keep priority for easy overrides.
+    """
+    cfg_path = os.path.join(get_project_root(), 'config', 'train_config.json')
+    if not os.path.exists(cfg_path):
+        return {}
+
+    try:
+        with open(cfg_path, 'r', encoding='utf-8') as f:
+            cfg = json.load(f)
+        for key, value in cfg.items():
+            if os.getenv(key) is None:
+                os.environ[key] = str(value)
+        print(f"✓ Config chargée: {cfg_path}")
+        return cfg
+    except Exception as e:
+        print(f"⚠️  Config ignorée ({e})")
+        return {}
+
+
+CONFIG_DEFAULTS = load_config_defaults()
 
 
 print("="*60)
@@ -219,31 +245,52 @@ print("\n" + "="*60)
 print("SECTION 6: Préparation Train/Validation")
 print("="*60)
 
-X, y, genres_list = [], [], []
-
-total_rows = len(df_filtered)
-print(f"Création des paires (cela peut prendre du temps...)...")
-log_memory()
-
-try:
+def build_pairs(df_subset):
+    X_local, y_local, genres_local = [], [], []
+    total_rows = len(df_subset)
     pair_start = time.time()
-    for idx, (row_idx, row) in enumerate(df_filtered.iterrows()):
+
+    for idx, (_, row) in enumerate(df_subset.iterrows()):
         if (idx + 1) % 500 == 0:
             elapsed = time.time() - pair_start
-            remaining = elapsed / (idx + 1) * (total_rows - idx - 1)
-            print(f"  Progression: {idx + 1}/{total_rows} | ETA: {remaining:.0f}s | Paires: {len(X):,}")
+            remaining = elapsed / (idx + 1) * max(total_rows - idx - 1, 0)
+            print(f"  Progression: {idx + 1}/{total_rows} | ETA: {remaining:.0f}s | Paires: {len(X_local):,}")
             log_memory()
-        
+
         tokens = row['encoded_tokens']
         genre = row['genre_encoded']
         for i in range(len(tokens) - 1):
-            X.append(tokens[:i+1])
-            y.append(tokens[i+1])
-            genres_list.append(genre)
-    print(f"  ✓ {len(X):,} paires créées en {time.time() - pair_start:.1f}s")
+            X_local.append(tokens[:i+1])
+            y_local.append(tokens[i+1])
+            genres_local.append(genre)
+
+    return X_local, y_local, genres_local, time.time() - pair_start
+
+
+print("Séparation au niveau chanson (anti-fuite train/val)...")
+song_train_df, song_val_df = train_test_split(df_filtered, test_size=0.2, random_state=42)
+print(f"✓ Chansons train: {len(song_train_df):,} | val: {len(song_val_df):,}")
+
+train_song_ids = set(song_train_df.index.tolist())
+val_song_ids = set(song_val_df.index.tolist())
+overlap_ids = train_song_ids.intersection(val_song_ids)
+if overlap_ids:
+    print(f"⚠️  Chevauchement train/val détecté: {len(overlap_ids)}")
+else:
+    print("✓ Aucun chevauchement chanson entre train et val")
+
+print("Création des paires train...")
+log_memory()
+try:
+    X_train_raw, y_train_raw, genres_train_raw, train_pair_time = build_pairs(song_train_df)
+    print(f"  ✓ {len(X_train_raw):,} paires train en {train_pair_time:.1f}s")
+
+    print("Création des paires val...")
+    X_val_raw, y_val_raw, genres_val_raw, val_pair_time = build_pairs(song_val_df)
+    print(f"  ✓ {len(X_val_raw):,} paires val en {val_pair_time:.1f}s")
 except MemoryError:
-    print(f"❌ MemoryError lors de la création des paires ({len(X):,} paires créées)")
-    print("  💡 Conseil: Réduire MAX_VOCAB_SIZE ou TOP_GENRES")
+    print("❌ MemoryError lors de la création des paires")
+    print("  💡 Conseil: Réduire MAX_VOCAB_SIZE, SEQ_LEN ou MAX_SAMPLES")
     sys.exit(1)
 except Exception as e:
     print(f"❌ Erreur: {e}")
@@ -258,13 +305,12 @@ def pad_sequence(seq, max_len):
     else:
         return seq[-max_len:]
 
-X_padded = np.array([pad_sequence(seq, SEQ_LEN) for seq in X])
-y_array = np.array(y)
-genres_array = np.array(genres_list)
-
-X_train, X_val, y_train, y_val, genres_train, genres_val = train_test_split(
-    X_padded, y_array, genres_array, test_size=0.2, random_state=42
-)
+X_train = np.array([pad_sequence(seq, SEQ_LEN) for seq in X_train_raw])
+X_val = np.array([pad_sequence(seq, SEQ_LEN) for seq in X_val_raw])
+y_train = np.array(y_train_raw)
+y_val = np.array(y_val_raw)
+genres_train = np.array(genres_train_raw)
+genres_val = np.array(genres_val_raw)
 
 print(f"✓ Train: {len(X_train):,} | Val: {len(X_val):,}")
 
@@ -700,12 +746,42 @@ def tokens_to_lyrics(token_indices):
             words.append(word)
     return ' '.join(words)
 
+
+def generation_quality_metrics(text):
+    tokens = text.split()
+    if not tokens:
+        return {
+            'token_count': 0,
+            'unique_ratio': 0.0,
+            'repeat_bigram_rate': 0.0,
+            'repeat_trigram_rate': 0.0,
+        }
+
+    token_count = len(tokens)
+    unique_ratio = len(set(tokens)) / token_count
+
+    bigrams = list(zip(tokens, tokens[1:]))
+    trigrams = list(zip(tokens, tokens[1:], tokens[2:]))
+    repeat_bigram_rate = 0.0 if not bigrams else 1.0 - (len(set(bigrams)) / len(bigrams))
+    repeat_trigram_rate = 0.0 if not trigrams else 1.0 - (len(set(trigrams)) / len(trigrams))
+
+    return {
+        'token_count': token_count,
+        'unique_ratio': unique_ratio,
+        'repeat_bigram_rate': repeat_bigram_rate,
+        'repeat_trigram_rate': repeat_trigram_rate,
+    }
+
 print("\nGénération par genre:")
+generation_metrics = {}
 for genre_idx, genre_name in enumerate(genre_encoder.classes_):
     tokens = generate_lyrics(model, genre_idx, max_length=40, temperature=0.8)
     lyrics = tokens_to_lyrics(tokens)
+    generation_metrics[genre_name] = generation_quality_metrics(lyrics)
     print(f"\n{genre_name.upper()}:")
     print(f"  {lyrics[:150]}...")
+    gm = generation_metrics[genre_name]
+    print(f"  [Qualité] tokens={gm['token_count']}, unique={gm['unique_ratio']:.2f}, rep2={gm['repeat_bigram_rate']:.2f}, rep3={gm['repeat_trigram_rate']:.2f}")
 
 print("\n" + "="*60)
 print("SECTION 10: Visualisations et Statistiques")
@@ -834,6 +910,68 @@ except Exception as e:
         print(f"  💾 Sauvegarde de secours: {fallback_path}")
     except Exception as e2:
         print(f"  ❌ Sauvegarde de secours aussi échouée: {e2}")
+
+run_metadata = {
+    'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
+    'git_commit': '',
+    'config': {
+        'LANG_FILTER': LANG_FILTER,
+        'MAX_SAMPLES': MAX_SAMPLES,
+        'MIN_FREQ': MIN_FREQ,
+        'MAX_VOCAB_SIZE': MAX_VOCAB_SIZE,
+        'SEQ_LEN': SEQ_LEN,
+        'EMBEDDING_DIM': EMBEDDING_DIM,
+        'HIDDEN_DIM': HIDDEN_DIM,
+        'NUM_EPOCHS': NUM_EPOCHS,
+        'BATCH_SIZE': BATCH_SIZE,
+        'LEARNING_RATE': LEARNING_RATE,
+        'LR_DECAY': LR_DECAY,
+        'MIN_LEARNING_RATE': MIN_LEARNING_RATE,
+        'DROPOUT_RATE': DROPOUT_RATE,
+        'LABEL_SMOOTHING': LABEL_SMOOTHING,
+        'CHECKPOINT_EVERY': CHECKPOINT_EVERY,
+        'EARLY_STOP_PATIENCE': EARLY_STOP_PATIENCE,
+    },
+    'dataset': {
+        'songs_total': len(df),
+        'songs_filtered': len(df_filtered),
+        'songs_train': len(song_train_df),
+        'songs_val': len(song_val_df),
+        'vocab_size': len(word2idx),
+        'genres': list(genre_encoder.classes_),
+    },
+    'metrics': {
+        'best_epoch': best_epoch,
+        'best_val_loss': best_val_loss,
+        'train_loss_final': model.loss_history[-1] if model.loss_history else None,
+        'val_loss_final': model.val_loss_history[-1] if model.val_loss_history else None,
+        'train_ppl_final': compute_perplexity(model.loss_history[-1]) if model.loss_history else None,
+        'val_ppl_final': compute_perplexity(model.val_loss_history[-1]) if model.val_loss_history else None,
+        'generation_quality_by_genre': generation_metrics,
+    },
+    'artifacts': {
+        'model_path': model_path,
+        'plot_path': plot_path,
+    }
+}
+
+try:
+    run_metadata['git_commit'] = subprocess.check_output(
+        ['git', 'rev-parse', '--short', 'HEAD'],
+        cwd=get_project_root(),
+        stderr=subprocess.DEVNULL,
+        text=True,
+    ).strip()
+except Exception:
+    run_metadata['git_commit'] = ''
+
+metadata_path = get_output_path('run_metadata.json')
+try:
+    with open(metadata_path, 'w', encoding='utf-8') as f:
+        json.dump(run_metadata, f, indent=2, ensure_ascii=False)
+    print(f"✓ Métadonnées run sauvegardées: {metadata_path}")
+except Exception as e:
+    print(f"⚠️  Sauvegarde métadonnées échouée: {e}")
 
 print("\n" + "="*60)
 print("RÉSUMÉ DU TP")

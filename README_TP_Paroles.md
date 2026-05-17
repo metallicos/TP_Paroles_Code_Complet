@@ -157,8 +157,8 @@ pickle.dump(inference_package, open('lyrics_model.pkl', 'wb'))
 
 ### Option 1: Exécuter le script complet
 ```bash
-cd /home/abdou/Public/sites/cours
-python TP_Paroles_Code_Complet.py
+cd <chemin_du_projet>
+python3 TP_Paroles_Code_Complet.py
 ```
 
 ### Option 2: Utiliser le Notebook Jupyter

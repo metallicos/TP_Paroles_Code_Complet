@@ -60,7 +60,9 @@ notebook = {
             "outputs": [],
             "source": [
                 "# Charger le dataset Spotify\n",
-                "df = pd.read_csv('/home/abdou/Public/sites/cours/spotify_songs.csv')\n",
+                "project_root = os.getcwd()\n",
+                "csv_path = os.path.join(project_root, 'spotify_songs.csv')\n",
+                "df = pd.read_csv(csv_path)\n",
                 "\n",
                 "print('=== INFORMATIONS DU DATASET ===')\n",
                 "print(f'Nombre d\\'exemples: {len(df):,}')\n",
@@ -910,11 +912,15 @@ notebook = {
                 "}\n",
                 "\n",
                 "# Sauvegarder\n",
-                "with open('/home/abdou/Public/sites/cours/lyrics_model.pkl', 'wb') as f:\n",
+                "project_root = os.path.dirname(os.path.abspath('__file__')) if '__file__' in globals() else os.getcwd()\n",
+                "output_dir = os.path.join(project_root, 'outputs')\n",
+                "os.makedirs(output_dir, exist_ok=True)\n",
+                "model_path = os.path.join(output_dir, 'lyrics_model.pkl')\n",
+                "with open(model_path, 'wb') as f:\n",
                 "    pickle.dump(inference_package, f)\n",
                 "\n",
-                "print('✓ Modèle sauvegardé dans: /home/abdou/Public/sites/cours/lyrics_model.pkl')\n",
-                "print(f'\\nTaille du fichier: {os.path.getsize(\"/home/abdou/Public/sites/cours/lyrics_model.pkl\") / 1024:.1f} KB')"
+                "print(f'✓ Modèle sauvegardé dans: {model_path}')\n",
+                "print(f'\\nTaille du fichier: {os.path.getsize(model_path) / 1024:.1f} KB')"
             ]
         },
         {
@@ -997,7 +1003,7 @@ notebook = {
                 "print('=== DÉMONSTRATION DU GÉNÉRATEUR SAUVEGARDÉ ===')\n",
                 "print()\n",
                 "\n",
-                "generator = LyricsGenerator('/home/abdou/Public/sites/cours/lyrics_model.pkl')\n",
+                "generator = LyricsGenerator(os.path.join('outputs', 'lyrics_model.pkl'))\n",
                 "\n",
                 "print(f'Genres disponibles: {generator.list_genres()}')\n",
                 "print()\n",
@@ -1052,10 +1058,10 @@ notebook = {
                 "print('- Matrices: Représentation NumPy des données et poids')\n",
                 "print()\n",
                 "print('💾 FICHIERS GÉNÉRÉS:')\n",
-                "print('- /home/abdou/Public/sites/cours/lyrics_model.pkl')\n",
+                "print('- outputs/lyrics_model.pkl')\n",
                 "print()\n",
                 "print('🚀 UTILISATION FUTURE:')\n",
-                "print('generator = LyricsGenerator(\"/home/abdou/Public/sites/cours/lyrics_model.pkl\")')\n",
+                "print('generator = LyricsGenerator(\"outputs/lyrics_model.pkl\")')\n",
                 "print('lyrics = generator.generate(\"rock\", max_length=50, temperature=0.8)')\n",
                 "print()\n",
                 "print('='*60)"

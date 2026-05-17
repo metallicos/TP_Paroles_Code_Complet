@@ -43,15 +43,15 @@
 -------------------
 
 Option 1: Exécuter le code Python complet (RECOMMANDÉ)
-    cd /home/abdou/Public/sites/cours
-    python TP_Paroles_Code_Complet.py
+    cd <chemin_du_projet>
+    python3 TP_Paroles_Code_Complet.py
     
 Option 2: Utiliser le Notebook Jupyter
     - Ouvrir TP_Generation_Paroles_Chanson.ipynb dans VS Code
     - Exécuter les cellules dans l'ordre
     
 Option 3: Générer des paroles avec le modèle entraîné
-    python infer_lyrics.py --genre rock --samples 3
+    python3 infer_lyrics.py --genre rock --samples 3
 
 
 📊 STRUCTURE DU TP

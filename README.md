@@ -100,18 +100,16 @@ python3 infer_lyrics.py --model outputs/checkpoint_epoch5.pkl --genre rock
 
 ## Paramètres & Configuration
 
-Tous les hyperparamètres sont dans `TP_Paroles_Code_Complet.py` et peuvent être surchargés via variables d'environnement.
+Les hyperparamètres sont chargés dans cet ordre de priorité :
+1. Variables d'environnement (priorité maximale)
+2. `config/train_config.json`
+3. Valeurs par défaut du script
+
+Le script exporte aussi les métadonnées d'exécution dans `outputs/run_metadata.json`.
 
 ### Taille du dataset
 
-```python
-MAX_SAMPLES = None   # None = tout le dataset (~18 000 chansons)
-                     # 2000 = debug rapide (~2 min)
-                     # 5000 = bon compromis (~5 min)
-                     # 10000 = haute qualité (~10 min)
-```
-
-Sans modifier le code :
+Sans modifier le code (prioritaire sur la config JSON) :
 
 ```bash
 MAX_SAMPLES=3000 python3 TP_Paroles_Code_Complet.py
@@ -121,14 +119,21 @@ MAX_SAMPLES=3000 python3 TP_Paroles_Code_Complet.py
 
 | Paramètre | Défaut | Description |
 |-----------|--------|-------------|
+| `LANG_FILTER` | `en` | Filtre langue du dataset (`""` pour désactiver) |
 | `MAX_SAMPLES` | `None` | Entrées du dataset à utiliser (`None` = tout) |
 | `TOP_GENRES` | `5` | Nombre de genres à retenir |
-| `MAX_VOCAB_SIZE` | `20 000` | Taille maximale du vocabulaire |
-| `MIN_FREQ` | `2` | Fréquence minimale d'un mot pour être inclus |
-| `SEQ_LEN` | `10` | Longueur de la séquence d'entrée (tokens) |
-| `NUM_EPOCHS` | `10` | Nombre d'époques |
+| `MAX_VOCAB_SIZE` | `12 000` | Taille maximale du vocabulaire |
+| `MIN_FREQ` | `5` | Fréquence minimale d'un mot pour être inclus |
+| `SEQ_LEN` | `20` | Longueur de la séquence d'entrée (tokens) |
+| `EMBEDDING_DIM` | `32` | Dimension des embeddings mots/genres |
+| `HIDDEN_DIM` | `128` | Dimension couche cachée |
+| `NUM_EPOCHS` | `15` | Nombre d'époques |
 | `BATCH_SIZE` | `128` | Taille du batch |
-| `LEARNING_RATE` | `0.001` | Taux d'apprentissage |
+| `LEARNING_RATE` | `0.0008` | Taux d'apprentissage initial |
+| `LR_DECAY` | `0.97` | Décroissance du taux d'apprentissage |
+| `MIN_LEARNING_RATE` | `0.0001` | Planche du taux d'apprentissage |
+| `DROPOUT_RATE` | `0.15` | Dropout en entraînement |
+| `LABEL_SMOOTHING` | `0.05` | Lissage des labels |
 | `EARLY_STOP_PATIENCE` | `3` | Arrêt anticipé si val_loss stagne |
 | `CHECKPOINT_EVERY` | `1` | Sauvegarde checkpoint toutes les N époques |
 | `GRAD_CLIP` | `5.0` | Seuil de gradient clipping |
@@ -138,7 +143,17 @@ MAX_SAMPLES=3000 python3 TP_Paroles_Code_Complet.py
 | Variable | Valeurs possibles | Défaut |
 |----------|-------------------|--------|
 | `USE_GPU` | `1`, `true`, `auto`, `0` | `auto` |
+| `LANG_FILTER` | code langue (`en`, `es`, ...), vide | `en` |
 | `MAX_SAMPLES` | entier positif | non défini (= tout) |
+| `RESUME_FROM` | `latest` ou nom de checkpoint | non défini |
+
+Exemple complet :
+
+```bash
+USE_GPU=1 LANG_FILTER=en NUM_EPOCHS=25 SEQ_LEN=24 EMBEDDING_DIM=48 HIDDEN_DIM=192 \
+MIN_FREQ=4 MAX_VOCAB_SIZE=15000 LEARNING_RATE=0.0008 LR_DECAY=0.98 MIN_LEARNING_RATE=0.00005 \
+DROPOUT_RATE=0.15 LABEL_SMOOTHING=0.05 python3 TP_Paroles_Code_Complet.py
+```
 
 ---
 
