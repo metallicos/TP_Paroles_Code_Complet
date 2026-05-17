@@ -111,26 +111,24 @@ if MODEL_PATH.exists():
 
 # Hardcoded epoch history from the real training run
 # (from the console output pasted by user — 15 epochs)
+# Real epoch-by-epoch values extracted directly from custom_training.log
 EPOCH_DATA = [
     # epoch, train_loss, val_loss
-    # Epochs 1-3: real values from console output
-    # Epochs 4-14: interpolated monotonically from the real curve visible in training_stats.png
-    # Epoch 15: real final value
-    (1,  8.050448, 6.852386),
-    (2,  6.919662, 6.605075),
-    (3,  6.777648, 6.512596),
-    (4,  6.660000, 6.420000),
-    (5,  6.595000, 6.370000),
-    (6,  6.537000, 6.325000),
-    (7,  6.485000, 6.285000),
-    (8,  6.438000, 6.250000),
-    (9,  6.396000, 6.218000),
-    (10, 6.358000, 6.190000),
-    (11, 6.324000, 6.165000),
-    (12, 6.294000, 6.143000),
-    (13, 6.279000, 6.124000),
-    (14, 6.268000, 6.096000),
-    (15, 6.254800, 6.071200),
+    (1,  6.852659, 6.224521),
+    (2,  6.364096, 6.013772),
+    (3,  6.201519, 5.874646),
+    (4,  6.088671, 5.778401),
+    (5,  6.005936, 5.705616),
+    (6,  5.940786, 5.647806),
+    (7,  5.887522, 5.600662),
+    (8,  5.842990, 5.561297),
+    (9,  5.804566, 5.527726),
+    (10, 5.771507, 5.498614),
+    (11, 5.742548, 5.473164),
+    (12, 5.716566, 5.450793),
+    (13, 5.693530, 5.431165),
+    (14, 5.673271, 5.413323),
+    (15, 5.654216, 5.397285),
 ]
 
 epochs      = [r[0] for r in EPOCH_DATA]
@@ -142,12 +140,13 @@ gap_loss    = [v - t for t, v in zip(train_loss, val_loss)]   # negative = val b
 gap_ppl     = [vp - tp for tp, vp in zip(train_ppl, val_ppl)]
 
 # Generation quality per genre from metadata
+# Real generation quality from Section 9 of custom_training.log
 gen_quality = metrics.get('generation_quality_by_genre', {
-    'edm':  {'unique_ratio': 0.75, 'repeat_bigram_rate': 0.00, 'repeat_trigram_rate': 0.00, 'token_count': 40},
-    'pop':  {'unique_ratio': 0.72, 'repeat_bigram_rate': 0.05, 'repeat_trigram_rate': 0.00, 'token_count': 40},
-    'r&b':  {'unique_ratio': 0.65, 'repeat_bigram_rate': 0.03, 'repeat_trigram_rate': 0.00, 'token_count': 40},
-    'rap':  {'unique_ratio': 0.68, 'repeat_bigram_rate': 0.00, 'repeat_trigram_rate': 0.00, 'token_count': 40},
-    'rock': {'unique_ratio': 0.72, 'repeat_bigram_rate': 0.00, 'repeat_trigram_rate': 0.00, 'token_count': 25},
+    'edm':  {'unique_ratio': 0.60, 'repeat_bigram_rate': 0.15, 'repeat_trigram_rate': 0.08, 'token_count': 40},
+    'pop':  {'unique_ratio': 0.60, 'repeat_bigram_rate': 0.05, 'repeat_trigram_rate': 0.00, 'token_count': 40},
+    'r&b':  {'unique_ratio': 0.33, 'repeat_bigram_rate': 0.41, 'repeat_trigram_rate': 0.18, 'token_count': 40},
+    'rap':  {'unique_ratio': 0.47, 'repeat_bigram_rate': 0.28, 'repeat_trigram_rate': 0.16, 'token_count': 40},
+    'rock': {'unique_ratio': 0.53, 'repeat_bigram_rate': 0.08, 'repeat_trigram_rate': 0.00, 'token_count': 40},
 })
 
 # Load CSV for dataset stats
@@ -328,8 +327,8 @@ if df_raw is not None:
 
 # 3d — Train/Val split
 ax = fig.add_subplot(gs[1, 0])
-train_songs = dataset.get('songs_train', 2276)
-val_songs   = dataset.get('songs_val',  569)
+train_songs = dataset.get('songs_train', 11613)
+val_songs   = dataset.get('songs_val',  2904)
 ax.pie([train_songs, val_songs],
        labels=[f'Train\n{train_songs:,} chansons', f'Val\n{val_songs:,} chansons'],
        colors=[PALETTE['train'], PALETTE['val']], autopct='%1.1f%%',
@@ -340,13 +339,15 @@ ax.set_title('Séparation Train / Validation\n(Song-Level Split)')
 # 3e — Pairs per genre (approx from full dataset)
 ax = fig.add_subplot(gs[1, 1])
 genre_labels = ['EDM', 'Pop', 'R&B', 'Rap', 'Rock']
-# Approximate pair counts based on songs × avg_lyric_length
-pair_counts = [185000, 215000, 168000, 153000, 152000]
+# Real pair counts estimated proportionally from 4,449,959 total train pairs
+# (from custom_training.log) using song counts: pop=3737,rock=3388,r&b=3160,rap=2500,edm=1732
+# Order matches GENRE_COLORS: [edm, pop, r&b, rap, rock]
+pair_counts = [531000, 1146000, 969000, 766000, 1039000]
 bars = ax.bar(genre_labels, pair_counts, color=GENRE_COLORS, edgecolor='#0f1117', linewidth=1.2)
 for bar, v in zip(bars, pair_counts):
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1500,
+    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 8000,
             f'{v//1000}k', ha='center', va='bottom', fontsize=9, color='#e0e0e0')
-ax.set_title('Paires (X, y) par Genre\n(≈ 856k train total)')
+ax.set_title('Paires (X, y) par Genre\n(4.45M train total)')
 ax.set_ylabel('Nombre de Paires')
 ax.grid(True, axis='y')
 
@@ -523,19 +524,19 @@ m_colors     = [PALETTE['custom'], PALETTE['gpt2']]
 
 # 6a — Val PPL comparison
 ax = axes[0, 0]
-ppls = [433.21, 12.52]
+ppls = [220.81, 12.52]
 bars = ax.bar(model_names, ppls, color=m_colors, edgecolor='#0f1117', linewidth=1.5, width=0.5)
 for bar, v in zip(bars, ppls):
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 3,
-            f'{v:.1f}', ha='center', va='bottom', fontsize=13, fontweight='bold', color='#e0e0e0')
+    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 2,
+            f'{v:.2f}', ha='center', va='bottom', fontsize=13, fontweight='bold', color='#e0e0e0')
 ax.set_title('Perplexité de Validation (PPL)\n(plus bas = mieux)')
 ax.set_ylabel('Val PPL')
 ax.grid(True, axis='y')
-ax.set_ylim(0, 480)
+ax.set_ylim(0, 260)
 
 # 6b — Val Loss comparison
 ax = axes[0, 1]
-losses = [6.071, 2.527]
+losses = [5.397, 2.527]
 bars = ax.bar(model_names, losses, color=m_colors, edgecolor='#0f1117', linewidth=1.5, width=0.5)
 for bar, v in zip(bars, losses):
     ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.05,
@@ -543,7 +544,7 @@ for bar, v in zip(bars, losses):
 ax.set_title('Val Loss (Cross-Entropie)\n(plus bas = mieux)')
 ax.set_ylabel('Val Loss')
 ax.grid(True, axis='y')
-ax.set_ylim(0, 7.5)
+ax.set_ylim(0, 7.0)
 
 # 6c — Parameters
 ax = axes[0, 2]
@@ -559,16 +560,16 @@ ax.set_ylim(0, 135)
 
 # 6d — Training time
 ax = axes[1, 0]
-times = [456, 56]
+times = [2349, 58]
 bars = ax.bar(model_names, times, color=m_colors, edgecolor='#0f1117', linewidth=1.5, width=0.5)
 for bar, v in zip(bars, times):
     label = f'{v}s\n({v/60:.1f} min)'
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 2,
+    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 10,
             label, ha='center', va='bottom', fontsize=10, fontweight='bold', color='#e0e0e0')
 ax.set_title('Temps d\'Entraînement\n(GPU, secondes)')
 ax.set_ylabel('Secondes')
 ax.grid(True, axis='y')
-ax.set_ylim(0, 550)
+ax.set_ylim(0, 2700)
 
 # 6e — Feature comparison (radar)
 ax_radar = fig.add_subplot(2, 3, 5, polar=True)
@@ -603,15 +604,15 @@ ax = axes[1, 2]
 ax.axis('off')
 table_data = [
     ['Métrique',             'Custom', 'GPT-2'],
-    ['Val PPL',              '433',    '12.52'],
-    ['Val Loss',             '6.07',   '2.53'],
-    ['Paramètres',           '4.2M',   '117M'],
-    ['Temps entraîn.',       '7.6min', '56sec'],
+    ['Val PPL',              '220.81', '12.52'],
+    ['Val Loss',             '5.397',  '2.527'],
+    ['Paramètres',           '4.2M',   '124.4M'],
+    ['Temps entraîn.',       '39.2min','58sec'],
     ['Contexte (tokens)',    '20',     '1024'],
     ['Pré-entraînement',     '✗',      '✓'],
     ['Attention',            '✗',      '✓'],
     ['Code transparent',     '✓',      '✗'],
-    ['Gain ×PPL vs custom',  '—',      '×35'],
+    ['Gain ×PPL vs custom',  '—',      '×17.6'],
 ]
 table = ax.table(
     cellText=table_data[1:],

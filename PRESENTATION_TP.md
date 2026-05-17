@@ -86,7 +86,7 @@ Paires générées :
   X = [<BOS>, "i", "love"] → y = "you"
 ```
 
-**Total : 1 087 570 paires** (856 744 train / 230 826 val)
+**Total : 5 547 617 paires** (4 449 959 train / 1 097 658 val)
 
 ---
 
@@ -217,33 +217,33 @@ $$\text{lr}_{\text{epoch}} = \max(\text{lr}_0 \times 0.95^{\text{epoch}}, \text{
 
 | Époque | Train Loss | Val Loss | Val PPL | Meilleur |
 |:---:|:---:|:---:|:---:|:---:|
-| 1 | 8.050 | 6.852 | 946 | ✓ |
-| 2 | 6.920 | 6.605 | 739 | ✓ |
-| 3 | 6.778 | 6.513 | 674 | ✓ |
-| 5 | 6.58 | 6.35 | 574 | ✓ |
-| 10 | 6.43 | 6.22 | 500 | ✓ |
-| **15** | **6.255** | **6.071** | **433** | **✓** |
+| 1 | 6.853 | 6.225 | 505 | ✓ |
+| 2 | 6.364 | 6.014 | 409 | ✓ |
+| 3 | 6.202 | 5.875 | 356 | ✓ |
+| 5 | 6.006 | 5.706 | 301 | ✓ |
+| 10 | 5.772 | 5.499 | 244 | ✓ |
+| **15** | **5.654** | **5.397** | **221** | **✓** |
 
 > **Perplexité** = e^(val_loss) : nombre moyen de mots entre lesquels le modèle hésite.  
-> Une PPL de 433 signifie que le modèle choisit parmi ~433 mots plausibles à chaque étape — contre ~10 665 en début d'entraînement (**amélioration ×23**).
+> Une PPL de 220.81 signifie que le modèle choisit parmi ~221 mots plausibles à chaque étape — contre ~12 004 (distribution uniforme initiale) (**amélioration ×54**).
 
 ### Progrès Global
 | Phase | Val PPL | Gain |
 |---|---|---|
-| Avant corrections (modèle cassé) | 10 665 | — |
-| Après fix initialisation + backprop | 946 (époque 1) | ×11 |
-| Fin entraînement (époque 15) | **433** | **×24** |
+| Avant corrections (modèle cassé) | 12 004 (uniforme) | — |
+| Après fix initialisation + backprop | 505 (époque 1) | ×23.8 |
+| Fin entraînement (époque 15) | **220.81** | **×54** |
 
 ### Métriques de Qualité de Génération
 | Genre | Tokens | Ratio Unique | Rép. Bigrams | Rép. Trigrams |
 |---|:---:|:---:|:---:|:---:|
-| EDM | 40 | 0.75 | 0.00 | 0.00 |
-| Pop | 40 | 0.72 | 0.05 | 0.00 |
-| R&B | 40 | 0.65 | 0.03 | 0.00 |
-| Rap | 40 | 0.68 | 0.00 | 0.00 |
-| Rock | 25 | 0.72 | 0.00 | 0.00 |
+| EDM | 40 | 0.60 | 0.15 | 0.08 |
+| Pop | 40 | 0.60 | 0.05 | 0.00 |
+| R&B | 40 | **0.33** | **0.41** | **0.18** |
+| Rap | 40 | 0.47 | 0.28 | 0.16 |
+| Rock | 40 | 0.53 | 0.08 | 0.00 |
 
-> Ratio unique > 0.65 = bonne diversité lexicale. Répétition de bigrams < 0.05 = pas de boucles.
+> R&B montre plus de répétitions — ce genre musical utilise naturellement beaucoup de refrains répétés.
 
 ---
 
@@ -280,11 +280,11 @@ Architecture GPT-2 (version small) :
 ### Différences Clés vs Notre Modèle
 | Aspect | Feed-Forward Custom | GPT-2 Fine-tuné |
 |---|---|---|
-| Paramètres | ~4.2 M | **117 M** |
+| Paramètres | ~4.2 M | **124.4 M** |
 | Architecture | FC + ReLU | Transformer + Self-Attention |
 | Contexte (mémoire) | 20 tokens (fenêtre fixe) | **1 024 tokens** |
 | Pré-entraînement | Aucun | 40 GB de texte web (WebText) |
-| Temps fine-tuning | N/A | **56 secondes (3 époques, GPU)** |
+| Temps fine-tuning | N/A | **58.3 secondes (3 époques, GPU)** |
 | Vocabulaire | 12 004 (construit) | 50 257 (BPE pré-défini) |
 | Mécanisme clé | Embedding + Dense | **Self-Attention** |
 
@@ -327,10 +327,10 @@ trainer.train()
 
 | Critère | Feed-Forward Custom | GPT-2 Fine-tuné |
 |---|:---:|:---:|
-| **Val Perplexity** | 433 | **12.52** |
-| **Val Loss** | 6.07 | **2.53** |
-| **Paramètres** | 4.2 M | 117 M |
-| **Temps d'entraînement** | 7.6 min (15 epochs) | **56 sec (3 epochs)** |
+| **Val Perplexity** | 220.81 | **12.52** |
+| **Val Loss** | 5.397 | **2.527** |
+| **Paramètres** | 4.2 M | 124.4 M |
+| **Temps d'entraînement** | 39.2 min (15 epochs) | **58.3 sec (3 epochs)** |
 | **Cohérence grammaticale** | Faible | **Bonne** |
 | **Diversité lexicale** | Moyenne | **Élevée** |
 | **Mémoire du contexte** | 20 tokens | 1 024 tokens |
@@ -343,17 +343,17 @@ trainer.train()
 
 ```
 Val Loss
-  9.3 │●  ← Modèle cassé (avant fixes)
+  9.3 │● (poids ×0.01 — cassé, avant fix)
       │
-  8.0 │   ●  ← Epoch 1 (après fixes)
+  6.9 │   ●  ← Epoch 1 (après corrections)
       │
-  7.0 │      ●  ← Epoch 2
+  6.0 │      ●  ← Epoch 2 (5.397 val_loss final)
       │
-  6.5 │         ●  ← Epoch 5
+  5.7 │         ●  ← Epoch 5
       │
-  6.1 │                    ●  ← Epoch 15 (final)
+  5.4 │                    ●  ← Epoch 15 (val_loss=5.397, PPL=220.81)
       │
-  2.5 │ ════════════════════════ GPT-2 fine-tuné (réel)
+  2.5 │ ════════════════════════ GPT-2 fine-tuné (val_loss=2.527, PPL=12.52)
       └──────────────────────────────── Epochs
 ```
 
@@ -369,7 +369,7 @@ Val Loss
 1. **Attention multi-têtes** : capture les relations à longue distance
 2. **Pré-entraînement massif** : déjà "au courant" de l'anglais
 3. **BPE Tokenizer** : gère les mots rares, les suffixes, les contractions
-4. **117 M paramètres** : capacité de représentation sans commune mesure
+4. **124.4 M paramètres** : capacité de représentation sans commune mesure
 
 ---
 
@@ -470,7 +470,8 @@ Puis → **Top-K (K=60)** → **Top-P nucleus (p=0.92)** → **sampling**
 ### Limites du Modèle Custom
 - Pas de mémoire à long terme (fenêtre de 20 tokens seulement)
 - Architecture trop simple pour la syntaxe complexe
-- Val PPL = 433 → le modèle hésite encore entre ~433 mots
+- Val PPL = 220.81 → le modèle hésite encore entre ~221 mots
+  (vs 12.52 pour GPT-2, soit ×17.6 plus précis)
 
 ### Perspectives d'Amélioration
 | Amélioration | Gain Estimé | Complexité |
@@ -482,7 +483,7 @@ Puis → **Top-K (K=60)** → **Top-P nucleus (p=0.92)** → **sampling**
 
 ### GPT-2 — La Comparaison Qui Illustre le Fossé
 
-Notre modèle custom avec 4.2M paramètres et une architecture simple montre les **limites fondamentales** d'une approche sans attention. GPT-2, avec ses 117M paramètres et 12 couches Transformer, atteint une **PPL de 12.52 contre 433** — soit **×35 plus précis** — en seulement 56 secondes de fine-tuning.
+Notre modèle custom avec 4.2M paramètres et une architecture simple montre les **limites fondamentales** d'une approche sans attention. GPT-2, avec ses 124.4M paramètres et 12 couches Transformer, atteint une **PPL de 12.52 contre 220.81** — soit **×17.6 plus précis** — en seulement 58.3 secondes de fine-tuning.
 
 > Cette comparaison illustre parfaitement pourquoi les Transformers ont révolutionné le NLP depuis 2017 (Vaswani et al., "Attention is All You Need").
 
