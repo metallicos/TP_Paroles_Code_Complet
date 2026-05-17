@@ -212,34 +212,68 @@ word_embedding = randn(vocab_size, embed_dim) * 0.1
 
 > ⚠️ **Bug critique détecté et corrigé :** l'initialisation initiale `* 0.01` sur tous les poids créait des gradients de l'ordre de 10⁻¹¹ — le modèle n'apprenait rien.
 
+### Pourquoi avons-nous choisi cette architecture ?
+
+| Critère | Justification |
+|---|---|
+| **Pédagogie avant tout** | Un réseau Feed-Forward est la structure minimale qui contient *tous* les concepts fondamentaux : embedding, multiplication matricielle, activation non-linéaire, softmax, backprop. Aucune abstraction cachée. |
+| **Implémentation from scratch possible** | Contrairement aux RNN/LSTM ou aux Transformers, le FFN ne nécessite pas de boucle temporelle ni de mécanisme d'attention complexe — on peut écrire chaque dérivée à la main. |
+| **Contrôle du genre par embedding dédié** | L'ajout d'un `genre_embedding` concaténé à l'entrée est simple et transparent : le modèle *apprend* la représentation de chaque genre sans supervision explicite. |
+| **Référence de base (baseline)** | Un modèle simple offre une baseline honnête : toute amélioration future (LSTM, Transformer) est mesurable par rapport à ce point de départ. |
+| **Rapidité de débogage** | Avec ~4.2 M paramètres et NumPy uniquement, chaque passe prend quelques ms — idéal pour itérer rapidement sur les bugs. |
+
+> **Limite assumée :** le FFN n'a pas de mémoire séquentielle. Il traite les 20 tokens de contexte comme un sac de mots ordonnés, sans comprendre les dépendances à longue distance. C'est exactement ce que GPT-2 corrige.
+
 ---
 
 ## 5. Pipeline d'Entraînement
 
-### Hyperparamètres (Configuration Finale)
-```json
-{
-  "NUM_EPOCHS":      15,
-  "BATCH_SIZE":      128,
-  "LEARNING_RATE":   0.01,
-  "LR_DECAY":        0.95,
-  "DROPOUT_RATE":    0.15,
-  "LABEL_SMOOTHING": 0.05,
-  "EMBEDDING_DIM":   64,
-  "HIDDEN_DIM":      256,
-  "SEQ_LEN":         20,
-  "MIN_FREQ":        3,
-  "MAX_VOCAB_SIZE":  12000
-}
-```
+### Hyperparamètres (Configuration Finale) — Explication Détaillée
 
-### Fonction de Perte — Cross-Entropie avec Label Smoothing
-$$\mathcal{L} = -\sum_{c=1}^{V} \tilde{y}_c \cdot \log(\hat{p}_c)$$
+| Paramètre | Valeur | Rôle | Pourquoi cette valeur |
+|---|:---:|---|---|
+| `NUM_EPOCHS` | 15 | Nombre de passes complètes sur les données | Early stopping déclenché à 15 ; au-delà, la val_loss stagne. Augmenter risquerait le sur-apprentissage. |
+| `BATCH_SIZE` | 128 | Nombre d'exemples par mise à jour des poids | Compromis entre stabilité du gradient (grand batch) et vitesse de convergence (petit batch). 128 est standard pour les modèles de langage légers. |
+| `LEARNING_RATE` | 0.01 | Taille du pas de descente de gradient | Valeur initiale élevée pour une convergence rapide ; atténuée par `LR_DECAY` à chaque époque. |
+| `LR_DECAY` | 0.95 | Facteur multiplicatif de décroissance du LR | $\text{lr}_{e} = 0.01 \times 0.95^{e}$. Permet un apprentissage rapide au début et une convergence fine en fin d'entraînement. |
+| `DROPOUT_RATE` | 0.15 | Proportion de neurones désactivés aléatoirement | Régularisation légère (15 %) — suffisante pour éviter le sur-apprentissage sans trop degrader les performances. |
+| `LABEL_SMOOTHING` | 0.05 | Redistribution de la masse de probabilité | Évite que le modèle attribue 100 % de confiance à un seul mot — améliore la généralisation et réduit la sur-confiance. |
+| `EMBEDDING_DIM` | 64 | Dimension des vecteurs de représentation | Assez grand pour capturer des relations sémantiques, assez petit pour rester calculable sur CPU/GPU modeste. |
+| `HIDDEN_DIM` | 256 | Nombre de neurones dans la couche cachée | Capacité de représentation de la couche intermédiaire. 4× l'embedding dim — ratio classique. |
+| `SEQ_LEN` | 20 | Longueur de la fenêtre de contexte (tokens) | Contexte suffisant pour capturer des syntagmes (2-4 mots) ; fenêtre plus courte = plus de paires, plus vite. |
+| `MIN_FREQ` | 3 | Fréquence minimale pour inclure un mot | Élimine les fautes de frappe et hapax qui n'apporteraient que du bruit. |
+| `MAX_VOCAB_SIZE` | 12 000 | Taille maximale du vocabulaire | Vocabulaire suffisamment riche pour les 5 genres sans exploser la taille de la couche de sortie (W2). |
+
+### Fonction de Perte — Pourquoi la Cross-Entropie ?
+
+Nous utilisons la **cross-entropie catégorielle** car il s'agit d'un problème de **classification multi-classes** : à chaque étape, le modèle doit choisir un mot parmi les 12 004 du vocabulaire.
+
+$$\mathcal{L}_{CE} = -\log(\hat{p}_{\text{cible}})$$
+
+**Pourquoi pas d'autres fonctions de perte ?**
+
+| Fonction | Pourquoi inadaptée |
+|---|---|
+| MSE (erreur quadratique) | Conçue pour des sorties continues — pénalise les erreurs de manière quadratique, non adaptée aux probabilités discrètes |
+| Hinge loss (SVM) | Maximise une marge binaire — ne produit pas une distribution de probabilité sur le vocabulaire |
+| KL-Divergence | Équivalente à la cross-entropie quand la cible est one-hot, mais moins intuitive à implémenter manuellement |
+| **Cross-Entropie** ✓ | Mesure directement à quel point la distribution prédite s'éloigne de la vraie cible — se couple naturellement avec softmax |
+
+**Lien avec la Perplexité :**
+$$\text{PPL} = e^{\mathcal{L}_{CE}} \implies \text{minimiser } \mathcal{L} \equiv \text{minimiser PPL}$$
+
+### Pourquoi le Label Smoothing ($\varepsilon = 0.05$) ?
+
+Sans label smoothing, la cible est un vecteur **one-hot** (1 pour le bon mot, 0 pour tous les autres). Cela pousse le modèle à être sûr à 100 %, ce qui cause :
+- **Sur-confiance** : le modèle ignore les nuances sémantiques entre mots proches
+- **Gradients saturés** : le softmax sature, les mises à jour deviennent très faibles
 
 Avec label smoothing ($\varepsilon = 0.05$) :
-$$\tilde{y}_c = \begin{cases} 1 - \varepsilon & \text{si } c = \text{cible} \\ \frac{\varepsilon}{V-1} & \text{sinon} \end{cases}$$
+$$\tilde{y}_c = \begin{cases} 1 - \varepsilon = 0.95 & \text{si } c = \text{mot cible} \\ \frac{\varepsilon}{V-1} \approx 4 \times 10^{-6} & \text{pour les autres mots} \end{cases}$$
 
-> Le label smoothing évite la sur-confiance et améliore la généralisation.
+$$\mathcal{L}_{LS} = -\sum_{c=1}^{V} \tilde{y}_c \cdot \log(\hat{p}_c)$$
+
+> 5 % de la masse de probabilité est redistribuée uniformément → le modèle reste ouvert à plusieurs mots plausibles, ce qui améliore la qualité de génération.
 
 ### Backpropagation (Implémentée à la Main)
 ```
@@ -354,6 +388,21 @@ Architecture GPT-2 (version small) :
 | Temps fine-tuning | N/A | **58.3 secondes (3 époques, GPU)** |
 | Vocabulaire | 12 004 (construit) | 50 257 (BPE pré-défini) |
 | Mécanisme clé | Embedding + Dense | **Self-Attention** |
+
+### Pourquoi avons-nous choisi GPT-2 ?
+
+GPT-2 n'a pas été choisi au hasard. Chaque critère de sélection répond à un besoin précis du TP :
+
+| Critère | Détail |
+|---|---|
+| **Comparaison architecturale claire** | GPT-2 représente l'étape suivante naturelle après un FFN : il ajoute exactement ce qui manque à notre modèle (attention, mémoire longue). Le contraste est pédagogiquement parfait. |
+| **Disponibilité et reproductibilité** | `GPT2LMHeadModel.from_pretrained('gpt2')` — le modèle est téléchargeable en 1 commande, les résultats sont reproductibles par n'importe qui. |
+| **Fine-tuning rapide (58.3 s)** | Grâce au transfer learning, 3 époques suffisent pour adapter GPT-2 aux paroles de chansons. Cela permet de comparer sur le *même dataset* sans semaines d'entraînement. |
+| **Standard de l'état de l'art 2019–2022** | GPT-2 est le point d'entrée canonique des LLM modernes. Comprendre son architecture, c'est comprendre la base de GPT-4, LLaMA, Mistral. |
+| **Vocabulaire BPE (50 257 tokens)** | Le Byte-Pair Encoding gère les mots rares, les contractions (`'cause`, `ain't`), et les fautes — problème que notre vocabulaire de fréquence minimale ne résout pas. |
+| **Pré-entraînement sur WebText (40 GB)** | GPT-2 arrive déjà avec une connaissance de l'anglais, des rimes, des structures de phrases. Notre modèle part de zéro sur ~14 500 chansons. |
+
+> **Résultat attendu et confirmé :** GPT-2 atteint PPL = 12.52 vs 220.81 pour notre modèle — soit **×17.6 plus précis** en ×40 moins de temps d'entraînement. Ce ratio illustre exactement la puissance du transfer learning et de l'attention multi-têtes.
 
 ### Pourquoi le Self-Attention est Supérieur
 GPT-2 peut relier **n'importe quels mots dans le contexte**, pas juste les voisins immédiats :
