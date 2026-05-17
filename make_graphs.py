@@ -743,25 +743,21 @@ if gpt2_eval_epochs:
                      textcoords='offset points', xytext=(8, 6),
                      fontsize=10, color='#f39c12', fontweight='bold')
 
-    # Show Custom FF PPL as annotation, not as a line (avoids crushing scale)
-    ax2.annotate(
-        'Custom FF  PPL = 220.81  (hors échelle ↗)',
-        xy=(2.5, gpt2_eval_ppls[-1] + 1.5),
-        fontsize=9, color=PALETTE['custom'],
-        style='italic',
-        arrowprops=dict(arrowstyle='->', color=PALETTE['custom'], lw=1.4),
-        xytext=(1.1, gpt2_eval_ppls[-1] + 4),
-    )
-
-    ax2.fill_between(gpt2_eval_epochs, gpt2_eval_ppls,
-                     min(gpt2_eval_ppls) - 1,
-                     color='#f39c12', alpha=0.18)
-
-    # Tight y-axis around GPT-2 values
     ppl_min = min(gpt2_eval_ppls)
     ppl_max = max(gpt2_eval_ppls)
-    margin = (ppl_max - ppl_min) * 0.8 + 1.5
-    ax2.set_ylim(ppl_min - margin, ppl_max + margin * 3)
+    margin = 1.5
+    ax2.set_ylim(ppl_min - margin, ppl_max + margin * 2)
+
+    ax2.fill_between(gpt2_eval_epochs, gpt2_eval_ppls, ppl_min - margin,
+                     color='#f39c12', alpha=0.10)
+
+    # Simple text note about Custom FF — no broken arrow
+    ax2.text(0.03, 0.97,
+             f'Custom FF: PPL = 220.81\n(×{220.81/gpt2_eval_ppls[-1]:.1f} plus élevé — hors échelle)',
+             transform=ax2.transAxes, ha='left', va='top',
+             fontsize=9, color=PALETTE['custom'], style='italic',
+             bbox=dict(boxstyle='round,pad=0.35', facecolor='#1a1d27',
+                       edgecolor=PALETTE['custom'], alpha=0.85))
 
 for e in [1, 2, 3]:
     ax2.axvline(e, color='#555577', linestyle=':', linewidth=1.0, alpha=0.7)
