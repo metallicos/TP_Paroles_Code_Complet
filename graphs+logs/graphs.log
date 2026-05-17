@@ -1,0 +1,25 @@
+Chargement des données...
+  ✓ Modèle chargé
+  ✓ Dataset: 15,371 chansons
+
+Figure 1: Courbes d'entraînement...
+  ✓ training_curves.png
+Figure 2: Overfitting gap...
+  ✓ overfitting_gap.png
+Figure 3: Distribution du dataset...
+  ✓ dataset_distribution.png
+Figure 4: Fréquence vocabulaire (loi de Zipf)...
+  ✓ vocab_frequency.png
+Figure 5: Qualité de génération par genre...
+  ✓ generation_quality.png
+Figure 6: Comparaison des modèles...
+  ✓ model_comparison.png
+
+✅ Tous les graphiques sauvegardés dans: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/graphs
+   Fichiers:
+   • dataset_distribution.png                  397.5 KB
+   • generation_quality.png                    229.7 KB
+   • model_comparison.png                      453.6 KB
+   • overfitting_gap.png                       195.3 KB
+   • training_curves.png                       343.2 KB
+   • vocab_frequency.png                       214.2 KB

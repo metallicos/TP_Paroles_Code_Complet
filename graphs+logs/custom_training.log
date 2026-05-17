@@ -1,0 +1,1315 @@
+✓ Config chargée: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/config/train_config.json
+============================================================
+SECTION 1: Chargement du Dataset Spotify
+============================================================
+✓ Backend: GPU (CuPy)
+✓ Dataset chargé: 18,454 chansons
+✓ Filtre langue 'en': 15,371 chansons (sur 18,098)
+✓ Après nettoyage: 15,371 chansons avec paroles valides
+ℹ️  MAX_SAMPLES=None — utilisation du dataset complet (15,371 entrées)
+
+============================================================
+SECTION 2: Exploration des Genres
+============================================================
+✓ Top 5 genres:
+  1. pop: 3737 chansons
+  2. rock: 3388 chansons
+  3. r&b: 3160 chansons
+  4. rap: 2500 chansons
+  5. edm: 1732 chansons
+
+============================================================
+SECTION 3: Prétraitement du Texte
+============================================================
+✓ Prétraitement: taille moyenne 424 tokens
+
+============================================================
+SECTION 4: Construction du Vocabulaire
+============================================================
+✓ Vocabulaire: 12004 tokens (cap: 12000)
+
+============================================================
+SECTION 5: Encodage des Données
+============================================================
+✓ Données filtrées: 14517 chansons, 5 genres
+
+============================================================
+SECTION 6: Préparation Train/Validation
+============================================================
+Séparation au niveau chanson (anti-fuite train/val)...
+✓ Chansons train: 11,613 | val: 2,904
+✓ Aucun chevauchement chanson entre train et val
+Création des paires train...
+  [MEM] RAM: 8.0/216.3 GB (3.7% used)
+  Progression: 500/11613 | ETA: 26s | Paires: 192,477
+  [MEM] RAM: 8.4/216.3 GB (3.9% used)
+  Progression: 1000/11613 | ETA: 29s | Paires: 382,653
+  [MEM] RAM: 8.7/216.3 GB (4.0% used)
+  Progression: 1500/11613 | ETA: 28s | Paires: 570,814
+  [MEM] RAM: 9.1/216.3 GB (4.2% used)
+  Progression: 2000/11613 | ETA: 27s | Paires: 759,970
+  [MEM] RAM: 9.4/216.3 GB (4.4% used)
+  Progression: 2500/11613 | ETA: 27s | Paires: 947,012
+  [MEM] RAM: 9.8/216.3 GB (4.5% used)
+  Progression: 3000/11613 | ETA: 27s | Paires: 1,137,336
+  [MEM] RAM: 10.1/216.3 GB (4.7% used)
+  Progression: 3500/11613 | ETA: 23s | Paires: 1,329,939
+  [MEM] RAM: 10.5/216.3 GB (4.8% used)
+  Progression: 4000/11613 | ETA: 23s | Paires: 1,521,751
+  [MEM] RAM: 10.8/216.3 GB (5.0% used)
+  Progression: 4500/11613 | ETA: 21s | Paires: 1,722,941
+  [MEM] RAM: 11.2/216.3 GB (5.2% used)
+  Progression: 5000/11613 | ETA: 21s | Paires: 1,911,862
+  [MEM] RAM: 11.6/216.3 GB (5.4% used)
+  Progression: 5500/11613 | ETA: 18s | Paires: 2,102,248
+  [MEM] RAM: 12.0/216.3 GB (5.5% used)
+  Progression: 6000/11613 | ETA: 16s | Paires: 2,297,693
+  [MEM] RAM: 12.3/216.3 GB (5.7% used)
+  Progression: 6500/11613 | ETA: 16s | Paires: 2,491,418
+  [MEM] RAM: 12.7/216.3 GB (5.9% used)
+  Progression: 7000/11613 | ETA: 14s | Paires: 2,680,192
+  [MEM] RAM: 13.1/216.3 GB (6.0% used)
+  Progression: 7500/11613 | ETA: 12s | Paires: 2,866,987
+  [MEM] RAM: 13.4/216.3 GB (6.2% used)
+  Progression: 8000/11613 | ETA: 12s | Paires: 3,062,230
+  [MEM] RAM: 13.8/216.3 GB (6.4% used)
+  Progression: 8500/11613 | ETA: 10s | Paires: 3,256,868
+  [MEM] RAM: 14.2/216.3 GB (6.5% used)
+  Progression: 9000/11613 | ETA: 8s | Paires: 3,450,569
+  [MEM] RAM: 14.5/216.3 GB (6.7% used)
+  Progression: 9500/11613 | ETA: 6s | Paires: 3,644,142
+  [MEM] RAM: 14.9/216.3 GB (6.9% used)
+  Progression: 10000/11613 | ETA: 5s | Paires: 3,836,379
+  [MEM] RAM: 15.3/216.3 GB (7.1% used)
+  Progression: 10500/11613 | ETA: 4s | Paires: 4,026,756
+  [MEM] RAM: 15.6/216.3 GB (7.2% used)
+  Progression: 11000/11613 | ETA: 2s | Paires: 4,216,146
+  [MEM] RAM: 16.0/216.3 GB (7.4% used)
+  Progression: 11500/11613 | ETA: 0s | Paires: 4,408,566
+  [MEM] RAM: 16.4/216.3 GB (7.6% used)
+  ✓ 4,449,959 paires train en 34.8s
+Création des paires val...
+  Progression: 500/2904 | ETA: 3s | Paires: 192,059
+  [MEM] RAM: 16.8/216.3 GB (7.8% used)
+  Progression: 1000/2904 | ETA: 12s | Paires: 372,538
+  [MEM] RAM: 17.1/216.3 GB (7.9% used)
+  Progression: 1500/2904 | ETA: 7s | Paires: 557,996
+  [MEM] RAM: 17.4/216.3 GB (8.1% used)
+  Progression: 2000/2904 | ETA: 3s | Paires: 747,744
+  [MEM] RAM: 17.8/216.3 GB (8.2% used)
+  Progression: 2500/2904 | ETA: 1s | Paires: 941,139
+  [MEM] RAM: 18.2/216.3 GB (8.4% used)
+  ✓ 1,097,658 paires val en 8.9s
+✓ Train: 4,449,959 | Val: 1,097,658
+
+============================================================
+SECTION 7: Modèle Neural Network
+============================================================
+✓ Modèle créé
+
+============================================================
+SECTION 8: Entraînement du Modèle
+============================================================
+✓ Transfert des tenseurs vers GPU...
+  ✓ Transfert GPU réussi
+Config: epochs=15, batch=128, lr=0.01, decay=0.95, dropout=0.15, label_smoothing=0.05, patience=3
+  [MEM] RAM: 20.0/216.3 GB (9.3% used)
+
+Époque | Train Loss | Train Acc | Val Loss | Val Acc | Train PPL | Val PPL |   Time
+------------------------------------------------------------------------------------------
+
+Epoch 1/15 | lr=0.010000
+  [MEM] RAM: 20.0/216.3 GB (9.3% used)
+    Batch 500/34766 | Loss: 9.3143 | Acc: 0.0078 | Elapsed: 2.2s | ETA: 143s
+    Batch 1000/34766 | Loss: 9.1869 | Acc: 0.0156 | Elapsed: 4.3s | ETA: 141s
+    Batch 1500/34766 | Loss: 8.7660 | Acc: 0.0703 | Elapsed: 6.3s | ETA: 137s
+    Batch 2000/34766 | Loss: 8.9179 | Acc: 0.0312 | Elapsed: 8.4s | ETA: 136s
+    Batch 2500/34766 | Loss: 7.9556 | Acc: 0.0234 | Elapsed: 10.5s | ETA: 134s
+    Batch 3000/34766 | Loss: 7.1924 | Acc: 0.0781 | Elapsed: 12.5s | ETA: 132s
+    Batch 3500/34766 | Loss: 6.8864 | Acc: 0.0312 | Elapsed: 14.6s | ETA: 129s
+    Batch 4000/34766 | Loss: 7.4675 | Acc: 0.0312 | Elapsed: 16.7s | ETA: 127s
+    Batch 4500/34766 | Loss: 7.3004 | Acc: 0.0234 | Elapsed: 18.8s | ETA: 127s
+    Batch 5000/34766 | Loss: 7.1043 | Acc: 0.0156 | Elapsed: 20.8s | ETA: 122s
+    Batch 5500/34766 | Loss: 6.7252 | Acc: 0.0391 | Elapsed: 22.9s | ETA: 123s
+    Batch 6000/34766 | Loss: 6.4694 | Acc: 0.0312 | Elapsed: 25.0s | ETA: 119s
+    Batch 6500/34766 | Loss: 6.6843 | Acc: 0.1094 | Elapsed: 27.0s | ETA: 117s
+    Batch 7000/34766 | Loss: 7.1053 | Acc: 0.0078 | Elapsed: 29.1s | ETA: 114s
+    Batch 7500/34766 | Loss: 7.0563 | Acc: 0.0547 | Elapsed: 31.2s | ETA: 112s
+    Batch 8000/34766 | Loss: 6.6416 | Acc: 0.0234 | Elapsed: 33.2s | ETA: 111s
+    Batch 8500/34766 | Loss: 6.3221 | Acc: 0.0703 | Elapsed: 35.3s | ETA: 109s
+    Batch 9000/34766 | Loss: 7.0594 | Acc: 0.0234 | Elapsed: 37.4s | ETA: 107s
+    Batch 9500/34766 | Loss: 6.9127 | Acc: 0.0547 | Elapsed: 39.4s | ETA: 105s
+    Batch 10000/34766 | Loss: 6.9758 | Acc: 0.0469 | Elapsed: 41.5s | ETA: 102s
+    Batch 10500/34766 | Loss: 6.5288 | Acc: 0.0312 | Elapsed: 43.6s | ETA: 101s
+    Batch 11000/34766 | Loss: 6.4439 | Acc: 0.0625 | Elapsed: 45.6s | ETA: 98s
+    Batch 11500/34766 | Loss: 7.0302 | Acc: 0.1016 | Elapsed: 47.7s | ETA: 96s
+    Batch 12000/34766 | Loss: 7.2430 | Acc: 0.0312 | Elapsed: 49.8s | ETA: 94s
+    Batch 12500/34766 | Loss: 6.8446 | Acc: 0.0703 | Elapsed: 51.8s | ETA: 92s
+    Batch 13000/34766 | Loss: 7.1323 | Acc: 0.0156 | Elapsed: 53.9s | ETA: 90s
+    Batch 13500/34766 | Loss: 6.4087 | Acc: 0.0859 | Elapsed: 56.0s | ETA: 88s
+    Batch 14000/34766 | Loss: 6.5029 | Acc: 0.1484 | Elapsed: 58.0s | ETA: 86s
+    Batch 14500/34766 | Loss: 6.5062 | Acc: 0.0391 | Elapsed: 60.1s | ETA: 84s
+    Batch 15000/34766 | Loss: 6.6856 | Acc: 0.0234 | Elapsed: 62.2s | ETA: 81s
+    Batch 15500/34766 | Loss: 6.6730 | Acc: 0.0391 | Elapsed: 64.2s | ETA: 79s
+    Batch 16000/34766 | Loss: 6.4497 | Acc: 0.0234 | Elapsed: 66.3s | ETA: 77s
+    Batch 16500/34766 | Loss: 6.3354 | Acc: 0.0234 | Elapsed: 68.4s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.7771 | Acc: 0.0938 | Elapsed: 70.4s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.8471 | Acc: 0.1562 | Elapsed: 72.5s | ETA: 71s
+    Batch 18000/34766 | Loss: 6.8139 | Acc: 0.0469 | Elapsed: 74.5s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.9930 | Acc: 0.0391 | Elapsed: 76.6s | ETA: 67s
+    Batch 19000/34766 | Loss: 6.7578 | Acc: 0.0859 | Elapsed: 78.7s | ETA: 65s
+    Batch 19500/34766 | Loss: 6.7081 | Acc: 0.0156 | Elapsed: 80.7s | ETA: 63s
+    Batch 20000/34766 | Loss: 7.1616 | Acc: 0.0312 | Elapsed: 82.8s | ETA: 61s
+    Batch 20500/34766 | Loss: 7.2133 | Acc: 0.0312 | Elapsed: 84.9s | ETA: 59s
+    Batch 21000/34766 | Loss: 6.6554 | Acc: 0.0781 | Elapsed: 86.9s | ETA: 56s
+    Batch 21500/34766 | Loss: 6.4149 | Acc: 0.0781 | Elapsed: 89.0s | ETA: 55s
+    Batch 22000/34766 | Loss: 6.4139 | Acc: 0.0156 | Elapsed: 91.1s | ETA: 53s
+    Batch 22500/34766 | Loss: 5.9970 | Acc: 0.0938 | Elapsed: 93.1s | ETA: 51s
+    Batch 23000/34766 | Loss: 6.8487 | Acc: 0.0078 | Elapsed: 95.2s | ETA: 49s
+    Batch 23500/34766 | Loss: 6.2086 | Acc: 0.0703 | Elapsed: 97.3s | ETA: 46s
+    Batch 24000/34766 | Loss: 6.5064 | Acc: 0.0625 | Elapsed: 99.3s | ETA: 45s
+    Batch 24500/34766 | Loss: 6.9679 | Acc: 0.0781 | Elapsed: 101.4s | ETA: 42s
+    Batch 25000/34766 | Loss: 6.7586 | Acc: 0.0234 | Elapsed: 103.5s | ETA: 41s
+    Batch 25500/34766 | Loss: 6.8994 | Acc: 0.0859 | Elapsed: 105.6s | ETA: 39s
+    Batch 26000/34766 | Loss: 7.6297 | Acc: 0.0391 | Elapsed: 107.6s | ETA: 36s
+    Batch 26500/34766 | Loss: 6.1597 | Acc: 0.0469 | Elapsed: 109.7s | ETA: 34s
+    Batch 27000/34766 | Loss: 6.3406 | Acc: 0.1016 | Elapsed: 111.8s | ETA: 32s
+    Batch 27500/34766 | Loss: 6.6689 | Acc: 0.0625 | Elapsed: 113.9s | ETA: 30s
+    Batch 28000/34766 | Loss: 6.3275 | Acc: 0.0156 | Elapsed: 115.9s | ETA: 28s
+    Batch 28500/34766 | Loss: 7.0081 | Acc: 0.0469 | Elapsed: 118.0s | ETA: 26s
+    Batch 29000/34766 | Loss: 6.7111 | Acc: 0.0781 | Elapsed: 120.1s | ETA: 24s
+    Batch 29500/34766 | Loss: 7.0265 | Acc: 0.0547 | Elapsed: 122.1s | ETA: 22s
+    Batch 30000/34766 | Loss: 6.6721 | Acc: 0.1016 | Elapsed: 124.2s | ETA: 20s
+    Batch 30500/34766 | Loss: 5.4592 | Acc: 0.1797 | Elapsed: 126.3s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.9490 | Acc: 0.1328 | Elapsed: 128.4s | ETA: 16s
+    Batch 31500/34766 | Loss: 6.1825 | Acc: 0.0469 | Elapsed: 130.4s | ETA: 14s
+    Batch 32000/34766 | Loss: 7.0589 | Acc: 0.0469 | Elapsed: 132.5s | ETA: 11s
+    Batch 32500/34766 | Loss: 7.2192 | Acc: 0.1094 | Elapsed: 134.6s | ETA: 9s
+    Batch 33000/34766 | Loss: 6.1508 | Acc: 0.0625 | Elapsed: 136.6s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.6564 | Acc: 0.1641 | Elapsed: 138.7s | ETA: 5s
+    Batch 34000/34766 | Loss: 6.1418 | Acc: 0.1016 | Elapsed: 140.8s | ETA: 3s
+    Batch 34500/34766 | Loss: 6.5538 | Acc: 0.0234 | Elapsed: 142.8s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.6318 | Acc: 0.0769 | Elapsed: 144.0s | ETA: 0s
+     1 |   6.852659 |    0.0631 | 6.224521 |  0.0788 |  946.3944 | 504.9810 | 156.7s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch1.pkl
+
+Epoch 2/15 | lr=0.009500
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 6.0051 | Acc: 0.0625 | Elapsed: 2.1s | ETA: 142s
+    Batch 1000/34766 | Loss: 6.6320 | Acc: 0.0625 | Elapsed: 4.1s | ETA: 141s
+    Batch 1500/34766 | Loss: 6.1869 | Acc: 0.0781 | Elapsed: 6.2s | ETA: 139s
+    Batch 2000/34766 | Loss: 7.7142 | Acc: 0.0391 | Elapsed: 8.3s | ETA: 136s
+    Batch 2500/34766 | Loss: 6.8065 | Acc: 0.1016 | Elapsed: 10.4s | ETA: 133s
+    Batch 3000/34766 | Loss: 6.3542 | Acc: 0.1641 | Elapsed: 12.4s | ETA: 131s
+    Batch 3500/34766 | Loss: 5.6766 | Acc: 0.0938 | Elapsed: 14.5s | ETA: 129s
+    Batch 4000/34766 | Loss: 6.6594 | Acc: 0.0781 | Elapsed: 16.5s | ETA: 128s
+    Batch 4500/34766 | Loss: 6.6996 | Acc: 0.0547 | Elapsed: 18.6s | ETA: 125s
+    Batch 5000/34766 | Loss: 6.3013 | Acc: 0.0156 | Elapsed: 20.7s | ETA: 122s
+    Batch 5500/34766 | Loss: 6.2286 | Acc: 0.0312 | Elapsed: 22.8s | ETA: 121s
+    Batch 6000/34766 | Loss: 5.9376 | Acc: 0.0781 | Elapsed: 24.8s | ETA: 119s
+    Batch 6500/34766 | Loss: 6.2988 | Acc: 0.1016 | Elapsed: 26.9s | ETA: 117s
+    Batch 7000/34766 | Loss: 6.7525 | Acc: 0.0859 | Elapsed: 29.0s | ETA: 115s
+    Batch 7500/34766 | Loss: 6.5869 | Acc: 0.0859 | Elapsed: 31.0s | ETA: 112s
+    Batch 8000/34766 | Loss: 6.2059 | Acc: 0.0547 | Elapsed: 33.1s | ETA: 110s
+    Batch 8500/34766 | Loss: 5.8937 | Acc: 0.0859 | Elapsed: 35.1s | ETA: 108s
+    Batch 9000/34766 | Loss: 6.7151 | Acc: 0.0547 | Elapsed: 37.2s | ETA: 106s
+    Batch 9500/34766 | Loss: 6.4759 | Acc: 0.0781 | Elapsed: 39.3s | ETA: 104s
+    Batch 10000/34766 | Loss: 6.6356 | Acc: 0.0312 | Elapsed: 41.3s | ETA: 102s
+    Batch 10500/34766 | Loss: 6.0268 | Acc: 0.0859 | Elapsed: 43.4s | ETA: 100s
+    Batch 11000/34766 | Loss: 6.1465 | Acc: 0.0625 | Elapsed: 45.4s | ETA: 98s
+    Batch 11500/34766 | Loss: 6.6171 | Acc: 0.1875 | Elapsed: 47.5s | ETA: 96s
+    Batch 12000/34766 | Loss: 7.0052 | Acc: 0.0781 | Elapsed: 49.6s | ETA: 94s
+    Batch 12500/34766 | Loss: 6.5637 | Acc: 0.0625 | Elapsed: 51.6s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.6939 | Acc: 0.0391 | Elapsed: 53.7s | ETA: 90s
+    Batch 13500/34766 | Loss: 5.9254 | Acc: 0.1094 | Elapsed: 55.7s | ETA: 87s
+    Batch 14000/34766 | Loss: 6.2971 | Acc: 0.1484 | Elapsed: 57.8s | ETA: 86s
+    Batch 14500/34766 | Loss: 6.1311 | Acc: 0.0859 | Elapsed: 59.9s | ETA: 84s
+    Batch 15000/34766 | Loss: 6.3847 | Acc: 0.1094 | Elapsed: 61.9s | ETA: 82s
+    Batch 15500/34766 | Loss: 6.2994 | Acc: 0.0547 | Elapsed: 64.0s | ETA: 79s
+    Batch 16000/34766 | Loss: 6.3328 | Acc: 0.0156 | Elapsed: 66.0s | ETA: 77s
+    Batch 16500/34766 | Loss: 6.0583 | Acc: 0.0625 | Elapsed: 68.1s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.5020 | Acc: 0.1016 | Elapsed: 70.1s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.6754 | Acc: 0.1562 | Elapsed: 72.2s | ETA: 71s
+    Batch 18000/34766 | Loss: 6.5221 | Acc: 0.0781 | Elapsed: 74.2s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.8835 | Acc: 0.0703 | Elapsed: 76.3s | ETA: 66s
+    Batch 19000/34766 | Loss: 6.4868 | Acc: 0.0938 | Elapsed: 78.4s | ETA: 65s
+    Batch 19500/34766 | Loss: 6.4060 | Acc: 0.0391 | Elapsed: 80.4s | ETA: 63s
+    Batch 20000/34766 | Loss: 6.8270 | Acc: 0.0391 | Elapsed: 82.5s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.8896 | Acc: 0.0391 | Elapsed: 84.5s | ETA: 59s
+    Batch 21000/34766 | Loss: 6.5120 | Acc: 0.0859 | Elapsed: 86.6s | ETA: 56s
+    Batch 21500/34766 | Loss: 6.1128 | Acc: 0.0625 | Elapsed: 88.7s | ETA: 55s
+    Batch 22000/34766 | Loss: 6.2157 | Acc: 0.0391 | Elapsed: 90.7s | ETA: 52s
+    Batch 22500/34766 | Loss: 5.8448 | Acc: 0.0859 | Elapsed: 92.8s | ETA: 51s
+    Batch 23000/34766 | Loss: 6.5451 | Acc: 0.0078 | Elapsed: 94.9s | ETA: 49s
+    Batch 23500/34766 | Loss: 5.9125 | Acc: 0.0703 | Elapsed: 96.9s | ETA: 47s
+    Batch 24000/34766 | Loss: 6.3997 | Acc: 0.0859 | Elapsed: 99.0s | ETA: 45s
+    Batch 24500/34766 | Loss: 6.7693 | Acc: 0.0781 | Elapsed: 101.1s | ETA: 42s
+    Batch 25000/34766 | Loss: 6.4412 | Acc: 0.0781 | Elapsed: 103.1s | ETA: 41s
+    Batch 25500/34766 | Loss: 6.6640 | Acc: 0.1172 | Elapsed: 105.2s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.5330 | Acc: 0.0469 | Elapsed: 107.3s | ETA: 37s
+    Batch 26500/34766 | Loss: 5.8118 | Acc: 0.0781 | Elapsed: 109.3s | ETA: 34s
+    Batch 27000/34766 | Loss: 6.1666 | Acc: 0.1328 | Elapsed: 111.4s | ETA: 32s
+    Batch 27500/34766 | Loss: 6.4396 | Acc: 0.0547 | Elapsed: 113.5s | ETA: 30s
+    Batch 28000/34766 | Loss: 6.0237 | Acc: 0.0703 | Elapsed: 115.5s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.7896 | Acc: 0.0469 | Elapsed: 117.6s | ETA: 26s
+    Batch 29000/34766 | Loss: 6.5219 | Acc: 0.0938 | Elapsed: 119.6s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.8641 | Acc: 0.0703 | Elapsed: 121.7s | ETA: 22s
+    Batch 30000/34766 | Loss: 6.4242 | Acc: 0.0859 | Elapsed: 123.8s | ETA: 20s
+    Batch 30500/34766 | Loss: 5.0075 | Acc: 0.2656 | Elapsed: 125.8s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.7515 | Acc: 0.0938 | Elapsed: 127.9s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.8836 | Acc: 0.0625 | Elapsed: 130.0s | ETA: 14s
+    Batch 32000/34766 | Loss: 6.9464 | Acc: 0.0625 | Elapsed: 132.0s | ETA: 11s
+    Batch 32500/34766 | Loss: 7.0843 | Acc: 0.0859 | Elapsed: 134.1s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.8557 | Acc: 0.0781 | Elapsed: 136.2s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.5233 | Acc: 0.1328 | Elapsed: 138.2s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.9941 | Acc: 0.1094 | Elapsed: 140.3s | ETA: 3s
+    Batch 34500/34766 | Loss: 6.2408 | Acc: 0.1016 | Elapsed: 142.3s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.4838 | Acc: 0.0513 | Elapsed: 143.4s | ETA: 0s
+     2 |   6.364096 |    0.0871 | 6.013772 |  0.0959 |  580.6197 | 409.0233 | 156.1s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch2.pkl
+
+Epoch 3/15 | lr=0.009025
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.6718 | Acc: 0.1250 | Elapsed: 2.1s | ETA: 142s
+    Batch 1000/34766 | Loss: 6.5067 | Acc: 0.0938 | Elapsed: 4.1s | ETA: 140s
+    Batch 1500/34766 | Loss: 5.9410 | Acc: 0.1016 | Elapsed: 6.2s | ETA: 138s
+    Batch 2000/34766 | Loss: 7.5928 | Acc: 0.0625 | Elapsed: 8.3s | ETA: 135s
+    Batch 2500/34766 | Loss: 6.5598 | Acc: 0.1016 | Elapsed: 10.3s | ETA: 133s
+    Batch 3000/34766 | Loss: 6.1539 | Acc: 0.1562 | Elapsed: 12.4s | ETA: 132s
+    Batch 3500/34766 | Loss: 5.3801 | Acc: 0.1172 | Elapsed: 14.5s | ETA: 130s
+    Batch 4000/34766 | Loss: 6.5343 | Acc: 0.0703 | Elapsed: 16.6s | ETA: 128s
+    Batch 4500/34766 | Loss: 6.5400 | Acc: 0.0312 | Elapsed: 18.6s | ETA: 126s
+    Batch 5000/34766 | Loss: 6.0814 | Acc: 0.0469 | Elapsed: 20.7s | ETA: 122s
+    Batch 5500/34766 | Loss: 6.0490 | Acc: 0.0469 | Elapsed: 22.8s | ETA: 121s
+    Batch 6000/34766 | Loss: 5.6754 | Acc: 0.0859 | Elapsed: 24.8s | ETA: 121s
+    Batch 6500/34766 | Loss: 6.1057 | Acc: 0.1641 | Elapsed: 26.9s | ETA: 117s
+    Batch 7000/34766 | Loss: 6.6544 | Acc: 0.0703 | Elapsed: 29.0s | ETA: 115s
+    Batch 7500/34766 | Loss: 6.2988 | Acc: 0.0938 | Elapsed: 31.0s | ETA: 111s
+    Batch 8000/34766 | Loss: 6.0519 | Acc: 0.0781 | Elapsed: 33.1s | ETA: 110s
+    Batch 8500/34766 | Loss: 5.6907 | Acc: 0.1250 | Elapsed: 35.1s | ETA: 108s
+    Batch 9000/34766 | Loss: 6.4920 | Acc: 0.0703 | Elapsed: 37.2s | ETA: 107s
+    Batch 9500/34766 | Loss: 6.3184 | Acc: 0.0859 | Elapsed: 39.3s | ETA: 104s
+    Batch 10000/34766 | Loss: 6.5783 | Acc: 0.0547 | Elapsed: 41.3s | ETA: 103s
+    Batch 10500/34766 | Loss: 5.7056 | Acc: 0.1328 | Elapsed: 43.4s | ETA: 100s
+    Batch 11000/34766 | Loss: 6.0051 | Acc: 0.1094 | Elapsed: 45.5s | ETA: 97s
+    Batch 11500/34766 | Loss: 6.5461 | Acc: 0.1719 | Elapsed: 47.5s | ETA: 97s
+    Batch 12000/34766 | Loss: 6.8549 | Acc: 0.1094 | Elapsed: 49.6s | ETA: 94s
+    Batch 12500/34766 | Loss: 6.4135 | Acc: 0.0859 | Elapsed: 51.7s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.5604 | Acc: 0.0469 | Elapsed: 53.7s | ETA: 90s
+    Batch 13500/34766 | Loss: 5.6773 | Acc: 0.1094 | Elapsed: 55.8s | ETA: 87s
+    Batch 14000/34766 | Loss: 6.1631 | Acc: 0.1641 | Elapsed: 57.9s | ETA: 86s
+    Batch 14500/34766 | Loss: 5.8670 | Acc: 0.1094 | Elapsed: 59.9s | ETA: 84s
+    Batch 15000/34766 | Loss: 6.0839 | Acc: 0.1172 | Elapsed: 62.0s | ETA: 82s
+    Batch 15500/34766 | Loss: 6.1708 | Acc: 0.0625 | Elapsed: 64.1s | ETA: 80s
+    Batch 16000/34766 | Loss: 6.0822 | Acc: 0.0859 | Elapsed: 66.1s | ETA: 77s
+    Batch 16500/34766 | Loss: 5.9591 | Acc: 0.0781 | Elapsed: 68.2s | ETA: 76s
+    Batch 17000/34766 | Loss: 6.4378 | Acc: 0.0938 | Elapsed: 70.2s | ETA: 74s
+    Batch 17500/34766 | Loss: 6.5990 | Acc: 0.1875 | Elapsed: 72.3s | ETA: 71s
+    Batch 18000/34766 | Loss: 6.3699 | Acc: 0.0625 | Elapsed: 74.4s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.7092 | Acc: 0.0938 | Elapsed: 76.4s | ETA: 67s
+    Batch 19000/34766 | Loss: 6.3378 | Acc: 0.1016 | Elapsed: 78.5s | ETA: 65s
+    Batch 19500/34766 | Loss: 6.2638 | Acc: 0.0547 | Elapsed: 80.6s | ETA: 63s
+    Batch 20000/34766 | Loss: 6.4907 | Acc: 0.0625 | Elapsed: 82.6s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.7827 | Acc: 0.0625 | Elapsed: 84.7s | ETA: 59s
+    Batch 21000/34766 | Loss: 6.4319 | Acc: 0.0938 | Elapsed: 86.8s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.8833 | Acc: 0.0703 | Elapsed: 88.8s | ETA: 55s
+    Batch 22000/34766 | Loss: 6.0341 | Acc: 0.0312 | Elapsed: 90.9s | ETA: 52s
+    Batch 22500/34766 | Loss: 5.6996 | Acc: 0.0938 | Elapsed: 93.0s | ETA: 51s
+    Batch 23000/34766 | Loss: 6.3317 | Acc: 0.0312 | Elapsed: 95.1s | ETA: 49s
+    Batch 23500/34766 | Loss: 5.7120 | Acc: 0.1094 | Elapsed: 97.1s | ETA: 47s
+    Batch 24000/34766 | Loss: 6.2764 | Acc: 0.0625 | Elapsed: 99.2s | ETA: 45s
+    Batch 24500/34766 | Loss: 6.6252 | Acc: 0.1016 | Elapsed: 101.3s | ETA: 42s
+    Batch 25000/34766 | Loss: 6.2682 | Acc: 0.0625 | Elapsed: 103.3s | ETA: 40s
+    Batch 25500/34766 | Loss: 6.5137 | Acc: 0.1172 | Elapsed: 105.4s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.5307 | Acc: 0.0391 | Elapsed: 107.5s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.7213 | Acc: 0.0859 | Elapsed: 109.5s | ETA: 34s
+    Batch 27000/34766 | Loss: 6.1094 | Acc: 0.1094 | Elapsed: 111.6s | ETA: 32s
+    Batch 27500/34766 | Loss: 6.3405 | Acc: 0.0859 | Elapsed: 113.7s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.8128 | Acc: 0.1562 | Elapsed: 115.8s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.6570 | Acc: 0.0547 | Elapsed: 117.8s | ETA: 26s
+    Batch 29000/34766 | Loss: 6.3810 | Acc: 0.1016 | Elapsed: 119.9s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.7636 | Acc: 0.0781 | Elapsed: 122.0s | ETA: 22s
+    Batch 30000/34766 | Loss: 6.2978 | Acc: 0.0781 | Elapsed: 124.0s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.7117 | Acc: 0.3047 | Elapsed: 126.1s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.5278 | Acc: 0.1250 | Elapsed: 128.2s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.6960 | Acc: 0.0781 | Elapsed: 130.3s | ETA: 14s
+    Batch 32000/34766 | Loss: 6.8318 | Acc: 0.0547 | Elapsed: 132.3s | ETA: 11s
+    Batch 32500/34766 | Loss: 7.0060 | Acc: 0.0938 | Elapsed: 134.4s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.6534 | Acc: 0.0781 | Elapsed: 136.5s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.4253 | Acc: 0.1328 | Elapsed: 138.6s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.8349 | Acc: 0.1562 | Elapsed: 140.7s | ETA: 3s
+    Batch 34500/34766 | Loss: 6.0420 | Acc: 0.1328 | Elapsed: 142.7s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.3820 | Acc: 0.0513 | Elapsed: 143.8s | ETA: 0s
+     3 |   6.201519 |    0.1007 | 5.874646 |  0.1073 |  493.4980 | 355.8986 | 156.5s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch3.pkl
+
+Epoch 4/15 | lr=0.008574
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.5775 | Acc: 0.1172 | Elapsed: 2.1s | ETA: 144s
+    Batch 1000/34766 | Loss: 6.4097 | Acc: 0.0859 | Elapsed: 4.2s | ETA: 140s
+    Batch 1500/34766 | Loss: 5.8122 | Acc: 0.1172 | Elapsed: 6.2s | ETA: 138s
+    Batch 2000/34766 | Loss: 7.5048 | Acc: 0.0625 | Elapsed: 8.3s | ETA: 136s
+    Batch 2500/34766 | Loss: 6.4154 | Acc: 0.1172 | Elapsed: 10.4s | ETA: 132s
+    Batch 3000/34766 | Loss: 6.0188 | Acc: 0.1953 | Elapsed: 12.4s | ETA: 132s
+    Batch 3500/34766 | Loss: 5.2506 | Acc: 0.1328 | Elapsed: 14.5s | ETA: 129s
+    Batch 4000/34766 | Loss: 6.4093 | Acc: 0.0703 | Elapsed: 16.5s | ETA: 127s
+    Batch 4500/34766 | Loss: 6.4003 | Acc: 0.0469 | Elapsed: 18.6s | ETA: 125s
+    Batch 5000/34766 | Loss: 5.9673 | Acc: 0.0781 | Elapsed: 20.7s | ETA: 122s
+    Batch 5500/34766 | Loss: 5.8327 | Acc: 0.1016 | Elapsed: 22.7s | ETA: 121s
+    Batch 6000/34766 | Loss: 5.4055 | Acc: 0.0859 | Elapsed: 24.8s | ETA: 118s
+    Batch 6500/34766 | Loss: 6.0387 | Acc: 0.1328 | Elapsed: 26.9s | ETA: 117s
+    Batch 7000/34766 | Loss: 6.5692 | Acc: 0.0781 | Elapsed: 29.0s | ETA: 115s
+    Batch 7500/34766 | Loss: 6.2201 | Acc: 0.1172 | Elapsed: 31.0s | ETA: 114s
+    Batch 8000/34766 | Loss: 5.9333 | Acc: 0.1094 | Elapsed: 33.1s | ETA: 111s
+    Batch 8500/34766 | Loss: 5.5686 | Acc: 0.1250 | Elapsed: 35.2s | ETA: 108s
+    Batch 9000/34766 | Loss: 6.3431 | Acc: 0.1016 | Elapsed: 37.3s | ETA: 106s
+    Batch 9500/34766 | Loss: 6.1860 | Acc: 0.0859 | Elapsed: 39.3s | ETA: 105s
+    Batch 10000/34766 | Loss: 6.3812 | Acc: 0.0625 | Elapsed: 41.4s | ETA: 103s
+    Batch 10500/34766 | Loss: 5.4719 | Acc: 0.2031 | Elapsed: 43.5s | ETA: 100s
+    Batch 11000/34766 | Loss: 5.8977 | Acc: 0.1641 | Elapsed: 45.5s | ETA: 97s
+    Batch 11500/34766 | Loss: 6.4938 | Acc: 0.1016 | Elapsed: 47.6s | ETA: 96s
+    Batch 12000/34766 | Loss: 6.6477 | Acc: 0.1250 | Elapsed: 49.7s | ETA: 94s
+    Batch 12500/34766 | Loss: 6.3219 | Acc: 0.0781 | Elapsed: 51.7s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.4882 | Acc: 0.0391 | Elapsed: 53.8s | ETA: 90s
+    Batch 13500/34766 | Loss: 5.4661 | Acc: 0.1172 | Elapsed: 55.9s | ETA: 87s
+    Batch 14000/34766 | Loss: 6.1094 | Acc: 0.1562 | Elapsed: 57.9s | ETA: 86s
+    Batch 14500/34766 | Loss: 5.7708 | Acc: 0.1328 | Elapsed: 60.0s | ETA: 84s
+    Batch 15000/34766 | Loss: 5.9204 | Acc: 0.0781 | Elapsed: 62.1s | ETA: 82s
+    Batch 15500/34766 | Loss: 6.1366 | Acc: 0.0625 | Elapsed: 64.1s | ETA: 80s
+    Batch 16000/34766 | Loss: 5.8639 | Acc: 0.0859 | Elapsed: 66.2s | ETA: 78s
+    Batch 16500/34766 | Loss: 5.7847 | Acc: 0.0781 | Elapsed: 68.3s | ETA: 76s
+    Batch 17000/34766 | Loss: 6.3819 | Acc: 0.0859 | Elapsed: 70.4s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.4883 | Acc: 0.2031 | Elapsed: 72.4s | ETA: 72s
+    Batch 18000/34766 | Loss: 6.2088 | Acc: 0.0781 | Elapsed: 74.5s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.7113 | Acc: 0.0625 | Elapsed: 76.6s | ETA: 67s
+    Batch 19000/34766 | Loss: 6.2134 | Acc: 0.0781 | Elapsed: 78.6s | ETA: 65s
+    Batch 19500/34766 | Loss: 6.2219 | Acc: 0.0625 | Elapsed: 80.7s | ETA: 62s
+    Batch 20000/34766 | Loss: 6.0934 | Acc: 0.1562 | Elapsed: 82.8s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.6784 | Acc: 0.0703 | Elapsed: 84.8s | ETA: 59s
+    Batch 21000/34766 | Loss: 6.2623 | Acc: 0.0938 | Elapsed: 86.9s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.7747 | Acc: 0.0781 | Elapsed: 88.9s | ETA: 54s
+    Batch 22000/34766 | Loss: 5.9988 | Acc: 0.0391 | Elapsed: 91.0s | ETA: 52s
+    Batch 22500/34766 | Loss: 5.4910 | Acc: 0.1172 | Elapsed: 93.1s | ETA: 51s
+    Batch 23000/34766 | Loss: 6.1855 | Acc: 0.0547 | Elapsed: 95.2s | ETA: 49s
+    Batch 23500/34766 | Loss: 5.5336 | Acc: 0.1797 | Elapsed: 97.2s | ETA: 47s
+    Batch 24000/34766 | Loss: 6.1929 | Acc: 0.0625 | Elapsed: 99.3s | ETA: 45s
+    Batch 24500/34766 | Loss: 6.5143 | Acc: 0.1016 | Elapsed: 101.4s | ETA: 42s
+    Batch 25000/34766 | Loss: 6.1605 | Acc: 0.1172 | Elapsed: 103.5s | ETA: 41s
+    Batch 25500/34766 | Loss: 6.4494 | Acc: 0.1172 | Elapsed: 105.5s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.4611 | Acc: 0.0469 | Elapsed: 107.6s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.6580 | Acc: 0.1094 | Elapsed: 109.7s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.9928 | Acc: 0.1406 | Elapsed: 111.7s | ETA: 32s
+    Batch 27500/34766 | Loss: 6.1852 | Acc: 0.0469 | Elapsed: 113.8s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.6754 | Acc: 0.1953 | Elapsed: 115.9s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.5818 | Acc: 0.0547 | Elapsed: 118.0s | ETA: 26s
+    Batch 29000/34766 | Loss: 6.2919 | Acc: 0.1250 | Elapsed: 120.0s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.6860 | Acc: 0.0859 | Elapsed: 122.1s | ETA: 22s
+    Batch 30000/34766 | Loss: 6.1652 | Acc: 0.1016 | Elapsed: 124.2s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.6680 | Acc: 0.3125 | Elapsed: 126.2s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.3676 | Acc: 0.1484 | Elapsed: 128.3s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.6295 | Acc: 0.1016 | Elapsed: 130.4s | ETA: 14s
+    Batch 32000/34766 | Loss: 6.7206 | Acc: 0.0547 | Elapsed: 132.4s | ETA: 12s
+    Batch 32500/34766 | Loss: 6.9616 | Acc: 0.0859 | Elapsed: 134.5s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.5582 | Acc: 0.1016 | Elapsed: 136.6s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.2634 | Acc: 0.1484 | Elapsed: 138.7s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.8088 | Acc: 0.1406 | Elapsed: 140.7s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.9260 | Acc: 0.1172 | Elapsed: 142.8s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.2325 | Acc: 0.0513 | Elapsed: 143.9s | ETA: 0s
+     4 |   6.088671 |    0.1107 | 5.778401 |  0.1152 |  440.8351 | 323.2419 | 156.7s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch4.pkl
+
+Epoch 5/15 | lr=0.008145
+  [MEM] RAM: 19.5/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.4055 | Acc: 0.1094 | Elapsed: 2.1s | ETA: 141s
+    Batch 1000/34766 | Loss: 6.2935 | Acc: 0.1328 | Elapsed: 4.1s | ETA: 139s
+    Batch 1500/34766 | Loss: 5.6445 | Acc: 0.0938 | Elapsed: 6.2s | ETA: 138s
+    Batch 2000/34766 | Loss: 7.4545 | Acc: 0.0547 | Elapsed: 8.3s | ETA: 136s
+    Batch 2500/34766 | Loss: 6.3105 | Acc: 0.1328 | Elapsed: 10.3s | ETA: 133s
+    Batch 3000/34766 | Loss: 5.9574 | Acc: 0.1562 | Elapsed: 12.4s | ETA: 130s
+    Batch 3500/34766 | Loss: 5.1183 | Acc: 0.1484 | Elapsed: 14.5s | ETA: 129s
+    Batch 4000/34766 | Loss: 6.3442 | Acc: 0.0625 | Elapsed: 16.5s | ETA: 127s
+    Batch 4500/34766 | Loss: 6.3724 | Acc: 0.0547 | Elapsed: 18.6s | ETA: 125s
+    Batch 5000/34766 | Loss: 5.8261 | Acc: 0.1172 | Elapsed: 20.6s | ETA: 123s
+    Batch 5500/34766 | Loss: 5.7185 | Acc: 0.1250 | Elapsed: 22.7s | ETA: 121s
+    Batch 6000/34766 | Loss: 5.2465 | Acc: 0.1875 | Elapsed: 24.8s | ETA: 117s
+    Batch 6500/34766 | Loss: 6.0463 | Acc: 0.1406 | Elapsed: 26.8s | ETA: 117s
+    Batch 7000/34766 | Loss: 6.5770 | Acc: 0.0547 | Elapsed: 28.9s | ETA: 114s
+    Batch 7500/34766 | Loss: 6.1299 | Acc: 0.1094 | Elapsed: 31.0s | ETA: 112s
+    Batch 8000/34766 | Loss: 5.8249 | Acc: 0.1016 | Elapsed: 33.0s | ETA: 110s
+    Batch 8500/34766 | Loss: 5.4482 | Acc: 0.1328 | Elapsed: 35.1s | ETA: 107s
+    Batch 9000/34766 | Loss: 6.2586 | Acc: 0.0781 | Elapsed: 37.2s | ETA: 106s
+    Batch 9500/34766 | Loss: 6.1893 | Acc: 0.0859 | Elapsed: 39.2s | ETA: 105s
+    Batch 10000/34766 | Loss: 6.2714 | Acc: 0.0625 | Elapsed: 41.3s | ETA: 104s
+    Batch 10500/34766 | Loss: 5.3540 | Acc: 0.1797 | Elapsed: 43.4s | ETA: 101s
+    Batch 11000/34766 | Loss: 5.7974 | Acc: 0.1719 | Elapsed: 45.5s | ETA: 98s
+    Batch 11500/34766 | Loss: 6.4457 | Acc: 0.1562 | Elapsed: 47.6s | ETA: 97s
+    Batch 12000/34766 | Loss: 6.5624 | Acc: 0.1172 | Elapsed: 49.6s | ETA: 93s
+    Batch 12500/34766 | Loss: 6.3626 | Acc: 0.1250 | Elapsed: 51.7s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.3955 | Acc: 0.0391 | Elapsed: 53.8s | ETA: 90s
+    Batch 13500/34766 | Loss: 5.2822 | Acc: 0.1406 | Elapsed: 55.9s | ETA: 88s
+    Batch 14000/34766 | Loss: 6.0669 | Acc: 0.1562 | Elapsed: 57.9s | ETA: 85s
+    Batch 14500/34766 | Loss: 5.7138 | Acc: 0.1406 | Elapsed: 60.0s | ETA: 83s
+    Batch 15000/34766 | Loss: 5.8562 | Acc: 0.0938 | Elapsed: 62.1s | ETA: 81s
+    Batch 15500/34766 | Loss: 6.0946 | Acc: 0.0469 | Elapsed: 64.1s | ETA: 80s
+    Batch 16000/34766 | Loss: 5.7737 | Acc: 0.1172 | Elapsed: 66.2s | ETA: 78s
+    Batch 16500/34766 | Loss: 5.7418 | Acc: 0.0781 | Elapsed: 68.3s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.3896 | Acc: 0.1094 | Elapsed: 70.3s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.4847 | Acc: 0.1875 | Elapsed: 72.4s | ETA: 72s
+    Batch 18000/34766 | Loss: 6.1185 | Acc: 0.0781 | Elapsed: 74.5s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.6197 | Acc: 0.0859 | Elapsed: 76.5s | ETA: 67s
+    Batch 19000/34766 | Loss: 6.1375 | Acc: 0.1172 | Elapsed: 78.6s | ETA: 65s
+    Batch 19500/34766 | Loss: 6.1645 | Acc: 0.0938 | Elapsed: 80.6s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.7325 | Acc: 0.2031 | Elapsed: 82.7s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.5874 | Acc: 0.0781 | Elapsed: 84.8s | ETA: 59s
+    Batch 21000/34766 | Loss: 6.1437 | Acc: 0.1016 | Elapsed: 86.9s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.7215 | Acc: 0.1016 | Elapsed: 88.9s | ETA: 55s
+    Batch 22000/34766 | Loss: 5.8678 | Acc: 0.0625 | Elapsed: 91.0s | ETA: 53s
+    Batch 22500/34766 | Loss: 5.3493 | Acc: 0.1094 | Elapsed: 93.0s | ETA: 50s
+    Batch 23000/34766 | Loss: 6.0906 | Acc: 0.0625 | Elapsed: 95.1s | ETA: 48s
+    Batch 23500/34766 | Loss: 5.4518 | Acc: 0.1797 | Elapsed: 97.2s | ETA: 47s
+    Batch 24000/34766 | Loss: 6.2201 | Acc: 0.0469 | Elapsed: 99.2s | ETA: 45s
+    Batch 24500/34766 | Loss: 6.4418 | Acc: 0.1016 | Elapsed: 101.3s | ETA: 43s
+    Batch 25000/34766 | Loss: 6.1225 | Acc: 0.0781 | Elapsed: 103.3s | ETA: 40s
+    Batch 25500/34766 | Loss: 6.3986 | Acc: 0.1406 | Elapsed: 105.4s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.4077 | Acc: 0.0547 | Elapsed: 107.5s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.5759 | Acc: 0.0859 | Elapsed: 109.5s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.9248 | Acc: 0.1406 | Elapsed: 111.6s | ETA: 32s
+    Batch 27500/34766 | Loss: 6.0822 | Acc: 0.0703 | Elapsed: 113.7s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.5168 | Acc: 0.1797 | Elapsed: 115.7s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.5208 | Acc: 0.0547 | Elapsed: 117.8s | ETA: 26s
+    Batch 29000/34766 | Loss: 6.1895 | Acc: 0.1484 | Elapsed: 119.9s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.6271 | Acc: 0.0781 | Elapsed: 121.9s | ETA: 22s
+    Batch 30000/34766 | Loss: 6.0281 | Acc: 0.1250 | Elapsed: 124.0s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.5842 | Acc: 0.2891 | Elapsed: 126.1s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.3717 | Acc: 0.1641 | Elapsed: 128.1s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.5564 | Acc: 0.0938 | Elapsed: 130.2s | ETA: 13s
+    Batch 32000/34766 | Loss: 6.6337 | Acc: 0.0625 | Elapsed: 132.3s | ETA: 12s
+    Batch 32500/34766 | Loss: 6.9102 | Acc: 0.1094 | Elapsed: 134.3s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.4482 | Acc: 0.1094 | Elapsed: 136.4s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.2809 | Acc: 0.1484 | Elapsed: 138.5s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.6225 | Acc: 0.1562 | Elapsed: 140.5s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.9521 | Acc: 0.1250 | Elapsed: 142.6s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.2286 | Acc: 0.0513 | Elapsed: 143.7s | ETA: 0s
+     5 |   6.005936 |    0.1175 | 5.705616 |  0.1206 |  405.8305 | 300.5505 | 156.4s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch5.pkl
+
+Epoch 6/15 | lr=0.007738
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.3757 | Acc: 0.1172 | Elapsed: 2.1s | ETA: 142s
+    Batch 1000/34766 | Loss: 6.2763 | Acc: 0.1328 | Elapsed: 4.1s | ETA: 139s
+    Batch 1500/34766 | Loss: 5.5767 | Acc: 0.0703 | Elapsed: 6.2s | ETA: 138s
+    Batch 2000/34766 | Loss: 7.4305 | Acc: 0.0703 | Elapsed: 8.3s | ETA: 136s
+    Batch 2500/34766 | Loss: 6.2433 | Acc: 0.1406 | Elapsed: 10.3s | ETA: 134s
+    Batch 3000/34766 | Loss: 5.9092 | Acc: 0.1719 | Elapsed: 12.4s | ETA: 132s
+    Batch 3500/34766 | Loss: 5.0482 | Acc: 0.1328 | Elapsed: 14.5s | ETA: 128s
+    Batch 4000/34766 | Loss: 6.3598 | Acc: 0.0703 | Elapsed: 16.5s | ETA: 127s
+    Batch 4500/34766 | Loss: 6.3088 | Acc: 0.0469 | Elapsed: 18.6s | ETA: 125s
+    Batch 5000/34766 | Loss: 5.6741 | Acc: 0.1328 | Elapsed: 20.6s | ETA: 123s
+    Batch 5500/34766 | Loss: 5.6590 | Acc: 0.0938 | Elapsed: 22.7s | ETA: 121s
+    Batch 6000/34766 | Loss: 5.0925 | Acc: 0.2031 | Elapsed: 24.8s | ETA: 118s
+    Batch 6500/34766 | Loss: 6.0244 | Acc: 0.1406 | Elapsed: 26.8s | ETA: 117s
+    Batch 7000/34766 | Loss: 6.5157 | Acc: 0.0547 | Elapsed: 28.9s | ETA: 114s
+    Batch 7500/34766 | Loss: 6.0780 | Acc: 0.1484 | Elapsed: 30.9s | ETA: 112s
+    Batch 8000/34766 | Loss: 5.7305 | Acc: 0.1094 | Elapsed: 33.0s | ETA: 110s
+    Batch 8500/34766 | Loss: 5.4376 | Acc: 0.1094 | Elapsed: 35.1s | ETA: 108s
+    Batch 9000/34766 | Loss: 6.2003 | Acc: 0.1094 | Elapsed: 37.1s | ETA: 106s
+    Batch 9500/34766 | Loss: 6.1362 | Acc: 0.0703 | Elapsed: 39.2s | ETA: 103s
+    Batch 10000/34766 | Loss: 6.1153 | Acc: 0.0469 | Elapsed: 41.3s | ETA: 103s
+    Batch 10500/34766 | Loss: 5.2743 | Acc: 0.2031 | Elapsed: 43.3s | ETA: 100s
+    Batch 11000/34766 | Loss: 5.7143 | Acc: 0.1875 | Elapsed: 45.4s | ETA: 98s
+    Batch 11500/34766 | Loss: 6.3391 | Acc: 0.1797 | Elapsed: 47.5s | ETA: 96s
+    Batch 12000/34766 | Loss: 6.4756 | Acc: 0.1328 | Elapsed: 49.5s | ETA: 93s
+    Batch 12500/34766 | Loss: 6.2547 | Acc: 0.1016 | Elapsed: 51.6s | ETA: 93s
+    Batch 13000/34766 | Loss: 6.2929 | Acc: 0.0469 | Elapsed: 53.7s | ETA: 90s
+    Batch 13500/34766 | Loss: 5.1289 | Acc: 0.1641 | Elapsed: 55.7s | ETA: 88s
+    Batch 14000/34766 | Loss: 5.9777 | Acc: 0.1719 | Elapsed: 57.8s | ETA: 86s
+    Batch 14500/34766 | Loss: 5.6679 | Acc: 0.1328 | Elapsed: 59.8s | ETA: 83s
+    Batch 15000/34766 | Loss: 5.7896 | Acc: 0.1172 | Elapsed: 61.9s | ETA: 81s
+    Batch 15500/34766 | Loss: 6.0309 | Acc: 0.0625 | Elapsed: 63.9s | ETA: 79s
+    Batch 16000/34766 | Loss: 5.6506 | Acc: 0.1094 | Elapsed: 66.0s | ETA: 77s
+    Batch 16500/34766 | Loss: 5.6810 | Acc: 0.0703 | Elapsed: 68.1s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.3443 | Acc: 0.1172 | Elapsed: 70.1s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.4414 | Acc: 0.1797 | Elapsed: 72.2s | ETA: 71s
+    Batch 18000/34766 | Loss: 6.0079 | Acc: 0.1094 | Elapsed: 74.2s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.5984 | Acc: 0.0938 | Elapsed: 76.3s | ETA: 67s
+    Batch 19000/34766 | Loss: 6.0607 | Acc: 0.1094 | Elapsed: 78.4s | ETA: 65s
+    Batch 19500/34766 | Loss: 6.0894 | Acc: 0.0938 | Elapsed: 80.4s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.6025 | Acc: 0.2188 | Elapsed: 82.5s | ETA: 62s
+    Batch 20500/34766 | Loss: 6.5474 | Acc: 0.0781 | Elapsed: 84.6s | ETA: 59s
+    Batch 21000/34766 | Loss: 6.0697 | Acc: 0.1094 | Elapsed: 86.6s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.5477 | Acc: 0.1016 | Elapsed: 88.7s | ETA: 55s
+    Batch 22000/34766 | Loss: 5.7713 | Acc: 0.0781 | Elapsed: 90.8s | ETA: 53s
+    Batch 22500/34766 | Loss: 5.3198 | Acc: 0.1406 | Elapsed: 92.8s | ETA: 51s
+    Batch 23000/34766 | Loss: 6.0054 | Acc: 0.0703 | Elapsed: 94.9s | ETA: 48s
+    Batch 23500/34766 | Loss: 5.3706 | Acc: 0.1719 | Elapsed: 97.0s | ETA: 47s
+    Batch 24000/34766 | Loss: 6.1732 | Acc: 0.0625 | Elapsed: 99.0s | ETA: 45s
+    Batch 24500/34766 | Loss: 6.4211 | Acc: 0.1094 | Elapsed: 101.1s | ETA: 43s
+    Batch 25000/34766 | Loss: 6.0423 | Acc: 0.0781 | Elapsed: 103.2s | ETA: 41s
+    Batch 25500/34766 | Loss: 6.2727 | Acc: 0.1484 | Elapsed: 105.2s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.3868 | Acc: 0.0469 | Elapsed: 107.3s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.5238 | Acc: 0.1328 | Elapsed: 109.4s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.9374 | Acc: 0.1797 | Elapsed: 111.4s | ETA: 32s
+    Batch 27500/34766 | Loss: 5.9906 | Acc: 0.0859 | Elapsed: 113.5s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.4906 | Acc: 0.1875 | Elapsed: 115.6s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.4396 | Acc: 0.0469 | Elapsed: 117.7s | ETA: 26s
+    Batch 29000/34766 | Loss: 6.1645 | Acc: 0.1484 | Elapsed: 119.7s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.5769 | Acc: 0.0703 | Elapsed: 121.8s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.9952 | Acc: 0.0938 | Elapsed: 123.9s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.5873 | Acc: 0.2734 | Elapsed: 125.9s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.3371 | Acc: 0.1406 | Elapsed: 128.0s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.6244 | Acc: 0.1094 | Elapsed: 130.1s | ETA: 13s
+    Batch 32000/34766 | Loss: 6.5925 | Acc: 0.0625 | Elapsed: 132.2s | ETA: 11s
+    Batch 32500/34766 | Loss: 6.8978 | Acc: 0.0781 | Elapsed: 134.2s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.4672 | Acc: 0.0859 | Elapsed: 136.3s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.1825 | Acc: 0.1406 | Elapsed: 138.4s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.6231 | Acc: 0.1641 | Elapsed: 140.4s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.8292 | Acc: 0.1250 | Elapsed: 142.5s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.3136 | Acc: 0.0513 | Elapsed: 143.6s | ETA: 0s
+     6 |   5.940786 |    0.1229 | 5.647806 |  0.1253 |  380.2337 | 283.6684 | 156.4s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch6.pkl
+
+Epoch 7/15 | lr=0.007351
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.3106 | Acc: 0.1094 | Elapsed: 2.1s | ETA: 146s
+    Batch 1000/34766 | Loss: 6.2262 | Acc: 0.0938 | Elapsed: 4.2s | ETA: 140s
+    Batch 1500/34766 | Loss: 5.5396 | Acc: 0.0938 | Elapsed: 6.3s | ETA: 140s
+    Batch 2000/34766 | Loss: 7.3326 | Acc: 0.0781 | Elapsed: 8.3s | ETA: 136s
+    Batch 2500/34766 | Loss: 6.1954 | Acc: 0.1562 | Elapsed: 10.4s | ETA: 134s
+    Batch 3000/34766 | Loss: 5.8834 | Acc: 0.1562 | Elapsed: 12.5s | ETA: 132s
+    Batch 3500/34766 | Loss: 4.9436 | Acc: 0.1719 | Elapsed: 14.6s | ETA: 129s
+    Batch 4000/34766 | Loss: 6.2371 | Acc: 0.0781 | Elapsed: 16.7s | ETA: 128s
+    Batch 4500/34766 | Loss: 6.2768 | Acc: 0.0703 | Elapsed: 18.7s | ETA: 125s
+    Batch 5000/34766 | Loss: 5.6509 | Acc: 0.1406 | Elapsed: 20.8s | ETA: 124s
+    Batch 5500/34766 | Loss: 5.5661 | Acc: 0.1328 | Elapsed: 22.9s | ETA: 121s
+    Batch 6000/34766 | Loss: 4.9969 | Acc: 0.2266 | Elapsed: 24.9s | ETA: 119s
+    Batch 6500/34766 | Loss: 5.9612 | Acc: 0.1562 | Elapsed: 27.0s | ETA: 117s
+    Batch 7000/34766 | Loss: 6.5078 | Acc: 0.0781 | Elapsed: 29.1s | ETA: 115s
+    Batch 7500/34766 | Loss: 6.0422 | Acc: 0.1484 | Elapsed: 31.2s | ETA: 114s
+    Batch 8000/34766 | Loss: 5.7126 | Acc: 0.1250 | Elapsed: 33.3s | ETA: 112s
+    Batch 8500/34766 | Loss: 5.3578 | Acc: 0.1172 | Elapsed: 35.3s | ETA: 110s
+    Batch 9000/34766 | Loss: 6.1360 | Acc: 0.1328 | Elapsed: 37.4s | ETA: 109s
+    Batch 9500/34766 | Loss: 6.1559 | Acc: 0.0938 | Elapsed: 39.5s | ETA: 105s
+    Batch 10000/34766 | Loss: 6.0527 | Acc: 0.0859 | Elapsed: 41.6s | ETA: 103s
+    Batch 10500/34766 | Loss: 5.2491 | Acc: 0.1875 | Elapsed: 43.7s | ETA: 101s
+    Batch 11000/34766 | Loss: 5.5720 | Acc: 0.1953 | Elapsed: 45.8s | ETA: 100s
+    Batch 11500/34766 | Loss: 6.3920 | Acc: 0.1484 | Elapsed: 47.9s | ETA: 98s
+    Batch 12000/34766 | Loss: 6.3975 | Acc: 0.1328 | Elapsed: 50.0s | ETA: 95s
+    Batch 12500/34766 | Loss: 6.2324 | Acc: 0.1172 | Elapsed: 52.1s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.2859 | Acc: 0.0625 | Elapsed: 54.1s | ETA: 89s
+    Batch 13500/34766 | Loss: 5.0775 | Acc: 0.1641 | Elapsed: 56.2s | ETA: 88s
+    Batch 14000/34766 | Loss: 5.9476 | Acc: 0.1562 | Elapsed: 58.2s | ETA: 86s
+    Batch 14500/34766 | Loss: 5.5609 | Acc: 0.1484 | Elapsed: 60.3s | ETA: 84s
+    Batch 15000/34766 | Loss: 5.7714 | Acc: 0.1094 | Elapsed: 62.4s | ETA: 82s
+    Batch 15500/34766 | Loss: 5.9119 | Acc: 0.0469 | Elapsed: 64.4s | ETA: 79s
+    Batch 16000/34766 | Loss: 5.5911 | Acc: 0.1484 | Elapsed: 66.5s | ETA: 78s
+    Batch 16500/34766 | Loss: 5.6411 | Acc: 0.0938 | Elapsed: 68.6s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.2972 | Acc: 0.1094 | Elapsed: 70.6s | ETA: 74s
+    Batch 17500/34766 | Loss: 6.4159 | Acc: 0.1797 | Elapsed: 72.7s | ETA: 71s
+    Batch 18000/34766 | Loss: 5.9460 | Acc: 0.1016 | Elapsed: 74.8s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.5168 | Acc: 0.1250 | Elapsed: 76.8s | ETA: 67s
+    Batch 19000/34766 | Loss: 6.0405 | Acc: 0.1094 | Elapsed: 78.9s | ETA: 65s
+    Batch 19500/34766 | Loss: 6.1163 | Acc: 0.1016 | Elapsed: 81.0s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.5642 | Acc: 0.2422 | Elapsed: 83.0s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.4633 | Acc: 0.1172 | Elapsed: 85.1s | ETA: 59s
+    Batch 21000/34766 | Loss: 6.0359 | Acc: 0.1094 | Elapsed: 87.1s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.5499 | Acc: 0.1016 | Elapsed: 89.2s | ETA: 54s
+    Batch 22000/34766 | Loss: 5.6996 | Acc: 0.0859 | Elapsed: 91.3s | ETA: 53s
+    Batch 22500/34766 | Loss: 5.2608 | Acc: 0.1094 | Elapsed: 93.3s | ETA: 51s
+    Batch 23000/34766 | Loss: 5.9105 | Acc: 0.0781 | Elapsed: 95.4s | ETA: 48s
+    Batch 23500/34766 | Loss: 5.3347 | Acc: 0.1484 | Elapsed: 97.5s | ETA: 47s
+    Batch 24000/34766 | Loss: 6.1547 | Acc: 0.0625 | Elapsed: 99.5s | ETA: 44s
+    Batch 24500/34766 | Loss: 6.3732 | Acc: 0.1094 | Elapsed: 101.6s | ETA: 42s
+    Batch 25000/34766 | Loss: 6.0048 | Acc: 0.0781 | Elapsed: 103.7s | ETA: 41s
+    Batch 25500/34766 | Loss: 6.2499 | Acc: 0.1484 | Elapsed: 105.7s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.2845 | Acc: 0.0625 | Elapsed: 107.8s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.5362 | Acc: 0.1406 | Elapsed: 109.9s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.8825 | Acc: 0.1172 | Elapsed: 111.9s | ETA: 32s
+    Batch 27500/34766 | Loss: 5.9161 | Acc: 0.1094 | Elapsed: 114.0s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.4010 | Acc: 0.1719 | Elapsed: 116.0s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.4188 | Acc: 0.0547 | Elapsed: 118.1s | ETA: 26s
+    Batch 29000/34766 | Loss: 6.1581 | Acc: 0.1406 | Elapsed: 120.2s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.5546 | Acc: 0.0703 | Elapsed: 122.2s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.9580 | Acc: 0.1250 | Elapsed: 124.3s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.4962 | Acc: 0.2500 | Elapsed: 126.4s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.2732 | Acc: 0.1562 | Elapsed: 128.4s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.6034 | Acc: 0.1328 | Elapsed: 130.5s | ETA: 14s
+    Batch 32000/34766 | Loss: 6.5157 | Acc: 0.0547 | Elapsed: 132.6s | ETA: 11s
+    Batch 32500/34766 | Loss: 6.8415 | Acc: 0.0859 | Elapsed: 134.6s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.3943 | Acc: 0.0781 | Elapsed: 136.7s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.1501 | Acc: 0.1328 | Elapsed: 138.8s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.5315 | Acc: 0.1484 | Elapsed: 140.8s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.8219 | Acc: 0.1172 | Elapsed: 142.9s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.1700 | Acc: 0.0769 | Elapsed: 144.0s | ETA: 0s
+     7 |   5.887522 |    0.1272 | 5.600662 |  0.1289 |  360.5110 | 270.6056 | 156.7s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch7.pkl
+
+Epoch 8/15 | lr=0.006983
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.2658 | Acc: 0.1406 | Elapsed: 2.1s | ETA: 140s
+    Batch 1000/34766 | Loss: 6.1885 | Acc: 0.1250 | Elapsed: 4.1s | ETA: 140s
+    Batch 1500/34766 | Loss: 5.4629 | Acc: 0.1016 | Elapsed: 6.2s | ETA: 138s
+    Batch 2000/34766 | Loss: 7.3690 | Acc: 0.0703 | Elapsed: 8.2s | ETA: 134s
+    Batch 2500/34766 | Loss: 6.1431 | Acc: 0.1641 | Elapsed: 10.3s | ETA: 133s
+    Batch 3000/34766 | Loss: 5.8697 | Acc: 0.1797 | Elapsed: 12.4s | ETA: 131s
+    Batch 3500/34766 | Loss: 4.9015 | Acc: 0.1719 | Elapsed: 14.4s | ETA: 129s
+    Batch 4000/34766 | Loss: 6.1017 | Acc: 0.0938 | Elapsed: 16.5s | ETA: 127s
+    Batch 4500/34766 | Loss: 6.2279 | Acc: 0.0703 | Elapsed: 18.5s | ETA: 124s
+    Batch 5000/34766 | Loss: 5.5229 | Acc: 0.1562 | Elapsed: 20.6s | ETA: 123s
+    Batch 5500/34766 | Loss: 5.6218 | Acc: 0.1016 | Elapsed: 22.7s | ETA: 121s
+    Batch 6000/34766 | Loss: 4.9166 | Acc: 0.2500 | Elapsed: 24.7s | ETA: 119s
+    Batch 6500/34766 | Loss: 5.9645 | Acc: 0.1562 | Elapsed: 26.8s | ETA: 116s
+    Batch 7000/34766 | Loss: 6.4599 | Acc: 0.0703 | Elapsed: 28.8s | ETA: 113s
+    Batch 7500/34766 | Loss: 5.9463 | Acc: 0.1484 | Elapsed: 30.9s | ETA: 113s
+    Batch 8000/34766 | Loss: 5.6021 | Acc: 0.1484 | Elapsed: 33.0s | ETA: 110s
+    Batch 8500/34766 | Loss: 5.3308 | Acc: 0.1250 | Elapsed: 35.0s | ETA: 108s
+    Batch 9000/34766 | Loss: 6.1031 | Acc: 0.1094 | Elapsed: 37.1s | ETA: 107s
+    Batch 9500/34766 | Loss: 6.1103 | Acc: 0.1094 | Elapsed: 39.2s | ETA: 104s
+    Batch 10000/34766 | Loss: 5.9750 | Acc: 0.0938 | Elapsed: 41.2s | ETA: 101s
+    Batch 10500/34766 | Loss: 5.1514 | Acc: 0.2344 | Elapsed: 43.3s | ETA: 99s
+    Batch 11000/34766 | Loss: 5.4402 | Acc: 0.2109 | Elapsed: 45.3s | ETA: 98s
+    Batch 11500/34766 | Loss: 6.2859 | Acc: 0.1641 | Elapsed: 47.4s | ETA: 96s
+    Batch 12000/34766 | Loss: 6.3306 | Acc: 0.1328 | Elapsed: 49.4s | ETA: 94s
+    Batch 12500/34766 | Loss: 6.2604 | Acc: 0.1250 | Elapsed: 51.5s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.2572 | Acc: 0.0703 | Elapsed: 53.6s | ETA: 89s
+    Batch 13500/34766 | Loss: 5.0053 | Acc: 0.1562 | Elapsed: 55.6s | ETA: 88s
+    Batch 14000/34766 | Loss: 5.9423 | Acc: 0.1641 | Elapsed: 57.7s | ETA: 86s
+    Batch 14500/34766 | Loss: 5.5340 | Acc: 0.1719 | Elapsed: 59.7s | ETA: 84s
+    Batch 15000/34766 | Loss: 5.6655 | Acc: 0.1250 | Elapsed: 61.8s | ETA: 82s
+    Batch 15500/34766 | Loss: 5.8194 | Acc: 0.0625 | Elapsed: 63.9s | ETA: 79s
+    Batch 16000/34766 | Loss: 5.6057 | Acc: 0.1172 | Elapsed: 65.9s | ETA: 78s
+    Batch 16500/34766 | Loss: 5.6132 | Acc: 0.1016 | Elapsed: 68.0s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.3046 | Acc: 0.1094 | Elapsed: 70.1s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.3696 | Acc: 0.1953 | Elapsed: 72.1s | ETA: 71s
+    Batch 18000/34766 | Loss: 5.8822 | Acc: 0.1172 | Elapsed: 74.2s | ETA: 68s
+    Batch 18500/34766 | Loss: 6.4996 | Acc: 0.1328 | Elapsed: 76.2s | ETA: 67s
+    Batch 19000/34766 | Loss: 5.9935 | Acc: 0.1250 | Elapsed: 78.3s | ETA: 65s
+    Batch 19500/34766 | Loss: 6.0659 | Acc: 0.1016 | Elapsed: 80.3s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.4918 | Acc: 0.2422 | Elapsed: 82.4s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.5081 | Acc: 0.1016 | Elapsed: 84.4s | ETA: 58s
+    Batch 21000/34766 | Loss: 6.0110 | Acc: 0.1406 | Elapsed: 86.5s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.4360 | Acc: 0.0938 | Elapsed: 88.6s | ETA: 54s
+    Batch 22000/34766 | Loss: 5.6975 | Acc: 0.0859 | Elapsed: 90.6s | ETA: 52s
+    Batch 22500/34766 | Loss: 5.1312 | Acc: 0.1562 | Elapsed: 92.7s | ETA: 50s
+    Batch 23000/34766 | Loss: 5.8191 | Acc: 0.0938 | Elapsed: 94.7s | ETA: 48s
+    Batch 23500/34766 | Loss: 5.2708 | Acc: 0.1797 | Elapsed: 96.8s | ETA: 47s
+    Batch 24000/34766 | Loss: 6.1251 | Acc: 0.0938 | Elapsed: 98.8s | ETA: 44s
+    Batch 24500/34766 | Loss: 6.3045 | Acc: 0.1406 | Elapsed: 100.9s | ETA: 43s
+    Batch 25000/34766 | Loss: 5.9800 | Acc: 0.0703 | Elapsed: 103.0s | ETA: 41s
+    Batch 25500/34766 | Loss: 6.2028 | Acc: 0.1484 | Elapsed: 105.1s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.2417 | Acc: 0.0703 | Elapsed: 107.1s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.4221 | Acc: 0.1172 | Elapsed: 109.2s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.8074 | Acc: 0.1484 | Elapsed: 111.3s | ETA: 32s
+    Batch 27500/34766 | Loss: 5.9896 | Acc: 0.0781 | Elapsed: 113.3s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.4036 | Acc: 0.1875 | Elapsed: 115.4s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.2967 | Acc: 0.0625 | Elapsed: 117.5s | ETA: 26s
+    Batch 29000/34766 | Loss: 6.0637 | Acc: 0.1328 | Elapsed: 119.5s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.4807 | Acc: 0.1094 | Elapsed: 121.6s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.8930 | Acc: 0.1406 | Elapsed: 123.7s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.4753 | Acc: 0.2812 | Elapsed: 125.8s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.2719 | Acc: 0.1875 | Elapsed: 127.8s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.5951 | Acc: 0.0859 | Elapsed: 129.9s | ETA: 14s
+    Batch 32000/34766 | Loss: 6.5268 | Acc: 0.0703 | Elapsed: 132.0s | ETA: 11s
+    Batch 32500/34766 | Loss: 6.8325 | Acc: 0.0859 | Elapsed: 134.0s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.3210 | Acc: 0.1172 | Elapsed: 136.1s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.1239 | Acc: 0.1406 | Elapsed: 138.2s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.5420 | Acc: 0.1562 | Elapsed: 140.2s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.7443 | Acc: 0.1250 | Elapsed: 142.3s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.1961 | Acc: 0.0769 | Elapsed: 143.4s | ETA: 0s
+     8 |   5.842990 |    0.1308 | 5.561297 |  0.1322 |  344.8089 | 260.1599 | 156.0s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch8.pkl
+
+Epoch 9/15 | lr=0.006634
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.2303 | Acc: 0.1562 | Elapsed: 2.1s | ETA: 140s
+    Batch 1000/34766 | Loss: 6.1600 | Acc: 0.1250 | Elapsed: 4.1s | ETA: 140s
+    Batch 1500/34766 | Loss: 5.4268 | Acc: 0.0781 | Elapsed: 6.2s | ETA: 136s
+    Batch 2000/34766 | Loss: 7.2655 | Acc: 0.0703 | Elapsed: 8.2s | ETA: 135s
+    Batch 2500/34766 | Loss: 6.1244 | Acc: 0.1562 | Elapsed: 10.3s | ETA: 134s
+    Batch 3000/34766 | Loss: 5.8311 | Acc: 0.1797 | Elapsed: 12.4s | ETA: 132s
+    Batch 3500/34766 | Loss: 4.8286 | Acc: 0.1875 | Elapsed: 14.5s | ETA: 129s
+    Batch 4000/34766 | Loss: 6.0743 | Acc: 0.1016 | Elapsed: 16.5s | ETA: 128s
+    Batch 4500/34766 | Loss: 6.2084 | Acc: 0.0781 | Elapsed: 18.6s | ETA: 124s
+    Batch 5000/34766 | Loss: 5.4675 | Acc: 0.1719 | Elapsed: 20.6s | ETA: 123s
+    Batch 5500/34766 | Loss: 5.5478 | Acc: 0.1250 | Elapsed: 22.7s | ETA: 121s
+    Batch 6000/34766 | Loss: 4.8102 | Acc: 0.2500 | Elapsed: 24.8s | ETA: 119s
+    Batch 6500/34766 | Loss: 5.9878 | Acc: 0.1484 | Elapsed: 26.8s | ETA: 116s
+    Batch 7000/34766 | Loss: 6.4743 | Acc: 0.0859 | Elapsed: 28.9s | ETA: 113s
+    Batch 7500/34766 | Loss: 5.9617 | Acc: 0.1406 | Elapsed: 30.9s | ETA: 113s
+    Batch 8000/34766 | Loss: 5.6115 | Acc: 0.1484 | Elapsed: 33.0s | ETA: 110s
+    Batch 8500/34766 | Loss: 5.2348 | Acc: 0.1406 | Elapsed: 35.1s | ETA: 108s
+    Batch 9000/34766 | Loss: 6.0986 | Acc: 0.1094 | Elapsed: 37.1s | ETA: 106s
+    Batch 9500/34766 | Loss: 6.0865 | Acc: 0.0859 | Elapsed: 39.2s | ETA: 103s
+    Batch 10000/34766 | Loss: 5.8663 | Acc: 0.1172 | Elapsed: 41.2s | ETA: 102s
+    Batch 10500/34766 | Loss: 5.1161 | Acc: 0.2344 | Elapsed: 43.3s | ETA: 99s
+    Batch 11000/34766 | Loss: 5.3847 | Acc: 0.2109 | Elapsed: 45.4s | ETA: 98s
+    Batch 11500/34766 | Loss: 6.3014 | Acc: 0.1719 | Elapsed: 47.4s | ETA: 96s
+    Batch 12000/34766 | Loss: 6.3621 | Acc: 0.1562 | Elapsed: 49.5s | ETA: 94s
+    Batch 12500/34766 | Loss: 6.2351 | Acc: 0.1406 | Elapsed: 51.5s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.2228 | Acc: 0.0625 | Elapsed: 53.6s | ETA: 89s
+    Batch 13500/34766 | Loss: 4.9372 | Acc: 0.1562 | Elapsed: 55.7s | ETA: 88s
+    Batch 14000/34766 | Loss: 5.9044 | Acc: 0.1719 | Elapsed: 57.7s | ETA: 85s
+    Batch 14500/34766 | Loss: 5.4969 | Acc: 0.1797 | Elapsed: 59.8s | ETA: 83s
+    Batch 15000/34766 | Loss: 5.6476 | Acc: 0.1172 | Elapsed: 61.8s | ETA: 82s
+    Batch 15500/34766 | Loss: 5.8050 | Acc: 0.0547 | Elapsed: 63.9s | ETA: 80s
+    Batch 16000/34766 | Loss: 5.5349 | Acc: 0.1328 | Elapsed: 66.0s | ETA: 77s
+    Batch 16500/34766 | Loss: 5.5677 | Acc: 0.1172 | Elapsed: 68.0s | ETA: 77s
+    Batch 17000/34766 | Loss: 6.3065 | Acc: 0.1172 | Elapsed: 70.1s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.3812 | Acc: 0.1719 | Elapsed: 72.1s | ETA: 72s
+    Batch 18000/34766 | Loss: 5.8119 | Acc: 0.1406 | Elapsed: 74.2s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.4568 | Acc: 0.1406 | Elapsed: 76.3s | ETA: 67s
+    Batch 19000/34766 | Loss: 5.9342 | Acc: 0.1016 | Elapsed: 78.3s | ETA: 65s
+    Batch 19500/34766 | Loss: 6.0161 | Acc: 0.1172 | Elapsed: 80.4s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.4271 | Acc: 0.2422 | Elapsed: 82.5s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.4206 | Acc: 0.1016 | Elapsed: 84.5s | ETA: 58s
+    Batch 21000/34766 | Loss: 5.9512 | Acc: 0.1484 | Elapsed: 86.6s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.4422 | Acc: 0.0938 | Elapsed: 88.6s | ETA: 54s
+    Batch 22000/34766 | Loss: 5.6093 | Acc: 0.0781 | Elapsed: 90.7s | ETA: 53s
+    Batch 22500/34766 | Loss: 5.0767 | Acc: 0.1719 | Elapsed: 92.7s | ETA: 51s
+    Batch 23000/34766 | Loss: 5.7908 | Acc: 0.0938 | Elapsed: 94.8s | ETA: 48s
+    Batch 23500/34766 | Loss: 5.1903 | Acc: 0.1562 | Elapsed: 96.9s | ETA: 46s
+    Batch 24000/34766 | Loss: 6.0840 | Acc: 0.0859 | Elapsed: 98.9s | ETA: 44s
+    Batch 24500/34766 | Loss: 6.3179 | Acc: 0.1094 | Elapsed: 101.0s | ETA: 42s
+    Batch 25000/34766 | Loss: 5.9535 | Acc: 0.0703 | Elapsed: 103.1s | ETA: 40s
+    Batch 25500/34766 | Loss: 6.1362 | Acc: 0.1875 | Elapsed: 105.1s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.1906 | Acc: 0.0547 | Elapsed: 107.2s | ETA: 37s
+    Batch 26500/34766 | Loss: 5.3885 | Acc: 0.1172 | Elapsed: 109.2s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.8507 | Acc: 0.1484 | Elapsed: 111.3s | ETA: 32s
+    Batch 27500/34766 | Loss: 5.8516 | Acc: 0.0859 | Elapsed: 113.4s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.3563 | Acc: 0.1719 | Elapsed: 115.4s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.3616 | Acc: 0.0625 | Elapsed: 117.5s | ETA: 26s
+    Batch 29000/34766 | Loss: 6.0552 | Acc: 0.1328 | Elapsed: 119.5s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.4665 | Acc: 0.0859 | Elapsed: 121.6s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.8578 | Acc: 0.1172 | Elapsed: 123.7s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.4148 | Acc: 0.2891 | Elapsed: 125.7s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.1830 | Acc: 0.1797 | Elapsed: 127.8s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.5814 | Acc: 0.1250 | Elapsed: 129.9s | ETA: 13s
+    Batch 32000/34766 | Loss: 6.4227 | Acc: 0.0859 | Elapsed: 131.9s | ETA: 11s
+    Batch 32500/34766 | Loss: 6.8151 | Acc: 0.0625 | Elapsed: 134.0s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.2366 | Acc: 0.0781 | Elapsed: 136.0s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.1079 | Acc: 0.1562 | Elapsed: 138.1s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.5457 | Acc: 0.1875 | Elapsed: 140.1s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.7207 | Acc: 0.1172 | Elapsed: 142.2s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.2747 | Acc: 0.0769 | Elapsed: 143.3s | ETA: 0s
+     9 |   5.804566 |    0.1342 | 5.527726 |  0.1349 |  331.8113 | 251.5712 | 156.1s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch9.pkl
+
+Epoch 10/15 | lr=0.006302
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.2519 | Acc: 0.1406 | Elapsed: 2.1s | ETA: 142s
+    Batch 1000/34766 | Loss: 6.1680 | Acc: 0.1328 | Elapsed: 4.1s | ETA: 139s
+    Batch 1500/34766 | Loss: 5.3658 | Acc: 0.0781 | Elapsed: 6.2s | ETA: 138s
+    Batch 2000/34766 | Loss: 7.2235 | Acc: 0.0703 | Elapsed: 8.3s | ETA: 135s
+    Batch 2500/34766 | Loss: 6.1483 | Acc: 0.1562 | Elapsed: 10.3s | ETA: 134s
+    Batch 3000/34766 | Loss: 5.7751 | Acc: 0.1875 | Elapsed: 12.4s | ETA: 132s
+    Batch 3500/34766 | Loss: 4.7205 | Acc: 0.1797 | Elapsed: 14.5s | ETA: 130s
+    Batch 4000/34766 | Loss: 6.0602 | Acc: 0.1094 | Elapsed: 16.5s | ETA: 127s
+    Batch 4500/34766 | Loss: 6.1874 | Acc: 0.1016 | Elapsed: 18.6s | ETA: 124s
+    Batch 5000/34766 | Loss: 5.3180 | Acc: 0.1641 | Elapsed: 20.7s | ETA: 123s
+    Batch 5500/34766 | Loss: 5.4808 | Acc: 0.1484 | Elapsed: 22.8s | ETA: 121s
+    Batch 6000/34766 | Loss: 4.8673 | Acc: 0.2500 | Elapsed: 24.8s | ETA: 119s
+    Batch 6500/34766 | Loss: 5.9293 | Acc: 0.1797 | Elapsed: 26.9s | ETA: 117s
+    Batch 7000/34766 | Loss: 6.4663 | Acc: 0.0781 | Elapsed: 29.0s | ETA: 113s
+    Batch 7500/34766 | Loss: 5.8767 | Acc: 0.1641 | Elapsed: 31.0s | ETA: 112s
+    Batch 8000/34766 | Loss: 5.4807 | Acc: 0.1641 | Elapsed: 33.1s | ETA: 110s
+    Batch 8500/34766 | Loss: 5.2739 | Acc: 0.1094 | Elapsed: 35.1s | ETA: 108s
+    Batch 9000/34766 | Loss: 6.0139 | Acc: 0.1250 | Elapsed: 37.2s | ETA: 107s
+    Batch 9500/34766 | Loss: 6.0443 | Acc: 0.0938 | Elapsed: 39.3s | ETA: 103s
+    Batch 10000/34766 | Loss: 5.7840 | Acc: 0.1172 | Elapsed: 41.3s | ETA: 102s
+    Batch 10500/34766 | Loss: 5.0372 | Acc: 0.2344 | Elapsed: 43.4s | ETA: 99s
+    Batch 11000/34766 | Loss: 5.2478 | Acc: 0.2031 | Elapsed: 45.4s | ETA: 98s
+    Batch 11500/34766 | Loss: 6.2453 | Acc: 0.1953 | Elapsed: 47.5s | ETA: 96s
+    Batch 12000/34766 | Loss: 6.2434 | Acc: 0.1406 | Elapsed: 49.6s | ETA: 94s
+    Batch 12500/34766 | Loss: 6.1772 | Acc: 0.1484 | Elapsed: 51.6s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.1572 | Acc: 0.0781 | Elapsed: 53.7s | ETA: 89s
+    Batch 13500/34766 | Loss: 4.9450 | Acc: 0.1406 | Elapsed: 55.7s | ETA: 87s
+    Batch 14000/34766 | Loss: 5.9201 | Acc: 0.1562 | Elapsed: 57.8s | ETA: 85s
+    Batch 14500/34766 | Loss: 5.4649 | Acc: 0.1875 | Elapsed: 59.8s | ETA: 83s
+    Batch 15000/34766 | Loss: 5.6091 | Acc: 0.1484 | Elapsed: 61.9s | ETA: 81s
+    Batch 15500/34766 | Loss: 5.8004 | Acc: 0.0469 | Elapsed: 64.0s | ETA: 79s
+    Batch 16000/34766 | Loss: 5.5269 | Acc: 0.1250 | Elapsed: 66.0s | ETA: 77s
+    Batch 16500/34766 | Loss: 5.5724 | Acc: 0.1016 | Elapsed: 68.1s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.2682 | Acc: 0.1172 | Elapsed: 70.1s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.3504 | Acc: 0.1719 | Elapsed: 72.2s | ETA: 71s
+    Batch 18000/34766 | Loss: 5.7756 | Acc: 0.1250 | Elapsed: 74.3s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.4790 | Acc: 0.1250 | Elapsed: 76.3s | ETA: 67s
+    Batch 19000/34766 | Loss: 5.8774 | Acc: 0.1094 | Elapsed: 78.4s | ETA: 65s
+    Batch 19500/34766 | Loss: 5.9977 | Acc: 0.1016 | Elapsed: 80.5s | ETA: 64s
+    Batch 20000/34766 | Loss: 5.4479 | Acc: 0.2500 | Elapsed: 82.6s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.4635 | Acc: 0.1016 | Elapsed: 84.6s | ETA: 59s
+    Batch 21000/34766 | Loss: 5.9112 | Acc: 0.1406 | Elapsed: 86.7s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.4582 | Acc: 0.1250 | Elapsed: 88.8s | ETA: 54s
+    Batch 22000/34766 | Loss: 5.6006 | Acc: 0.0703 | Elapsed: 90.9s | ETA: 53s
+    Batch 22500/34766 | Loss: 5.0503 | Acc: 0.1875 | Elapsed: 92.9s | ETA: 51s
+    Batch 23000/34766 | Loss: 5.7477 | Acc: 0.1094 | Elapsed: 95.0s | ETA: 49s
+    Batch 23500/34766 | Loss: 5.1902 | Acc: 0.1719 | Elapsed: 97.0s | ETA: 47s
+    Batch 24000/34766 | Loss: 6.0766 | Acc: 0.0938 | Elapsed: 99.1s | ETA: 44s
+    Batch 24500/34766 | Loss: 6.2615 | Acc: 0.1094 | Elapsed: 101.1s | ETA: 42s
+    Batch 25000/34766 | Loss: 5.9151 | Acc: 0.0625 | Elapsed: 103.2s | ETA: 40s
+    Batch 25500/34766 | Loss: 6.1171 | Acc: 0.1562 | Elapsed: 105.3s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.1083 | Acc: 0.0859 | Elapsed: 107.3s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.4514 | Acc: 0.1094 | Elapsed: 109.4s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.8788 | Acc: 0.1484 | Elapsed: 111.5s | ETA: 32s
+    Batch 27500/34766 | Loss: 5.8329 | Acc: 0.0938 | Elapsed: 113.5s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.3676 | Acc: 0.1953 | Elapsed: 115.6s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.2735 | Acc: 0.0469 | Elapsed: 117.7s | ETA: 26s
+    Batch 29000/34766 | Loss: 5.9512 | Acc: 0.1406 | Elapsed: 119.7s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.4162 | Acc: 0.1250 | Elapsed: 121.8s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.7516 | Acc: 0.1406 | Elapsed: 123.9s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.3593 | Acc: 0.3125 | Elapsed: 125.9s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.1622 | Acc: 0.1562 | Elapsed: 128.0s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.6278 | Acc: 0.1016 | Elapsed: 130.0s | ETA: 13s
+    Batch 32000/34766 | Loss: 6.4013 | Acc: 0.0703 | Elapsed: 132.1s | ETA: 11s
+    Batch 32500/34766 | Loss: 6.8127 | Acc: 0.0938 | Elapsed: 134.2s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.2260 | Acc: 0.0625 | Elapsed: 136.3s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.0374 | Acc: 0.1484 | Elapsed: 138.3s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.5258 | Acc: 0.1797 | Elapsed: 140.4s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.6428 | Acc: 0.1328 | Elapsed: 142.5s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.1975 | Acc: 0.1026 | Elapsed: 143.6s | ETA: 0s
+    10 |   5.771507 |    0.1369 | 5.498614 |  0.1370 |  321.0211 | 244.3529 | 156.6s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch10.pkl
+
+Epoch 11/15 | lr=0.005987
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.2140 | Acc: 0.1328 | Elapsed: 2.1s | ETA: 144s
+    Batch 1000/34766 | Loss: 6.1159 | Acc: 0.1094 | Elapsed: 4.2s | ETA: 140s
+    Batch 1500/34766 | Loss: 5.3040 | Acc: 0.1250 | Elapsed: 6.2s | ETA: 138s
+    Batch 2000/34766 | Loss: 7.1736 | Acc: 0.0625 | Elapsed: 8.3s | ETA: 136s
+    Batch 2500/34766 | Loss: 6.0895 | Acc: 0.1484 | Elapsed: 10.4s | ETA: 134s
+    Batch 3000/34766 | Loss: 5.7298 | Acc: 0.1953 | Elapsed: 12.5s | ETA: 131s
+    Batch 3500/34766 | Loss: 4.7182 | Acc: 0.1875 | Elapsed: 14.5s | ETA: 130s
+    Batch 4000/34766 | Loss: 6.0344 | Acc: 0.0859 | Elapsed: 16.6s | ETA: 126s
+    Batch 4500/34766 | Loss: 6.1732 | Acc: 0.0703 | Elapsed: 18.7s | ETA: 125s
+    Batch 5000/34766 | Loss: 5.3300 | Acc: 0.1797 | Elapsed: 20.8s | ETA: 124s
+    Batch 5500/34766 | Loss: 5.4658 | Acc: 0.1562 | Elapsed: 22.8s | ETA: 121s
+    Batch 6000/34766 | Loss: 4.7790 | Acc: 0.2500 | Elapsed: 24.9s | ETA: 120s
+    Batch 6500/34766 | Loss: 5.9754 | Acc: 0.1719 | Elapsed: 27.0s | ETA: 117s
+    Batch 7000/34766 | Loss: 6.4145 | Acc: 0.0703 | Elapsed: 29.1s | ETA: 116s
+    Batch 7500/34766 | Loss: 5.8231 | Acc: 0.1406 | Elapsed: 31.1s | ETA: 113s
+    Batch 8000/34766 | Loss: 5.5019 | Acc: 0.1406 | Elapsed: 33.2s | ETA: 109s
+    Batch 8500/34766 | Loss: 5.2066 | Acc: 0.1328 | Elapsed: 35.2s | ETA: 108s
+    Batch 9000/34766 | Loss: 5.9769 | Acc: 0.1016 | Elapsed: 37.3s | ETA: 107s
+    Batch 9500/34766 | Loss: 6.0746 | Acc: 0.0938 | Elapsed: 39.4s | ETA: 104s
+    Batch 10000/34766 | Loss: 5.7627 | Acc: 0.1406 | Elapsed: 41.4s | ETA: 102s
+    Batch 10500/34766 | Loss: 5.0550 | Acc: 0.2188 | Elapsed: 43.5s | ETA: 99s
+    Batch 11000/34766 | Loss: 5.2031 | Acc: 0.1953 | Elapsed: 45.6s | ETA: 98s
+    Batch 11500/34766 | Loss: 6.2324 | Acc: 0.1719 | Elapsed: 47.6s | ETA: 99s
+    Batch 12000/34766 | Loss: 6.2510 | Acc: 0.1328 | Elapsed: 49.7s | ETA: 94s
+    Batch 12500/34766 | Loss: 6.1272 | Acc: 0.1172 | Elapsed: 51.8s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.1641 | Acc: 0.0781 | Elapsed: 53.8s | ETA: 89s
+    Batch 13500/34766 | Loss: 4.8951 | Acc: 0.1641 | Elapsed: 55.9s | ETA: 88s
+    Batch 14000/34766 | Loss: 5.8333 | Acc: 0.1641 | Elapsed: 57.9s | ETA: 85s
+    Batch 14500/34766 | Loss: 5.4337 | Acc: 0.1719 | Elapsed: 60.0s | ETA: 85s
+    Batch 15000/34766 | Loss: 5.6137 | Acc: 0.1484 | Elapsed: 62.1s | ETA: 83s
+    Batch 15500/34766 | Loss: 5.7733 | Acc: 0.0625 | Elapsed: 64.2s | ETA: 80s
+    Batch 16000/34766 | Loss: 5.4977 | Acc: 0.1328 | Elapsed: 66.3s | ETA: 78s
+    Batch 16500/34766 | Loss: 5.4726 | Acc: 0.0781 | Elapsed: 68.3s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.2296 | Acc: 0.1172 | Elapsed: 70.4s | ETA: 74s
+    Batch 17500/34766 | Loss: 6.3131 | Acc: 0.1719 | Elapsed: 72.4s | ETA: 71s
+    Batch 18000/34766 | Loss: 5.8095 | Acc: 0.1094 | Elapsed: 74.5s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.4044 | Acc: 0.1406 | Elapsed: 76.6s | ETA: 67s
+    Batch 19000/34766 | Loss: 5.9173 | Acc: 0.1328 | Elapsed: 78.6s | ETA: 65s
+    Batch 19500/34766 | Loss: 5.9111 | Acc: 0.1094 | Elapsed: 80.7s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.4570 | Acc: 0.2344 | Elapsed: 82.8s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.4122 | Acc: 0.1172 | Elapsed: 84.9s | ETA: 59s
+    Batch 21000/34766 | Loss: 5.9544 | Acc: 0.1484 | Elapsed: 86.9s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.4479 | Acc: 0.1094 | Elapsed: 89.0s | ETA: 54s
+    Batch 22000/34766 | Loss: 5.6004 | Acc: 0.0703 | Elapsed: 91.0s | ETA: 53s
+    Batch 22500/34766 | Loss: 5.0288 | Acc: 0.1719 | Elapsed: 93.1s | ETA: 51s
+    Batch 23000/34766 | Loss: 5.6307 | Acc: 0.1094 | Elapsed: 95.2s | ETA: 49s
+    Batch 23500/34766 | Loss: 5.1220 | Acc: 0.1719 | Elapsed: 97.2s | ETA: 46s
+    Batch 24000/34766 | Loss: 6.0699 | Acc: 0.0781 | Elapsed: 99.3s | ETA: 44s
+    Batch 24500/34766 | Loss: 6.1994 | Acc: 0.0938 | Elapsed: 101.3s | ETA: 42s
+    Batch 25000/34766 | Loss: 5.9086 | Acc: 0.0469 | Elapsed: 103.4s | ETA: 40s
+    Batch 25500/34766 | Loss: 6.0887 | Acc: 0.1719 | Elapsed: 105.5s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.1224 | Acc: 0.0703 | Elapsed: 107.6s | ETA: 37s
+    Batch 26500/34766 | Loss: 5.3800 | Acc: 0.1250 | Elapsed: 109.6s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.8183 | Acc: 0.1562 | Elapsed: 111.7s | ETA: 32s
+    Batch 27500/34766 | Loss: 5.7887 | Acc: 0.1016 | Elapsed: 113.8s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.3230 | Acc: 0.1953 | Elapsed: 115.8s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.2409 | Acc: 0.0547 | Elapsed: 117.9s | ETA: 26s
+    Batch 29000/34766 | Loss: 5.9346 | Acc: 0.1406 | Elapsed: 120.0s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.4249 | Acc: 0.0859 | Elapsed: 122.0s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.7621 | Acc: 0.1328 | Elapsed: 124.1s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.3739 | Acc: 0.3203 | Elapsed: 126.2s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.1621 | Acc: 0.1641 | Elapsed: 128.3s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.6036 | Acc: 0.1172 | Elapsed: 130.3s | ETA: 14s
+    Batch 32000/34766 | Loss: 6.3845 | Acc: 0.0781 | Elapsed: 132.4s | ETA: 11s
+    Batch 32500/34766 | Loss: 6.7747 | Acc: 0.0859 | Elapsed: 134.4s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.2365 | Acc: 0.0781 | Elapsed: 136.5s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.0177 | Acc: 0.1719 | Elapsed: 138.6s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.4789 | Acc: 0.1719 | Elapsed: 140.7s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.5949 | Acc: 0.1562 | Elapsed: 142.8s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.1162 | Acc: 0.0769 | Elapsed: 143.9s | ETA: 0s
+    11 |   5.742548 |    0.1393 | 5.473164 |  0.1390 |  311.8579 | 238.2128 | 156.6s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch11.pkl
+
+Epoch 12/15 | lr=0.005688
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.1616 | Acc: 0.1484 | Elapsed: 2.1s | ETA: 142s
+    Batch 1000/34766 | Loss: 5.9891 | Acc: 0.1172 | Elapsed: 4.1s | ETA: 141s
+    Batch 1500/34766 | Loss: 5.3553 | Acc: 0.0938 | Elapsed: 6.2s | ETA: 136s
+    Batch 2000/34766 | Loss: 7.1195 | Acc: 0.0703 | Elapsed: 8.3s | ETA: 136s
+    Batch 2500/34766 | Loss: 6.0813 | Acc: 0.1641 | Elapsed: 10.3s | ETA: 134s
+    Batch 3000/34766 | Loss: 5.7501 | Acc: 0.2266 | Elapsed: 12.4s | ETA: 131s
+    Batch 3500/34766 | Loss: 4.7318 | Acc: 0.1953 | Elapsed: 14.5s | ETA: 130s
+    Batch 4000/34766 | Loss: 5.9533 | Acc: 0.1172 | Elapsed: 16.6s | ETA: 127s
+    Batch 4500/34766 | Loss: 6.1602 | Acc: 0.0625 | Elapsed: 18.6s | ETA: 126s
+    Batch 5000/34766 | Loss: 5.2076 | Acc: 0.1953 | Elapsed: 20.7s | ETA: 124s
+    Batch 5500/34766 | Loss: 5.4555 | Acc: 0.1406 | Elapsed: 22.8s | ETA: 120s
+    Batch 6000/34766 | Loss: 4.7087 | Acc: 0.2344 | Elapsed: 24.8s | ETA: 119s
+    Batch 6500/34766 | Loss: 5.9147 | Acc: 0.1797 | Elapsed: 26.9s | ETA: 119s
+    Batch 7000/34766 | Loss: 6.3427 | Acc: 0.0703 | Elapsed: 29.0s | ETA: 117s
+    Batch 7500/34766 | Loss: 5.8434 | Acc: 0.1328 | Elapsed: 31.1s | ETA: 114s
+    Batch 8000/34766 | Loss: 5.4827 | Acc: 0.1484 | Elapsed: 33.2s | ETA: 111s
+    Batch 8500/34766 | Loss: 5.1763 | Acc: 0.1328 | Elapsed: 35.3s | ETA: 109s
+    Batch 9000/34766 | Loss: 6.0012 | Acc: 0.1094 | Elapsed: 37.4s | ETA: 107s
+    Batch 9500/34766 | Loss: 6.0271 | Acc: 0.0781 | Elapsed: 39.5s | ETA: 105s
+    Batch 10000/34766 | Loss: 5.6977 | Acc: 0.1172 | Elapsed: 41.5s | ETA: 103s
+    Batch 10500/34766 | Loss: 4.9837 | Acc: 0.2500 | Elapsed: 43.6s | ETA: 101s
+    Batch 11000/34766 | Loss: 5.1215 | Acc: 0.1953 | Elapsed: 45.7s | ETA: 99s
+    Batch 11500/34766 | Loss: 6.2663 | Acc: 0.1875 | Elapsed: 47.8s | ETA: 96s
+    Batch 12000/34766 | Loss: 6.1564 | Acc: 0.1406 | Elapsed: 49.9s | ETA: 95s
+    Batch 12500/34766 | Loss: 6.1270 | Acc: 0.1328 | Elapsed: 52.0s | ETA: 94s
+    Batch 13000/34766 | Loss: 6.1464 | Acc: 0.0703 | Elapsed: 54.1s | ETA: 90s
+    Batch 13500/34766 | Loss: 4.8478 | Acc: 0.1719 | Elapsed: 56.2s | ETA: 89s
+    Batch 14000/34766 | Loss: 5.8340 | Acc: 0.1641 | Elapsed: 58.2s | ETA: 86s
+    Batch 14500/34766 | Loss: 5.4242 | Acc: 0.1953 | Elapsed: 60.3s | ETA: 85s
+    Batch 15000/34766 | Loss: 5.5673 | Acc: 0.1719 | Elapsed: 62.4s | ETA: 83s
+    Batch 15500/34766 | Loss: 5.6861 | Acc: 0.0625 | Elapsed: 64.5s | ETA: 80s
+    Batch 16000/34766 | Loss: 5.4515 | Acc: 0.1641 | Elapsed: 66.6s | ETA: 78s
+    Batch 16500/34766 | Loss: 5.4970 | Acc: 0.1094 | Elapsed: 68.7s | ETA: 78s
+    Batch 17000/34766 | Loss: 6.2183 | Acc: 0.1016 | Elapsed: 70.8s | ETA: 76s
+    Batch 17500/34766 | Loss: 6.3166 | Acc: 0.1641 | Elapsed: 72.9s | ETA: 70s
+    Batch 18000/34766 | Loss: 5.6888 | Acc: 0.1094 | Elapsed: 74.9s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.3830 | Acc: 0.1250 | Elapsed: 77.0s | ETA: 67s
+    Batch 19000/34766 | Loss: 5.8683 | Acc: 0.1094 | Elapsed: 79.0s | ETA: 65s
+    Batch 19500/34766 | Loss: 5.9144 | Acc: 0.1172 | Elapsed: 81.1s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.4223 | Acc: 0.2578 | Elapsed: 83.2s | ETA: 60s
+    Batch 20500/34766 | Loss: 6.4015 | Acc: 0.1094 | Elapsed: 85.2s | ETA: 59s
+    Batch 21000/34766 | Loss: 5.8956 | Acc: 0.1484 | Elapsed: 87.3s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.3891 | Acc: 0.0938 | Elapsed: 89.4s | ETA: 55s
+    Batch 22000/34766 | Loss: 5.5676 | Acc: 0.0781 | Elapsed: 91.4s | ETA: 53s
+    Batch 22500/34766 | Loss: 5.0274 | Acc: 0.1641 | Elapsed: 93.5s | ETA: 50s
+    Batch 23000/34766 | Loss: 5.6493 | Acc: 0.0859 | Elapsed: 95.6s | ETA: 49s
+    Batch 23500/34766 | Loss: 5.0501 | Acc: 0.1797 | Elapsed: 97.6s | ETA: 47s
+    Batch 24000/34766 | Loss: 6.0710 | Acc: 0.0938 | Elapsed: 99.7s | ETA: 45s
+    Batch 24500/34766 | Loss: 6.1878 | Acc: 0.1172 | Elapsed: 101.8s | ETA: 43s
+    Batch 25000/34766 | Loss: 5.8715 | Acc: 0.0703 | Elapsed: 103.8s | ETA: 40s
+    Batch 25500/34766 | Loss: 6.0427 | Acc: 0.1719 | Elapsed: 105.9s | ETA: 39s
+    Batch 26000/34766 | Loss: 7.0855 | Acc: 0.0859 | Elapsed: 108.0s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.3493 | Acc: 0.1172 | Elapsed: 110.1s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.7757 | Acc: 0.1641 | Elapsed: 112.2s | ETA: 32s
+    Batch 27500/34766 | Loss: 5.7971 | Acc: 0.1016 | Elapsed: 114.2s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.2117 | Acc: 0.2031 | Elapsed: 116.3s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.1310 | Acc: 0.0703 | Elapsed: 118.4s | ETA: 26s
+    Batch 29000/34766 | Loss: 5.8989 | Acc: 0.1484 | Elapsed: 120.5s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.3547 | Acc: 0.0703 | Elapsed: 122.5s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.7207 | Acc: 0.1484 | Elapsed: 124.6s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.3228 | Acc: 0.3203 | Elapsed: 126.7s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.1581 | Acc: 0.1484 | Elapsed: 128.7s | ETA: 15s
+    Batch 31500/34766 | Loss: 5.5786 | Acc: 0.1016 | Elapsed: 130.8s | ETA: 13s
+    Batch 32000/34766 | Loss: 6.4087 | Acc: 0.0781 | Elapsed: 132.9s | ETA: 11s
+    Batch 32500/34766 | Loss: 6.7998 | Acc: 0.0859 | Elapsed: 134.9s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.1593 | Acc: 0.1172 | Elapsed: 137.0s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.0394 | Acc: 0.1641 | Elapsed: 139.1s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.4178 | Acc: 0.1641 | Elapsed: 141.2s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.5799 | Acc: 0.1484 | Elapsed: 143.3s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.1561 | Acc: 0.1282 | Elapsed: 144.3s | ETA: 0s
+    12 |   5.716566 |    0.1414 | 5.450793 |  0.1408 |  303.8595 | 232.9429 | 157.1s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch12.pkl
+
+Epoch 13/15 | lr=0.005404
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.1347 | Acc: 0.1641 | Elapsed: 2.1s | ETA: 142s
+    Batch 1000/34766 | Loss: 6.0416 | Acc: 0.1094 | Elapsed: 4.2s | ETA: 142s
+    Batch 1500/34766 | Loss: 5.2502 | Acc: 0.1172 | Elapsed: 6.3s | ETA: 139s
+    Batch 2000/34766 | Loss: 7.1109 | Acc: 0.0859 | Elapsed: 8.4s | ETA: 138s
+    Batch 2500/34766 | Loss: 6.0555 | Acc: 0.1562 | Elapsed: 10.5s | ETA: 135s
+    Batch 3000/34766 | Loss: 5.6987 | Acc: 0.2188 | Elapsed: 12.5s | ETA: 133s
+    Batch 3500/34766 | Loss: 4.6594 | Acc: 0.1484 | Elapsed: 14.6s | ETA: 130s
+    Batch 4000/34766 | Loss: 5.9057 | Acc: 0.1094 | Elapsed: 16.7s | ETA: 126s
+    Batch 4500/34766 | Loss: 6.1491 | Acc: 0.0625 | Elapsed: 18.7s | ETA: 125s
+    Batch 5000/34766 | Loss: 5.0986 | Acc: 0.1953 | Elapsed: 20.8s | ETA: 123s
+    Batch 5500/34766 | Loss: 5.4065 | Acc: 0.1719 | Elapsed: 22.9s | ETA: 121s
+    Batch 6000/34766 | Loss: 4.7924 | Acc: 0.2656 | Elapsed: 24.9s | ETA: 119s
+    Batch 6500/34766 | Loss: 5.9546 | Acc: 0.1875 | Elapsed: 27.0s | ETA: 116s
+    Batch 7000/34766 | Loss: 6.3598 | Acc: 0.0547 | Elapsed: 29.1s | ETA: 115s
+    Batch 7500/34766 | Loss: 5.7607 | Acc: 0.1562 | Elapsed: 31.1s | ETA: 113s
+    Batch 8000/34766 | Loss: 5.4156 | Acc: 0.1641 | Elapsed: 33.2s | ETA: 111s
+    Batch 8500/34766 | Loss: 5.1658 | Acc: 0.1641 | Elapsed: 35.3s | ETA: 108s
+    Batch 9000/34766 | Loss: 6.0152 | Acc: 0.1016 | Elapsed: 37.3s | ETA: 105s
+    Batch 9500/34766 | Loss: 6.0167 | Acc: 0.1016 | Elapsed: 39.4s | ETA: 106s
+    Batch 10000/34766 | Loss: 5.6140 | Acc: 0.1328 | Elapsed: 41.4s | ETA: 101s
+    Batch 10500/34766 | Loss: 4.9053 | Acc: 0.2500 | Elapsed: 43.5s | ETA: 100s
+    Batch 11000/34766 | Loss: 5.0028 | Acc: 0.2031 | Elapsed: 45.6s | ETA: 98s
+    Batch 11500/34766 | Loss: 6.2023 | Acc: 0.1719 | Elapsed: 47.6s | ETA: 96s
+    Batch 12000/34766 | Loss: 6.2123 | Acc: 0.1250 | Elapsed: 49.7s | ETA: 93s
+    Batch 12500/34766 | Loss: 6.1174 | Acc: 0.1484 | Elapsed: 51.7s | ETA: 91s
+    Batch 13000/34766 | Loss: 6.1343 | Acc: 0.0625 | Elapsed: 53.8s | ETA: 90s
+    Batch 13500/34766 | Loss: 4.7972 | Acc: 0.1641 | Elapsed: 55.9s | ETA: 88s
+    Batch 14000/34766 | Loss: 5.8209 | Acc: 0.1562 | Elapsed: 57.9s | ETA: 86s
+    Batch 14500/34766 | Loss: 5.4251 | Acc: 0.1875 | Elapsed: 60.0s | ETA: 84s
+    Batch 15000/34766 | Loss: 5.5776 | Acc: 0.1484 | Elapsed: 62.1s | ETA: 81s
+    Batch 15500/34766 | Loss: 5.6104 | Acc: 0.0703 | Elapsed: 64.1s | ETA: 79s
+    Batch 16000/34766 | Loss: 5.4532 | Acc: 0.1562 | Elapsed: 66.2s | ETA: 77s
+    Batch 16500/34766 | Loss: 5.4502 | Acc: 0.0938 | Elapsed: 68.2s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.2227 | Acc: 0.1172 | Elapsed: 70.3s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.2489 | Acc: 0.1953 | Elapsed: 72.4s | ETA: 70s
+    Batch 18000/34766 | Loss: 5.6880 | Acc: 0.1406 | Elapsed: 74.4s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.3442 | Acc: 0.1406 | Elapsed: 76.5s | ETA: 67s
+    Batch 19000/34766 | Loss: 5.8725 | Acc: 0.1094 | Elapsed: 78.5s | ETA: 67s
+    Batch 19500/34766 | Loss: 5.8608 | Acc: 0.0859 | Elapsed: 80.6s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.4011 | Acc: 0.2578 | Elapsed: 82.7s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.4425 | Acc: 0.1094 | Elapsed: 84.7s | ETA: 59s
+    Batch 21000/34766 | Loss: 5.8500 | Acc: 0.1562 | Elapsed: 86.8s | ETA: 56s
+    Batch 21500/34766 | Loss: 5.3477 | Acc: 0.1172 | Elapsed: 88.9s | ETA: 55s
+    Batch 22000/34766 | Loss: 5.5125 | Acc: 0.0781 | Elapsed: 90.9s | ETA: 53s
+    Batch 22500/34766 | Loss: 4.9977 | Acc: 0.1953 | Elapsed: 93.0s | ETA: 51s
+    Batch 23000/34766 | Loss: 5.6202 | Acc: 0.0859 | Elapsed: 95.1s | ETA: 49s
+    Batch 23500/34766 | Loss: 5.0172 | Acc: 0.1719 | Elapsed: 97.1s | ETA: 46s
+    Batch 24000/34766 | Loss: 6.0568 | Acc: 0.0859 | Elapsed: 99.2s | ETA: 44s
+    Batch 24500/34766 | Loss: 6.1855 | Acc: 0.1094 | Elapsed: 101.2s | ETA: 42s
+    Batch 25000/34766 | Loss: 5.9062 | Acc: 0.0625 | Elapsed: 103.3s | ETA: 41s
+    Batch 25500/34766 | Loss: 6.0412 | Acc: 0.1797 | Elapsed: 105.4s | ETA: 38s
+    Batch 26000/34766 | Loss: 7.0362 | Acc: 0.0938 | Elapsed: 107.4s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.3895 | Acc: 0.1172 | Elapsed: 109.5s | ETA: 35s
+    Batch 27000/34766 | Loss: 5.7412 | Acc: 0.1875 | Elapsed: 111.6s | ETA: 33s
+    Batch 27500/34766 | Loss: 5.7771 | Acc: 0.0859 | Elapsed: 113.7s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.2519 | Acc: 0.2031 | Elapsed: 115.8s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.1393 | Acc: 0.0625 | Elapsed: 117.9s | ETA: 26s
+    Batch 29000/34766 | Loss: 5.9323 | Acc: 0.1172 | Elapsed: 119.9s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.3349 | Acc: 0.0781 | Elapsed: 122.0s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.7383 | Acc: 0.1484 | Elapsed: 124.1s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.3125 | Acc: 0.3203 | Elapsed: 126.2s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.1715 | Acc: 0.1797 | Elapsed: 128.3s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.4895 | Acc: 0.1406 | Elapsed: 130.4s | ETA: 14s
+    Batch 32000/34766 | Loss: 6.3560 | Acc: 0.0859 | Elapsed: 132.5s | ETA: 12s
+    Batch 32500/34766 | Loss: 6.7824 | Acc: 0.0703 | Elapsed: 134.6s | ETA: 10s
+    Batch 33000/34766 | Loss: 5.2130 | Acc: 0.1016 | Elapsed: 136.7s | ETA: 7s
+    Batch 33500/34766 | Loss: 5.9691 | Acc: 0.1875 | Elapsed: 138.8s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.4335 | Acc: 0.2031 | Elapsed: 140.9s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.5210 | Acc: 0.1484 | Elapsed: 142.9s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.3439 | Acc: 0.0256 | Elapsed: 144.1s | ETA: 0s
+    13 |   5.693530 |    0.1435 | 5.431165 |  0.1422 |  296.9401 | 228.4151 | 156.8s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch13.pkl
+
+Epoch 14/15 | lr=0.005133
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.1046 | Acc: 0.1562 | Elapsed: 2.1s | ETA: 143s
+    Batch 1000/34766 | Loss: 6.0321 | Acc: 0.1172 | Elapsed: 4.2s | ETA: 140s
+    Batch 1500/34766 | Loss: 5.2197 | Acc: 0.1094 | Elapsed: 6.2s | ETA: 137s
+    Batch 2000/34766 | Loss: 7.1024 | Acc: 0.0625 | Elapsed: 8.3s | ETA: 135s
+    Batch 2500/34766 | Loss: 6.0517 | Acc: 0.1719 | Elapsed: 10.4s | ETA: 134s
+    Batch 3000/34766 | Loss: 5.6989 | Acc: 0.2031 | Elapsed: 12.4s | ETA: 132s
+    Batch 3500/34766 | Loss: 4.5687 | Acc: 0.1875 | Elapsed: 14.5s | ETA: 129s
+    Batch 4000/34766 | Loss: 5.8851 | Acc: 0.1094 | Elapsed: 16.6s | ETA: 127s
+    Batch 4500/34766 | Loss: 6.1296 | Acc: 0.0781 | Elapsed: 18.6s | ETA: 125s
+    Batch 5000/34766 | Loss: 5.1193 | Acc: 0.1641 | Elapsed: 20.7s | ETA: 122s
+    Batch 5500/34766 | Loss: 5.4277 | Acc: 0.1328 | Elapsed: 22.8s | ETA: 121s
+    Batch 6000/34766 | Loss: 4.7383 | Acc: 0.2578 | Elapsed: 24.8s | ETA: 119s
+    Batch 6500/34766 | Loss: 5.9241 | Acc: 0.1562 | Elapsed: 26.9s | ETA: 117s
+    Batch 7000/34766 | Loss: 6.3737 | Acc: 0.0469 | Elapsed: 29.0s | ETA: 114s
+    Batch 7500/34766 | Loss: 5.7770 | Acc: 0.1406 | Elapsed: 31.0s | ETA: 112s
+    Batch 8000/34766 | Loss: 5.3964 | Acc: 0.1562 | Elapsed: 33.1s | ETA: 113s
+    Batch 8500/34766 | Loss: 5.1452 | Acc: 0.1562 | Elapsed: 35.2s | ETA: 108s
+    Batch 9000/34766 | Loss: 5.8889 | Acc: 0.1094 | Elapsed: 37.2s | ETA: 106s
+    Batch 9500/34766 | Loss: 5.9211 | Acc: 0.0938 | Elapsed: 39.3s | ETA: 104s
+    Batch 10000/34766 | Loss: 5.5975 | Acc: 0.1484 | Elapsed: 41.3s | ETA: 101s
+    Batch 10500/34766 | Loss: 4.8919 | Acc: 0.2734 | Elapsed: 43.4s | ETA: 101s
+    Batch 11000/34766 | Loss: 4.9629 | Acc: 0.2266 | Elapsed: 45.5s | ETA: 99s
+    Batch 11500/34766 | Loss: 6.1959 | Acc: 0.1562 | Elapsed: 47.6s | ETA: 96s
+    Batch 12000/34766 | Loss: 6.1469 | Acc: 0.1875 | Elapsed: 49.7s | ETA: 95s
+    Batch 12500/34766 | Loss: 6.0981 | Acc: 0.1172 | Elapsed: 51.8s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.1197 | Acc: 0.0781 | Elapsed: 53.8s | ETA: 91s
+    Batch 13500/34766 | Loss: 4.8644 | Acc: 0.1484 | Elapsed: 55.9s | ETA: 88s
+    Batch 14000/34766 | Loss: 5.8206 | Acc: 0.1797 | Elapsed: 58.0s | ETA: 87s
+    Batch 14500/34766 | Loss: 5.3919 | Acc: 0.1797 | Elapsed: 60.1s | ETA: 84s
+    Batch 15000/34766 | Loss: 5.5921 | Acc: 0.1719 | Elapsed: 62.2s | ETA: 83s
+    Batch 15500/34766 | Loss: 5.6081 | Acc: 0.0781 | Elapsed: 64.3s | ETA: 80s
+    Batch 16000/34766 | Loss: 5.4181 | Acc: 0.1250 | Elapsed: 66.3s | ETA: 77s
+    Batch 16500/34766 | Loss: 5.4602 | Acc: 0.0938 | Elapsed: 68.4s | ETA: 75s
+    Batch 17000/34766 | Loss: 6.2024 | Acc: 0.1016 | Elapsed: 70.5s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.2294 | Acc: 0.1797 | Elapsed: 72.5s | ETA: 72s
+    Batch 18000/34766 | Loss: 5.6551 | Acc: 0.1328 | Elapsed: 74.6s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.3639 | Acc: 0.1562 | Elapsed: 76.7s | ETA: 67s
+    Batch 19000/34766 | Loss: 5.8275 | Acc: 0.1406 | Elapsed: 78.7s | ETA: 65s
+    Batch 19500/34766 | Loss: 5.8735 | Acc: 0.1172 | Elapsed: 80.8s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.3703 | Acc: 0.2656 | Elapsed: 82.9s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.3419 | Acc: 0.1172 | Elapsed: 84.9s | ETA: 59s
+    Batch 21000/34766 | Loss: 5.8471 | Acc: 0.1328 | Elapsed: 87.0s | ETA: 57s
+    Batch 21500/34766 | Loss: 5.3410 | Acc: 0.1250 | Elapsed: 89.1s | ETA: 55s
+    Batch 22000/34766 | Loss: 5.4949 | Acc: 0.0781 | Elapsed: 91.1s | ETA: 52s
+    Batch 22500/34766 | Loss: 5.0108 | Acc: 0.1953 | Elapsed: 93.2s | ETA: 51s
+    Batch 23000/34766 | Loss: 5.6196 | Acc: 0.0938 | Elapsed: 95.3s | ETA: 49s
+    Batch 23500/34766 | Loss: 5.0657 | Acc: 0.1641 | Elapsed: 97.4s | ETA: 46s
+    Batch 24000/34766 | Loss: 6.0249 | Acc: 0.1016 | Elapsed: 99.4s | ETA: 44s
+    Batch 24500/34766 | Loss: 6.1850 | Acc: 0.1094 | Elapsed: 101.5s | ETA: 42s
+    Batch 25000/34766 | Loss: 5.8200 | Acc: 0.0547 | Elapsed: 103.5s | ETA: 40s
+    Batch 25500/34766 | Loss: 6.0189 | Acc: 0.1719 | Elapsed: 105.6s | ETA: 38s
+    Batch 26000/34766 | Loss: 6.9982 | Acc: 0.0781 | Elapsed: 107.7s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.3798 | Acc: 0.1172 | Elapsed: 109.7s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.7126 | Acc: 0.1641 | Elapsed: 111.8s | ETA: 32s
+    Batch 27500/34766 | Loss: 5.6787 | Acc: 0.1016 | Elapsed: 113.8s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.2761 | Acc: 0.1953 | Elapsed: 115.9s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.1323 | Acc: 0.0781 | Elapsed: 118.0s | ETA: 26s
+    Batch 29000/34766 | Loss: 5.9048 | Acc: 0.1562 | Elapsed: 120.1s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.3012 | Acc: 0.0938 | Elapsed: 122.1s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.6548 | Acc: 0.1484 | Elapsed: 124.2s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.3087 | Acc: 0.2969 | Elapsed: 126.3s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.1008 | Acc: 0.1797 | Elapsed: 128.4s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.5170 | Acc: 0.1172 | Elapsed: 130.4s | ETA: 14s
+    Batch 32000/34766 | Loss: 6.3097 | Acc: 0.0938 | Elapsed: 132.5s | ETA: 11s
+    Batch 32500/34766 | Loss: 6.7481 | Acc: 0.0938 | Elapsed: 134.6s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.1448 | Acc: 0.0781 | Elapsed: 136.7s | ETA: 7s
+    Batch 33500/34766 | Loss: 5.9993 | Acc: 0.1719 | Elapsed: 138.7s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.4729 | Acc: 0.2188 | Elapsed: 140.8s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.4740 | Acc: 0.1797 | Elapsed: 142.9s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.2125 | Acc: 0.1026 | Elapsed: 144.0s | ETA: 0s
+    14 |   5.673271 |    0.1452 | 5.413323 |  0.1438 |  290.9848 | 224.3760 | 156.7s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch14.pkl
+
+Epoch 15/15 | lr=0.004877
+  [MEM] RAM: 19.4/216.3 GB (9.0% used)
+    Batch 500/34766 | Loss: 5.1145 | Acc: 0.1641 | Elapsed: 2.1s | ETA: 142s
+    Batch 1000/34766 | Loss: 6.0615 | Acc: 0.1094 | Elapsed: 4.1s | ETA: 141s
+    Batch 1500/34766 | Loss: 5.1716 | Acc: 0.1094 | Elapsed: 6.2s | ETA: 138s
+    Batch 2000/34766 | Loss: 7.0783 | Acc: 0.0859 | Elapsed: 8.3s | ETA: 136s
+    Batch 2500/34766 | Loss: 6.0240 | Acc: 0.1484 | Elapsed: 10.4s | ETA: 132s
+    Batch 3000/34766 | Loss: 5.7016 | Acc: 0.2344 | Elapsed: 12.4s | ETA: 132s
+    Batch 3500/34766 | Loss: 4.5573 | Acc: 0.1719 | Elapsed: 14.5s | ETA: 130s
+    Batch 4000/34766 | Loss: 5.8726 | Acc: 0.1094 | Elapsed: 16.5s | ETA: 127s
+    Batch 4500/34766 | Loss: 6.1527 | Acc: 0.0781 | Elapsed: 18.6s | ETA: 125s
+    Batch 5000/34766 | Loss: 5.0560 | Acc: 0.1641 | Elapsed: 20.7s | ETA: 122s
+    Batch 5500/34766 | Loss: 5.3960 | Acc: 0.1406 | Elapsed: 22.7s | ETA: 121s
+    Batch 6000/34766 | Loss: 4.6963 | Acc: 0.3047 | Elapsed: 24.8s | ETA: 119s
+    Batch 6500/34766 | Loss: 5.9209 | Acc: 0.1719 | Elapsed: 26.9s | ETA: 119s
+    Batch 7000/34766 | Loss: 6.3415 | Acc: 0.0703 | Elapsed: 28.9s | ETA: 115s
+    Batch 7500/34766 | Loss: 5.7229 | Acc: 0.1406 | Elapsed: 31.0s | ETA: 112s
+    Batch 8000/34766 | Loss: 5.4049 | Acc: 0.1406 | Elapsed: 33.1s | ETA: 111s
+    Batch 8500/34766 | Loss: 5.1080 | Acc: 0.1719 | Elapsed: 35.2s | ETA: 108s
+    Batch 9000/34766 | Loss: 5.8920 | Acc: 0.1172 | Elapsed: 37.2s | ETA: 107s
+    Batch 9500/34766 | Loss: 5.9936 | Acc: 0.0859 | Elapsed: 39.3s | ETA: 104s
+    Batch 10000/34766 | Loss: 5.5438 | Acc: 0.1484 | Elapsed: 41.3s | ETA: 102s
+    Batch 10500/34766 | Loss: 4.8693 | Acc: 0.2656 | Elapsed: 43.4s | ETA: 100s
+    Batch 11000/34766 | Loss: 4.8342 | Acc: 0.2344 | Elapsed: 45.5s | ETA: 97s
+    Batch 11500/34766 | Loss: 6.2026 | Acc: 0.1406 | Elapsed: 47.5s | ETA: 96s
+    Batch 12000/34766 | Loss: 6.1061 | Acc: 0.1484 | Elapsed: 49.6s | ETA: 94s
+    Batch 12500/34766 | Loss: 6.1610 | Acc: 0.1406 | Elapsed: 51.6s | ETA: 92s
+    Batch 13000/34766 | Loss: 6.0775 | Acc: 0.0625 | Elapsed: 53.7s | ETA: 90s
+    Batch 13500/34766 | Loss: 4.7678 | Acc: 0.1719 | Elapsed: 55.7s | ETA: 87s
+    Batch 14000/34766 | Loss: 5.8077 | Acc: 0.1484 | Elapsed: 57.8s | ETA: 86s
+    Batch 14500/34766 | Loss: 5.3667 | Acc: 0.1641 | Elapsed: 59.9s | ETA: 84s
+    Batch 15000/34766 | Loss: 5.5513 | Acc: 0.1641 | Elapsed: 61.9s | ETA: 82s
+    Batch 15500/34766 | Loss: 5.5606 | Acc: 0.0625 | Elapsed: 64.0s | ETA: 80s
+    Batch 16000/34766 | Loss: 5.4040 | Acc: 0.1328 | Elapsed: 66.1s | ETA: 77s
+    Batch 16500/34766 | Loss: 5.4272 | Acc: 0.1172 | Elapsed: 68.1s | ETA: 76s
+    Batch 17000/34766 | Loss: 6.2189 | Acc: 0.1094 | Elapsed: 70.2s | ETA: 73s
+    Batch 17500/34766 | Loss: 6.2276 | Acc: 0.2031 | Elapsed: 72.3s | ETA: 71s
+    Batch 18000/34766 | Loss: 5.6670 | Acc: 0.1094 | Elapsed: 74.3s | ETA: 69s
+    Batch 18500/34766 | Loss: 6.3547 | Acc: 0.1172 | Elapsed: 76.4s | ETA: 67s
+    Batch 19000/34766 | Loss: 5.7515 | Acc: 0.1406 | Elapsed: 78.5s | ETA: 65s
+    Batch 19500/34766 | Loss: 5.8558 | Acc: 0.1172 | Elapsed: 80.5s | ETA: 63s
+    Batch 20000/34766 | Loss: 5.3663 | Acc: 0.2734 | Elapsed: 82.6s | ETA: 61s
+    Batch 20500/34766 | Loss: 6.3691 | Acc: 0.1328 | Elapsed: 84.7s | ETA: 59s
+    Batch 21000/34766 | Loss: 5.8556 | Acc: 0.1406 | Elapsed: 86.7s | ETA: 58s
+    Batch 21500/34766 | Loss: 5.3182 | Acc: 0.1016 | Elapsed: 88.8s | ETA: 55s
+    Batch 22000/34766 | Loss: 5.4836 | Acc: 0.0781 | Elapsed: 90.8s | ETA: 52s
+    Batch 22500/34766 | Loss: 4.9543 | Acc: 0.1797 | Elapsed: 92.9s | ETA: 51s
+    Batch 23000/34766 | Loss: 5.5283 | Acc: 0.1328 | Elapsed: 95.0s | ETA: 48s
+    Batch 23500/34766 | Loss: 4.9954 | Acc: 0.1641 | Elapsed: 97.0s | ETA: 46s
+    Batch 24000/34766 | Loss: 6.0196 | Acc: 0.0781 | Elapsed: 99.1s | ETA: 45s
+    Batch 24500/34766 | Loss: 6.1846 | Acc: 0.1172 | Elapsed: 101.2s | ETA: 42s
+    Batch 25000/34766 | Loss: 5.8008 | Acc: 0.0547 | Elapsed: 103.2s | ETA: 40s
+    Batch 25500/34766 | Loss: 5.9840 | Acc: 0.1953 | Elapsed: 105.3s | ETA: 38s
+    Batch 26000/34766 | Loss: 6.9284 | Acc: 0.0938 | Elapsed: 107.4s | ETA: 36s
+    Batch 26500/34766 | Loss: 5.3553 | Acc: 0.1016 | Elapsed: 109.4s | ETA: 34s
+    Batch 27000/34766 | Loss: 5.6942 | Acc: 0.1641 | Elapsed: 111.5s | ETA: 32s
+    Batch 27500/34766 | Loss: 5.6647 | Acc: 0.1016 | Elapsed: 113.5s | ETA: 30s
+    Batch 28000/34766 | Loss: 5.1523 | Acc: 0.2109 | Elapsed: 115.6s | ETA: 28s
+    Batch 28500/34766 | Loss: 6.0661 | Acc: 0.0781 | Elapsed: 117.7s | ETA: 26s
+    Batch 29000/34766 | Loss: 5.8304 | Acc: 0.1406 | Elapsed: 119.8s | ETA: 24s
+    Batch 29500/34766 | Loss: 6.2788 | Acc: 0.1172 | Elapsed: 121.8s | ETA: 22s
+    Batch 30000/34766 | Loss: 5.7061 | Acc: 0.1875 | Elapsed: 123.9s | ETA: 20s
+    Batch 30500/34766 | Loss: 4.2782 | Acc: 0.3672 | Elapsed: 126.0s | ETA: 18s
+    Batch 31000/34766 | Loss: 5.1466 | Acc: 0.1875 | Elapsed: 128.0s | ETA: 16s
+    Batch 31500/34766 | Loss: 5.4954 | Acc: 0.1094 | Elapsed: 130.1s | ETA: 14s
+    Batch 32000/34766 | Loss: 6.3281 | Acc: 0.0859 | Elapsed: 132.2s | ETA: 11s
+    Batch 32500/34766 | Loss: 6.7184 | Acc: 0.0703 | Elapsed: 134.2s | ETA: 9s
+    Batch 33000/34766 | Loss: 5.1376 | Acc: 0.0938 | Elapsed: 136.3s | ETA: 7s
+    Batch 33500/34766 | Loss: 6.0010 | Acc: 0.1719 | Elapsed: 138.4s | ETA: 5s
+    Batch 34000/34766 | Loss: 5.3937 | Acc: 0.1875 | Elapsed: 140.4s | ETA: 3s
+    Batch 34500/34766 | Loss: 5.4524 | Acc: 0.1719 | Elapsed: 142.5s | ETA: 1s
+    Batch 34766/34766 | Loss: 5.2097 | Acc: 0.1282 | Elapsed: 143.6s | ETA: 0s
+    15 |   5.654216 |    0.1467 | 5.397285 |  0.1450 |  285.4925 | 220.8060 | 156.2s ✓ best
+  💾 Checkpoint sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/checkpoint_epoch15.pkl
+
+✓ Entraînement terminé en 2349.5s (39.2 min)
+✓ Meilleure val_loss: 5.397285 (époque 15)
+
+============================================================
+SECTION 9: Génération de Paroles
+============================================================
+
+Génération par genre:
+
+EDM:
+  but you long you i'm in calling <UNK> i want you of ride than you you you you you know that you're trying to walk for you and you are you oh, you're g...
+  [Qualité] tokens=40, unique=0.60, rep2=0.15, rep3=0.08
+
+POP:
+  i then i in in love lost, i'd my you love ten experience said sun's she i you i see you i just feel hope you get to you are you <UNK> i want to you fe...
+  [Qualité] tokens=40, unique=0.60, rep2=0.05, rep3=0.00
+
+R&B:
+  you me right you threw <UNK> your you and you you you you you you you me you you know you you know you you do you you and you're you you in me you ain...
+  [Qualité] tokens=40, unique=0.33, rep2=0.41, rep3=0.18
+
+RAP:
+  baby boy <UNK> this <UNK> <UNK> the i do your you <UNK> to the can <UNK> and right the clouds is <UNK> the <UNK> <UNK> <UNK> <UNK> the bass <UNK> <UNK...
+  [Qualité] tokens=40, unique=0.47, rep2=0.28, rep3=0.16
+
+ROCK:
+  i your the you're you you that little when you're you go! that in you're you you're your you don't want to turn you to you you're out when you underst...
+  [Qualité] tokens=40, unique=0.53, rep2=0.08, rep3=0.00
+
+============================================================
+SECTION 10: Visualisations et Statistiques
+============================================================
+
+✓ Graphiques sauvegardés: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/training_stats.png
+
+📊 STATISTIQUES FINALES:
+  • Meilleur Train Loss: 5.6542
+  • Meilleur Val Loss: 5.3973
+  • Train Perplexity (epoch 1): 946.3944
+  • Val Perplexity (epoch 1): 504.9810
+  • Train Perplexity (final): 285.4925
+  • Val Perplexity (final): 220.8060
+  • Longueur moyenne paroles: 424.8 tokens
+  • Longueur max paroles: 5509 tokens
+  • Total paires (input, target): 5,547,617
+
+============================================================
+SECTION 11: Sauvegarde du Modèle
+============================================================
+✓ Modèle sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/lyrics_model.pkl
+✓ Taille: 33030.9 KB
+✓ Métadonnées run sauvegardées: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/run_metadata.json
+
+============================================================
+RÉSUMÉ DU TP
+============================================================
+✓ Dataset: 14517 chansons
+✓ Vocabulaire: 12,004 tokens
+✓ Genres: 5
+✓ Exemples: 4,449,959 train / 1,097,658 val
+
+📊 MÉTRIQUES FINALES:
+✓ Train Loss: 5.6542
+✓ Val Loss: 5.3973
+✓ Train Perplexity: 285.4925
+✓ Val Perplexity: 220.8060
+
+📈 Graphiques sauvegardés: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/training_stats.png
+💾 Modèle sauvegardé: /teamspace/studios/this_studio/TP_Paroles_Code_Complet/outputs/lyrics_model.pkl
+============================================================
