@@ -435,6 +435,12 @@ trainer.train()
 
 **3 lignes suffisent** là où notre implémentation custom nécessite >400 lignes de code.
 
+### Courbes d'Entraînement GPT-2
+
+![GPT-2 Fine-tuning — Loss, PPL, Learning Rate, Grad Norm](graphs+logs/gpt2_training_curve.png)
+
+> Les 4 courbes confirment une convergence saine : la loss val descend régulièrement (2.562 → 2.527), la PPL atteint **12.52** en 3 époques, le learning rate suit le schedule linéaire HuggingFace, et la norme des gradients se stabilise autour de 4.5–5 après l'époque 1.
+
 ---
 
 ## 8. Comparaison des Deux Approches
