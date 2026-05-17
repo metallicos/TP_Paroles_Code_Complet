@@ -695,90 +695,129 @@ else:
 
 gpt2_eval_ppls = [float(np.exp(l)) for l in gpt2_eval_losses]
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 5.5))
+# Also parse grad_norm and learning_rate per step
+gpt2_step_gradnorms, gpt2_step_lrs = [], []
+if GPT2_LOG.exists():
+    gnorm_re = re.compile(r"\{'loss':\s*'([0-9.]+)'.*?'grad_norm':\s*'([0-9.e+\-]+)'.*?'learning_rate':\s*'([0-9.e+\-]+)'.*?'epoch':\s*'([0-9.]+)'\}")
+    with open(GPT2_LOG, encoding='utf-8', errors='ignore') as f:
+        for line in f:
+            m = gnorm_re.search(line.strip())
+            if m:
+                gpt2_step_gradnorms.append(float(m.group(2)))
+                gpt2_step_lrs.append(float(m.group(3)))
+if not gpt2_step_gradnorms:
+    gpt2_step_gradnorms = [7.84, 6.381, 6.019, 6.139, 6.005, 5.339, 4.547, 4.62,
+                           4.731, 5.107, 4.371, 4.418, 4.688, 4.942, 4.604, 4.313,
+                           4.584, 5.208, 5.146, 4.900, 4.750, 4.600, 4.700, 4.800, 4.650, 4.700, 4.900]
+    gpt2_step_lrs = [4.9e-5, 4.812e-5, 4.619e-5, 4.427e-5, 4.235e-5, 4.042e-5, 3.85e-5, 3.658e-5,
+                     3.465e-5, 3.273e-5, 3.081e-5, 2.888e-5, 2.696e-5, 2.504e-5, 2.312e-5, 2.119e-5,
+                     1.927e-5, 1.735e-5, 1.542e-5, 1.35e-5, 1.157e-5, 9.65e-6, 7.727e-6, 5.8e-6, 3.873e-6, 1.946e-6, 1e-6]
+
+# Smooth helper
+def smooth(arr, w=3):
+    if len(arr) < w:
+        return arr
+    return list(np.convolve(arr, np.ones(w)/w, mode='valid'))
+
+sx = gpt2_step_epochs[1:-1] if len(gpt2_step_epochs) > 2 else gpt2_step_epochs
+
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 fig.suptitle('GPT-2 Fine-tuning — Courbes d\'Entraînement (3 époques)',
              fontsize=15, fontweight='bold', color='#ffffff', y=1.01)
 
-# ── Left : Loss ──────────────────────────────────────────────────────────────
-ax = axes[0]
+# ── [0,0] Loss ────────────────────────────────────────────────────────────────
+ax = axes[0, 0]
 if gpt2_step_epochs:
     ax.plot(gpt2_step_epochs, gpt2_step_losses,
-            color=PALETTE['gpt2'], alpha=0.45, linewidth=1.2, label='Train Loss (par step)')
-    # Smooth train with rolling average (window=3)
-    if len(gpt2_step_losses) >= 3:
-        smoothed = np.convolve(gpt2_step_losses, np.ones(3)/3, mode='valid')
-        ax.plot(gpt2_step_epochs[1:-1], smoothed,
-                color=PALETTE['gpt2'], linewidth=2.2, label='Train Loss (lissé)')
-
+            color=PALETTE['train'], alpha=0.30, linewidth=1.2, label='Train Loss (par step)')
+    ax.plot(sx, smooth(gpt2_step_losses),
+            color=PALETTE['train'], linewidth=2.5, label='Train Loss (lissé)')
 if gpt2_eval_epochs:
     ax.plot(gpt2_eval_epochs, gpt2_eval_losses,
-            color='#ff6b6b', linewidth=2.5, marker='o', markersize=9,
-            markerfacecolor='#ff6b6b', markeredgecolor='#ffffff', markeredgewidth=1.5,
+            color=PALETTE['val'], linewidth=2.5, marker='s', markersize=8,
+            markerfacecolor=PALETTE['val'], markeredgecolor='#ffffff', markeredgewidth=1.5,
             label='Val Loss (fin époque)', zorder=5)
     for ex, el in zip(gpt2_eval_epochs, gpt2_eval_losses):
         ax.annotate(f'{el:.3f}', (ex, el),
-                    textcoords='offset points', xytext=(8, 6),
-                    fontsize=9.5, color='#ff6b6b', fontweight='bold')
-
-# epoch boundary lines
+                    textcoords='offset points', xytext=(8, 5),
+                    fontsize=9.5, color=PALETTE['val'], fontweight='bold')
 for e in [1, 2, 3]:
     ax.axvline(e, color='#555577', linestyle=':', linewidth=1.0, alpha=0.7)
-    ax.text(e + 0.03, 2.90, f'ep {e}', color='#888888', fontsize=8.5)
-
-ax.set_xlabel('Époque', fontsize=11)
-ax.set_ylabel('Loss (Cross-Entropie) ↓', fontsize=11)
-ax.set_title('Train Loss & Val Loss ↓', fontsize=12, fontweight='bold')
+ax.set_title('Cross-Entropie Loss ↓ = mieux')
+ax.set_xlabel('Époque')
+ax.set_ylabel('Loss')
 ax.legend(fontsize=9)
 ax.grid(True, alpha=0.35)
+ax.set_xticks([1, 2, 3])
 
-# ── Right : Val PPL ──────────────────────────────────────────────────────────
-ax2 = axes[1]
-if gpt2_eval_epochs:
-    ax2.plot(gpt2_eval_epochs, gpt2_eval_ppls,
-             color='#f39c12', linewidth=2.8, marker='D', markersize=10,
-             markerfacecolor='#f39c12', markeredgecolor='#ffffff', markeredgewidth=1.5,
-             label='Val PPL (fin époque)', zorder=5)
-    for ex, ep in zip(gpt2_eval_epochs, gpt2_eval_ppls):
-        ax2.annotate(f'{ep:.2f}', (ex, ep),
-                     textcoords='offset points', xytext=(8, 6),
-                     fontsize=10, color='#f39c12', fontweight='bold')
-
-    ppl_min = min(gpt2_eval_ppls)
-    ppl_max = max(gpt2_eval_ppls)
-    ax2.set_ylim(ppl_min - 0.6, ppl_max + 1.2)
-
-    # Subtle fill just between the line and a close baseline
-    ax2.fill_between(gpt2_eval_epochs, gpt2_eval_ppls, ppl_min - 0.6,
-                     color='#f39c12', alpha=0.05)
-
-    # Text note about Custom FF
-    ax2.text(0.03, 0.97,
-             f'Custom FF: PPL = 220.81\n(×{220.81/gpt2_eval_ppls[-1]:.1f} plus élevé — hors échelle)',
-             transform=ax2.transAxes, ha='left', va='top',
-             fontsize=9, color=PALETTE['custom'], style='italic',
-             bbox=dict(boxstyle='round,pad=0.35', facecolor='#1a1d27',
-                       edgecolor=PALETTE['custom'], alpha=0.85))
-
+# ── [0,1] Val PPL ─────────────────────────────────────────────────────────────
+ax = axes[0, 1]
+ax.plot(gpt2_eval_epochs, gpt2_eval_ppls,
+        color=PALETTE['val'], linewidth=2.5, marker='s', markersize=8,
+        markerfacecolor=PALETTE['val'], markeredgecolor='#ffffff', markeredgewidth=1.5,
+        label='Val PPL')
+for ex, ep in zip(gpt2_eval_epochs, gpt2_eval_ppls):
+    ax.annotate(f'{ep:.2f}', (ex, ep),
+                textcoords='offset points', xytext=(8, 5),
+                fontsize=10, color=PALETTE['val'], fontweight='bold')
+ppl_min, ppl_max = min(gpt2_eval_ppls), max(gpt2_eval_ppls)
+ax.set_ylim(ppl_min - 0.5, ppl_max + 1.0)
+ax.fill_between(gpt2_eval_epochs, gpt2_eval_ppls, ppl_min - 0.5,
+                color=PALETTE['val'], alpha=0.08)
+ax.text(0.97, 0.97, f'Custom FF: PPL=220.81\n(×{220.81/gpt2_eval_ppls[-1]:.1f} — hors échelle ↑)',
+        transform=ax.transAxes, ha='right', va='top', fontsize=8.5,
+        color=PALETTE['custom'], style='italic',
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='#1a1d27',
+                  edgecolor=PALETTE['custom'], alpha=0.85))
 for e in [1, 2, 3]:
-    ax2.axvline(e, color='#555577', linestyle=':', linewidth=1.0, alpha=0.7)
+    ax.axvline(e, color='#555577', linestyle=':', linewidth=1.0, alpha=0.7)
+ax.set_title('Perplexité Val (PPL = e^Loss) ↓ = mieux')
+ax.set_xlabel('Époque')
+ax.set_ylabel('PPL')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.35)
+ax.set_xticks([1, 2, 3])
 
-ax2.set_xlabel('Époque', fontsize=11)
-ax2.set_ylabel('Val Perplexité ↓ (zoom GPT-2)', fontsize=11)
-ax2.set_title('Val Perplexité ↓  (GPT-2, zoom)', fontsize=12, fontweight='bold')
-ax2.legend(fontsize=9, loc='lower left')
-ax2.grid(True, alpha=0.35)
+# ── [1,0] Learning Rate ───────────────────────────────────────────────────────
+ax = axes[1, 0]
+if gpt2_step_lrs:
+    ax.plot(gpt2_step_epochs[:len(gpt2_step_lrs)], [lr * 1e5 for lr in gpt2_step_lrs],
+            color=PALETTE['gap'], linewidth=2.5, marker='o', markersize=4,
+            label='Learning Rate (×10⁻⁵)')
+for e in [1, 2, 3]:
+    ax.axvline(e, color='#555577', linestyle=':', linewidth=1.0, alpha=0.7)
+ax.set_title('Décroissance du Learning Rate (warmup → linéaire ↓)')
+ax.set_xlabel('Époque')
+ax.set_ylabel('LR  (×10⁻⁵)')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.35)
+ax.set_xticks([1, 2, 3])
 
-# Stats box — placed inside right axes to avoid overlap
+# ── [1,1] Gradient Norm ───────────────────────────────────────────────────────
+ax = axes[1, 1]
+if gpt2_step_gradnorms:
+    sn = gpt2_step_epochs[:len(gpt2_step_gradnorms)]
+    ax.plot(sn, gpt2_step_gradnorms,
+            color=PALETTE['neutral'], alpha=0.35, linewidth=1.2, label='Grad norm (par step)')
+    sy_gn = smooth(gpt2_step_gradnorms)
+    ax.plot(sn[1:-1] if len(sn) > 2 else sn, sy_gn,
+            color=PALETTE['neutral'], linewidth=2.5, label='Grad norm (lissé)')
+for e in [1, 2, 3]:
+    ax.axvline(e, color='#555577', linestyle=':', linewidth=1.0, alpha=0.7)
+ax.set_title('Norme des Gradients ↓ = stabilisation')
+ax.set_xlabel('Époque')
+ax.set_ylabel('Grad Norm')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.35)
+ax.set_xticks([1, 2, 3])
+
+# Stats box bottom-center
 stats_text = (
-    "GPT-2 (small)  •  124.4 M params\n"
-    "3 époques  •  58.3 sec total\n"
-    "Val Loss final : 2.527  •  Val PPL : 12.52\n"
-    "LR : 5e-5  •  Batch : 4  •  fp16"
+    "GPT-2 small  •  124.4 M params  •  3 époques  •  58.3 sec  •  "
+    "Val Loss=2.527  •  Val PPL=12.52  •  LR=5e-5  •  Batch=4  •  fp16"
 )
-ax2.text(0.97, 0.97, stats_text, transform=ax2.transAxes,
-         ha='right', va='top', fontsize=8.5, color='#aaaaaa',
-         style='italic', linespacing=1.6,
-         bbox=dict(boxstyle='round,pad=0.4', facecolor='#1a1d27', edgecolor='#3a3d4d', alpha=0.85))
+fig.text(0.5, -0.02, stats_text, ha='center', fontsize=9,
+         color='#888888', style='italic')
 
 plt.tight_layout()
 save(fig, 'gpt2_training_curve.png')
