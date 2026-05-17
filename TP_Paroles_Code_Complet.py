@@ -375,7 +375,7 @@ class LyricsGenerationModel:
         return loss, probs
     
     def backward(self, X_batch, genres_batch, y_batch, logits, a1, combined, relu_mask, dropout_mask, probs,
-                 learning_rate=0.01, label_smoothing=0.0):
+                 learning_rate=0.01, label_smoothing=0.0, grad_clip=None):
         batch_size = X_batch.shape[0]
         if label_smoothing and label_smoothing > 0.0:
             smooth = float(label_smoothing)
@@ -397,6 +397,12 @@ class LyricsGenerationModel:
         
         dW1 = xp.dot(combined.T, d_z1)
         db1 = xp.sum(d_z1, axis=0, keepdims=True)
+
+        if grad_clip is not None and grad_clip > 0:
+            for grad in [dW1, db1, dW2, db2]:
+                grad_norm = float(xp.linalg.norm(grad).item())
+                if grad_norm > grad_clip:
+                    grad *= grad_clip / (grad_norm + 1e-8)
         
         self.W2 -= learning_rate * dW2
         self.b2 -= learning_rate * db2
@@ -504,13 +510,8 @@ def train_epoch(model, X_train, y_train, genres_train, batch_size=128, lr=0.01):
                 probs,
                 lr,
                 label_smoothing=LABEL_SMOOTHING,
+                grad_clip=GRAD_CLIP,
             )
-
-            # Gradient clipping on weight matrices
-            for param in [model.W1, model.W2, model.b1, model.b2]:
-                norm = float(xp.linalg.norm(param).item())
-                if norm > GRAD_CLIP:
-                    param *= GRAD_CLIP / (norm + 1e-8)
 
             total_loss += loss
             total_accuracy += accuracy
