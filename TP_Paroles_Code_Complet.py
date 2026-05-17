@@ -398,6 +398,11 @@ class LyricsGenerationModel:
         dW1 = xp.dot(combined.T, d_z1)
         db1 = xp.sum(d_z1, axis=0, keepdims=True)
 
+        d_combined = xp.dot(d_z1, self.W1.T)
+        d_word_flat = d_combined[:, :SEQ_LEN * self.embedding_dim]
+        d_genre_embed = d_combined[:, SEQ_LEN * self.embedding_dim:]
+        d_word_embed = d_word_flat.reshape(X_batch.shape[0], SEQ_LEN, self.embedding_dim)
+
         if grad_clip is not None and grad_clip > 0:
             for grad in [dW1, db1, dW2, db2]:
                 grad_norm = float(xp.linalg.norm(grad).item())
@@ -408,6 +413,36 @@ class LyricsGenerationModel:
         self.b2 -= learning_rate * db2
         self.W1 -= learning_rate * dW1
         self.b1 -= learning_rate * db1
+
+        # Update embeddings (token + genre) via scatter-add style accumulation
+        grad_word_embedding = xp.zeros_like(self.word_embedding)
+        flat_tokens = X_batch.reshape(-1)
+        flat_grads = d_word_embed.reshape(-1, self.embedding_dim)
+        valid_mask = (flat_tokens != PAD_IDX)
+        token_idx = flat_tokens[valid_mask]
+        token_grads = flat_grads[valid_mask]
+
+        if USING_GPU:
+            import cupyx
+            cupyx.scatter_add(grad_word_embedding, token_idx, token_grads)
+        else:
+            np.add.at(grad_word_embedding, token_idx, token_grads)
+
+        grad_genre_embedding = xp.zeros_like(self.genre_embedding)
+        if USING_GPU:
+            import cupyx
+            cupyx.scatter_add(grad_genre_embedding, genres_batch, d_genre_embed)
+        else:
+            np.add.at(grad_genre_embedding, genres_batch, d_genre_embed)
+
+        if grad_clip is not None and grad_clip > 0:
+            for grad in [grad_word_embedding, grad_genre_embedding]:
+                grad_norm = float(xp.linalg.norm(grad).item())
+                if grad_norm > grad_clip:
+                    grad *= grad_clip / (grad_norm + 1e-8)
+
+        self.word_embedding -= learning_rate * grad_word_embedding
+        self.genre_embedding -= learning_rate * grad_genre_embedding
 
 EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "32"))
 HIDDEN_DIM = int(os.getenv("HIDDEN_DIM", "128"))
