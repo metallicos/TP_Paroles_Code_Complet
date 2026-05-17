@@ -745,13 +745,13 @@ if gpt2_eval_epochs:
 
     ppl_min = min(gpt2_eval_ppls)
     ppl_max = max(gpt2_eval_ppls)
-    margin = 1.5
-    ax2.set_ylim(ppl_min - margin, ppl_max + margin * 2)
+    ax2.set_ylim(ppl_min - 0.6, ppl_max + 1.2)
 
-    ax2.fill_between(gpt2_eval_epochs, gpt2_eval_ppls, ppl_min - margin,
-                     color='#f39c12', alpha=0.10)
+    # Subtle fill just between the line and a close baseline
+    ax2.fill_between(gpt2_eval_epochs, gpt2_eval_ppls, ppl_min - 0.6,
+                     color='#f39c12', alpha=0.05)
 
-    # Simple text note about Custom FF — no broken arrow
+    # Text note about Custom FF
     ax2.text(0.03, 0.97,
              f'Custom FF: PPL = 220.81\n(×{220.81/gpt2_eval_ppls[-1]:.1f} plus élevé — hors échelle)',
              transform=ax2.transAxes, ha='left', va='top',
@@ -765,7 +765,7 @@ for e in [1, 2, 3]:
 ax2.set_xlabel('Époque', fontsize=11)
 ax2.set_ylabel('Val Perplexité ↓ (zoom GPT-2)', fontsize=11)
 ax2.set_title('Val Perplexité ↓  (GPT-2, zoom)', fontsize=12, fontweight='bold')
-ax2.legend(fontsize=9)
+ax2.legend(fontsize=9, loc='lower left')
 ax2.grid(True, alpha=0.35)
 
 # Stats box — placed inside right axes to avoid overlap
