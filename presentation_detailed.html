@@ -6,23 +6,26 @@
   <title>Projet Technique IA — Génération de Paroles</title>
   <style>
     :root {
-      --bg: #0b1020;
-      --bg-2: #0f1730;
-      --card: #121d37;
-      --line: #2b3c66;
-      --text: #e8efff;
-      --muted: #acbddf;
-      --accent: #7cb2ff;
-      --accent-2: #74e3c5;
-      --warn: #ffbe7a;
-      --code: #0a1328;
+      --bg: #050812;
+      --bg-2: #0a0f24;
+      --card: #101a37;
+      --line: #3f57a8;
+      --text: #f1f6ff;
+      --muted: #9eb2e3;
+      --accent: #69d5ff;
+      --accent-2: #9d7bff;
+      --warn: #ffc58a;
+      --code: #091127;
     }
 
     * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
-      background: radial-gradient(1200px 700px at 10% 0%, #1b2950 0%, var(--bg) 45%, #080d1d 100%);
+      background:
+        radial-gradient(1200px 700px at 5% -10%, rgba(105, 213, 255, 0.22) 0%, rgba(105, 213, 255, 0.0) 55%),
+        radial-gradient(1000px 620px at 92% 4%, rgba(157, 123, 255, 0.22) 0%, rgba(157, 123, 255, 0.0) 58%),
+        linear-gradient(145deg, #05070f 0%, #090f22 52%, #060a17 100%);
       color: var(--text);
       font-family: "Inter", "Segoe UI", "Roboto", Arial, sans-serif;
       line-height: 1.45;
@@ -32,9 +35,10 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      backdrop-filter: blur(8px);
-      background: rgba(8, 13, 29, 0.78);
+      backdrop-filter: blur(10px);
+      background: linear-gradient(90deg, rgba(7, 12, 28, 0.84), rgba(11, 20, 46, 0.84));
       border-bottom: 1px solid var(--line);
+      box-shadow: 0 0 22px rgba(105, 213, 255, 0.14);
       padding: 10px 24px;
       display: flex;
       justify-content: space-between;
@@ -44,6 +48,7 @@
     .brand {
       font-weight: 800;
       letter-spacing: .2px;
+      text-shadow: 0 0 18px rgba(105, 213, 255, .28);
     }
 
     .brand span { color: var(--accent-2); }
@@ -70,8 +75,11 @@
       padding: 32px;
       border-radius: 18px;
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(21, 34, 64, .82), rgba(14, 22, 42, .95));
-      box-shadow: 0 22px 45px rgba(0, 0, 0, .28);
+      background:
+        linear-gradient(180deg, rgba(16, 27, 57, .88), rgba(10, 18, 38, .96));
+      box-shadow:
+        0 24px 55px rgba(0, 0, 0, .38),
+        inset 0 0 0 1px rgba(105, 213, 255, .11);
       overflow: auto;
       display: none;
       page-break-after: always;
@@ -88,20 +96,27 @@
       align-items: center;
       gap: 8px;
       border: 1px solid var(--line);
-      background: rgba(10, 17, 35, 0.92);
+      background: linear-gradient(90deg, rgba(9, 16, 34, 0.95), rgba(14, 22, 48, 0.95));
       border-radius: 999px;
       padding: 8px 10px;
       backdrop-filter: blur(6px);
+      box-shadow: 0 0 20px rgba(105, 213, 255, 0.14);
     }
 
     .ctrl-btn {
-      border: 1px solid #36548d;
-      background: #132448;
-      color: #d9e8ff;
+      border: 1px solid #4a69c2;
+      background: linear-gradient(180deg, #173062, #112447);
+      color: #e4f1ff;
       border-radius: 999px;
       font-size: 12px;
       padding: 6px 10px;
       cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(105, 213, 255, 0.12);
+    }
+
+    .ctrl-btn:hover:not(:disabled) {
+      background: linear-gradient(180deg, #1e3b77, #15305f);
+      box-shadow: 0 0 14px rgba(105, 213, 255, .22);
     }
 
     .ctrl-btn:disabled {
@@ -124,10 +139,11 @@
     }
 
     .flow-card {
-      background: linear-gradient(180deg, #132140, #101a33);
-      border: 1px solid #35558f;
+      background: linear-gradient(180deg, #122348, #0f1a35);
+      border: 1px solid #4564bd;
       border-radius: 12px;
       padding: 12px;
+      box-shadow: inset 0 0 0 1px rgba(105, 213, 255, .08);
     }
 
     .flow-card h4 {
@@ -136,9 +152,9 @@
     }
 
     .flow-step {
-      border: 1px solid #36558f;
+      border: 1px solid #4b67bd;
       border-radius: 10px;
-      background: #122244;
+      background: linear-gradient(180deg, #132953, #102447);
       padding: 8px;
       font-size: 12px;
       color: #cfe0ff;
@@ -158,12 +174,13 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .45px;
-      color: #d7e8ff;
-      border: 1px solid #3b5ea2;
-      background: #15264a;
+      color: #e3f2ff;
+      border: 1px solid #4f72cf;
+      background: linear-gradient(90deg, #173266, #1b2c56);
       border-radius: 999px;
       padding: 6px 11px;
       margin-bottom: 12px;
+      box-shadow: 0 0 14px rgba(105, 213, 255, .15);
     }
 
     h1, h2, h3, h4 { margin: 0 0 10px; line-height: 1.2; }
@@ -180,16 +197,17 @@
     .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 
     .card {
-      background: linear-gradient(180deg, #142243, #111b35);
+      background: linear-gradient(180deg, #13244b, #101c37);
       border: 1px solid var(--line);
       border-radius: 12px;
       padding: 12px;
+      box-shadow: inset 0 0 0 1px rgba(105, 213, 255, .09);
     }
 
     .metric {
       border: 1px solid var(--line);
       border-radius: 12px;
-      background: #0f1932;
+      background: linear-gradient(180deg, #102145, #0d1a35);
       padding: 10px;
     }
     .metric .v { font-size: 25px; font-weight: 800; color: var(--accent-2); }
@@ -206,9 +224,9 @@
       margin-top: 8px;
     }
     .node {
-      border: 1px solid #3a578f;
+      border: 1px solid #4f72ca;
       border-radius: 10px;
-      background: #14254a;
+      background: linear-gradient(180deg, #14305d, #12284e);
       padding: 9px;
       min-height: 72px;
       font-size: 12px;
@@ -219,8 +237,9 @@
       width: 100%;
       border-radius: 11px;
       border: 1px solid var(--line);
-      background: #0a0f1f;
+      background: #0a1226;
       margin-top: 8px;
+      box-shadow: 0 0 18px rgba(157, 123, 255, 0.12);
     }
 
     .caption {
@@ -231,7 +250,7 @@
 
     pre {
       margin: 10px 0 0;
-      border: 1px solid #334b79;
+      border: 1px solid #4865b5;
       border-radius: 10px;
       background: var(--code);
       color: #dbe8ff;
@@ -245,7 +264,7 @@
       border-left: 3px solid var(--accent);
       padding: 8px 10px;
       border-radius: 8px;
-      background: #0d1730;
+      background: linear-gradient(90deg, rgba(105, 213, 255, 0.08), rgba(157, 123, 255, 0.08));
       font-family: "Cambria Math", "Times New Roman", serif;
       margin-top: 8px;
       color: #d8e8ff;
@@ -256,9 +275,9 @@
       font-size: 10px;
       padding: 3px 7px;
       border-radius: 999px;
-      border: 1px solid #2f7e6f;
-      background: #113932;
-      color: #d6fff4;
+      border: 1px solid #4f68c2;
+      background: linear-gradient(90deg, #17315f, #2a2d6a);
+      color: #d9ebff;
       margin-right: 5px;
       text-transform: uppercase;
       letter-spacing: .3px;
@@ -276,7 +295,7 @@
       text-align: left;
       vertical-align: top;
     }
-    th { background: #192a53; color: #e4efff; }
+    th { background: linear-gradient(180deg, #1b3165, #1a2b57); color: #e4efff; }
     td { color: #c9d7f0; }
 
     @media (max-width: 1040px) {
@@ -333,7 +352,7 @@
             <li>Décrire rigoureusement l’architecture complète du système IA.</li>
             <li>Formaliser le pipeline données → apprentissage → inférence.</li>
             <li>Relier les fonctions de code aux équations d’optimisation.</li>
-            <li>Analyser les limites théoriques du modèle custom.</li>
+            <li>Analyser les limites théoriques du modèle .</li>
             <li>Expliquer l’apport de l’intégration GPT en termes de capacité de modélisation.</li>
           </ul>
         </div>
@@ -342,7 +361,7 @@
           <ol style="margin:8px 0 0 20px; color:#c8d6f2;">
             <li>Formalisation du problème séquentiel.</li>
             <li>Ingénierie du dataset et transformations.</li>
-            <li>Architecture du réseau neuronal custom et backpropagation manuelle.</li>
+            <li>Architecture du réseau neuronal  et backpropagation manuelle.</li>
             <li>Objectif d’apprentissage, convergence et régularisation.</li>
             <li>Décodage probabiliste et contrôle de génération.</li>
             <li>Cadre Transformer et intégration GPT.</li>
@@ -365,7 +384,7 @@
           <div class="flow-link">↓</div>
           <div class="flow-step"><strong>Prétraitement</strong><br/>cleaning, tokenisation, encodage</div>
           <div class="flow-link">↓</div>
-          <div class="flow-step"><strong>Training Core</strong><br/>réseau neuronal custom (NumPy/CuPy)</div>
+          <div class="flow-step"><strong>Training Core</strong><br/>réseau neuronal  (NumPy/CuPy)</div>
         </div>
 
         <div class="flow-card">
@@ -482,7 +501,7 @@ def tokenize(text):
       <div class="caption">Distribution des chansons par genre et langage après nettoyage</div>    </section>
 
     <section class="slide">
-      <div class="kicker">Slide 7 · Architecture du modèle custom</div>
+      <div class="kicker">Slide 7 · Architecture du modèle </div>
       <h2>Réseau Feed-Forward conditionné par genre</h2>
 
       <div class="grid2">
@@ -802,7 +821,7 @@ fp16=True si CUDA</pre>
 
     <section class="slide">
       <div class="kicker">Slide 16 · Comparaison modèles</div>
-      <h2>Comparaison entre model custom et GPT-2</h2>
+      <h2>Comparaison entre notre modèle  et GPT-2</h2>
 
       <div class="grid2">
         <div class="card">
@@ -833,15 +852,8 @@ fp16=True si CUDA</pre>
 
       <div class="card">
         <p>Le projet constitue une implémentation complète d’un système génératif textuel: <strong>ingénierie des données</strong>, <strong>apprentissage supervisé next-token</strong>, <strong>backpropagation manuelle</strong>, <strong>décodage probabiliste contraint</strong> et <strong>extension par fine-tuning GPT</strong>.</p>
-        <p>La valeur scientifique est double: (1) explicabilité profonde via le modèle custom, (2) amélioration de qualité via le modèle Transformer, avec continuité théorique entre modèles.</p>
       </div>
 
-      <div class="grid4" style="margin-top:10px;">
-        <div class="metric"><div class="v">Custom</div><div class="l">Mécanismes ML explicités</div></div>
-        <div class="metric"><div class="v">GPT</div><div class="l">Qualité linguistique accrue</div></div>
-        <div class="metric"><div class="v">Hybrid</div><div class="l">Pipeline industriel plausible</div></div>
-        <div class="metric"><div class="v">Academic</div><div class="l">Formalisme + implémentation</div></div>
-      </div>
     </section>
 
   </main>
