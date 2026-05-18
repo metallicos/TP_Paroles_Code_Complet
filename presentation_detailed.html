@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Soutenance Technique IA — Génération de Paroles</title>
+  <title>Projet Technique IA — Génération de Paroles</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -58,19 +58,98 @@
       max-width: 1320px;
       margin: 0 auto;
       padding: 18px 22px 40px;
-      scroll-snap-type: y proximity;
+      height: calc(100vh - 74px);
+      padding: 10px 16px 14px;
+      overflow: hidden;
     }
 
     .slide {
-      min-height: calc(100vh - 96px);
-      margin: 18px 0;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
       padding: 32px;
       border-radius: 18px;
       border: 1px solid var(--line);
       background: linear-gradient(180deg, rgba(21, 34, 64, .82), rgba(14, 22, 42, .95));
       box-shadow: 0 22px 45px rgba(0, 0, 0, .28);
-      scroll-snap-align: start;
+      overflow: auto;
+      display: none;
       page-break-after: always;
+    }
+
+    .slide.active { display: block; }
+
+    .controls {
+      position: fixed;
+      right: 16px;
+      bottom: 14px;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: rgba(10, 17, 35, 0.92);
+      border-radius: 999px;
+      padding: 8px 10px;
+      backdrop-filter: blur(6px);
+    }
+
+    .ctrl-btn {
+      border: 1px solid #36548d;
+      background: #132448;
+      color: #d9e8ff;
+      border-radius: 999px;
+      font-size: 12px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .ctrl-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .counter {
+      min-width: 64px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .flow-card {
+      background: linear-gradient(180deg, #132140, #101a33);
+      border: 1px solid #35558f;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .flow-card h4 {
+      margin-bottom: 8px;
+      color: #dff0ff;
+    }
+
+    .flow-step {
+      border: 1px solid #36558f;
+      border-radius: 10px;
+      background: #122244;
+      padding: 8px;
+      font-size: 12px;
+      color: #cfe0ff;
+    }
+
+    .flow-link {
+      text-align: center;
+      color: #8fb8ff;
+      font-weight: 800;
+      padding: 4px 0;
+      letter-spacing: .3px;
     }
 
     .kicker {
@@ -206,6 +285,14 @@
       .arrow { display: none; }
       h1 { font-size: 34px; }
       h2 { font-size: 27px; }
+      .deck {
+        padding: 8px;
+        height: calc(100vh - 68px);
+      }
+      .slide {
+        padding: 18px;
+      }
+      .flow-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -220,14 +307,24 @@
   <main class="deck">
 
     <section class="slide">
-      <div class="kicker">Slide 1 · Introduction</div>
-      <h1>Génération Automatique de Paroles de Chanson</h1>
-      <p class="muted">Abdellah Saaid & Chihab Eddine Ethamry.</p>
+      <div style="min-height:100%;display:flex;align-items:center;justify-content:center;">
+      <div style="width:min(980px,100%);text-align:center;">
+        <div class="kicker">Slide 1 · Introduction</div>
+        <h1>Génération Automatique de Paroles de Chanson</h1>
+        <p class="muted">Présentation de Projet — Module Machine Learning</p>
+
+        <div class="card" style="max-width:720px;margin:16px auto 0;">
+          <h4>Équipe</h4>
+          <p><strong>Abdellah Saaid</strong> & <strong>Chihab Eddine Ethamry</strong></p>
+        </div>
+      </div>
+      </div>
+
 
     </section>
 
     <section class="slide">
-      <div class="kicker">Slide 2 · Cadre de soutenance</div>
+      <div class="kicker">Slide 2 · Cadre de Projet</div>
       <h2>Objectifs  et plan de lecture</h2>
       <div class="grid2">
         <div class="card">
@@ -261,26 +358,33 @@
 
       <p class="muted">L’architecture suit un découplage fonctionnel clair: préparation du signal d’apprentissage, entraînement supervisé, inférence contrôlée et extension Transformer. Cette séparation permet d’isoler les hypothèses de chaque couche du système et d’étudier précisément leur impact.</p>
 
-      <div class="diagram">
-        <div class="node"><strong>Ingestion</strong><br/>spotify_songs.csv<br/>pandas I/O</div>
-        <div class="arrow">→</div>
-        <div class="node"><strong>Prétraitement</strong><br/>cleaning, tokenisation,<br/>vocabulaire, encodage</div>
-        <div class="arrow">→</div>
-        <div class="node"><strong>Training Core</strong><br/>réseau neuronal custom<br/>NumPy/CuPy</div>
-      </div>
-      <div class="diagram" style="margin-top:8px;">
-        <div class="node"><strong>Checkpoints</strong><br/>best + epochN<br/>pickle + metadata</div>
-        <div class="arrow">→</div>
-        <div class="node"><strong>Inference Layer</strong><br/>logit penalties<br/>sampling contrôlé</div>
-        <div class="arrow">→</div>
-        <div class="node"><strong>Evaluation Layer</strong><br/>métriques théoriques<br/>PPL, diversité, cohérence</div>
-      </div>
-      <div class="diagram" style="margin-top:8px;">
-        <div class="node"><strong>GPT Branch</strong><br/>HF tokenizer + Trainer<br/>fine-tuning ciblé</div>
-        <div class="arrow">→</div>
-        <div class="node"><strong>Hybrid Flow</strong><br/>socle custom + GPT<br/>qualité améliorée</div>
-        <div class="arrow"></div>
-        <div class="node"><strong>Sortie</strong><br/>Paroles générées<br/>évaluation qualitative</div>
+      <div class="flow-grid">
+        <div class="flow-card">
+          <h4>Chaîne principale</h4>
+          <div class="flow-step"><strong>Ingestion</strong><br/>spotify_songs.csv · pandas I/O</div>
+          <div class="flow-link">↓</div>
+          <div class="flow-step"><strong>Prétraitement</strong><br/>cleaning, tokenisation, encodage</div>
+          <div class="flow-link">↓</div>
+          <div class="flow-step"><strong>Training Core</strong><br/>réseau neuronal custom (NumPy/CuPy)</div>
+        </div>
+
+        <div class="flow-card">
+          <h4>Chaîne d’exploitation</h4>
+          <div class="flow-step"><strong>Checkpoints</strong><br/>best + epochN, pickle, metadata</div>
+          <div class="flow-link">↓</div>
+          <div class="flow-step"><strong>Inference Layer</strong><br/>logit penalties, sampling contrôlé</div>
+          <div class="flow-link">↓</div>
+          <div class="flow-step"><strong>Evaluation Layer</strong><br/>PPL, diversité, cohérence</div>
+        </div>
+
+        <div class="flow-card">
+          <h4>Extension Transformer</h4>
+          <div class="flow-step"><strong>GPT Branch</strong><br/>HF tokenizer + Trainer</div>
+          <div class="flow-link">↓</div>
+          <div class="flow-step"><strong>Hybrid Flow</strong><br/>socle custom + GPT</div>
+          <div class="flow-link">↓</div>
+          <div class="flow-step"><strong>Sortie</strong><br/>paroles générées + évaluation qualitative</div>
+        </div>
       </div>
     </section>
 
@@ -741,5 +845,74 @@ fp16=True si CUDA</pre>
     </section>
 
   </main>
+
+  <div class="controls">
+    <button class="ctrl-btn" id="prevBtn">◀ Précédent</button>
+    <div class="counter" id="counter">1 / 1</div>
+    <button class="ctrl-btn" id="nextBtn">Suivant ▶</button>
+    <button class="ctrl-btn" id="fsBtn">⛶ Plein écran</button>
+  </div>
+
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const fsBtn = document.getElementById('fsBtn');
+      const counter = document.getElementById('counter');
+
+      let index = 0;
+
+      function showSlide(newIndex) {
+        index = Math.max(0, Math.min(newIndex, slides.length - 1));
+        slides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === index);
+          if (i === index) slide.scrollTop = 0;
+        });
+        counter.textContent = `${index + 1} / ${slides.length}`;
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === slides.length - 1;
+      }
+
+      function next() { showSlide(index + 1); }
+      function prev() { showSlide(index - 1); }
+
+      prevBtn.addEventListener('click', prev);
+      nextBtn.addEventListener('click', next);
+
+      fsBtn.addEventListener('click', async () => {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (['ArrowRight', 'PageDown', ' '].includes(e.key)) {
+          e.preventDefault();
+          next();
+        }
+        if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) {
+          e.preventDefault();
+          prev();
+        }
+        if (e.key.toLowerCase() === 'f') {
+          fsBtn.click();
+        }
+      });
+
+      let wheelLock = false;
+      document.addEventListener('wheel', (e) => {
+        if (wheelLock) return;
+        if (Math.abs(e.deltaY) < 25) return;
+        wheelLock = true;
+        if (e.deltaY > 0) next(); else prev();
+        setTimeout(() => { wheelLock = false; }, 220);
+      }, { passive: true });
+
+      showSlide(0);
+    })();
+  </script>
 </body>
 </html>
