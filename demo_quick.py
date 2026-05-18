@@ -10,10 +10,12 @@ import sys
 
 
 def get_project_root():
+    """Return absolute path of the project root."""
     return os.path.dirname(os.path.abspath(__file__))
 
 
 def test_quick_demo():
+    """Run a short generation demo if a trained model checkpoint is available."""
     project_root = get_project_root()
     model_path = os.path.join(project_root, 'outputs', 'lyrics_model.pkl')
     

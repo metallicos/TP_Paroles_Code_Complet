@@ -1,3 +1,17 @@
+"""
+Pipeline principal du TP — modèle custom de génération de paroles.
+
+Ce script couvre toute la chaîne :
+1) chargement + nettoyage du dataset,
+2) création vocabulaire / encodage,
+3) entraînement d'un modèle feed-forward conditionné par genre,
+4) sauvegarde checkpoints + métriques,
+5) génération et évaluation de base.
+
+Note: les hyperparamètres peuvent être définis via `config/train_config.json`
+et/ou variables d'environnement.
+"""
+
 import os
 import sys
 import pandas as pd

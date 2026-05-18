@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 
+"""Vérifications rapides de l'environnement du projet (imports, dataset, scripts, outputs)."""
+
 import os
 import sys
 import pandas as pd
 
 
 def get_project_root():
+    """Return absolute path of the project root (folder containing this script)."""
     return os.path.dirname(os.path.abspath(__file__))
 
 
 def test_imports():
+    """Check that required Python dependencies can be imported."""
     print("=" * 60)
     print("TEST 1: Vérification des imports")
     print("=" * 60)
@@ -41,6 +45,7 @@ def test_imports():
 
 
 def test_dataset():
+    """Validate dataset presence, readability, and required columns."""
     print("=" * 60)
     print("TEST 2: Vérification du Dataset")
     print("=" * 60)
@@ -78,6 +83,7 @@ def test_dataset():
 
 
 def test_model_existance():
+    """Check whether a trained model file exists and can be loaded."""
     print("=" * 60)
     print("TEST 3: Vérification du Modèle")
     print("=" * 60)
@@ -112,6 +118,7 @@ def test_model_existance():
 
 
 def test_scripts():
+    """Verify that core project scripts are present in the workspace."""
     print("=" * 60)
     print("TEST 4: Vérification des Scripts")
     print("=" * 60)
@@ -136,6 +143,7 @@ def test_scripts():
 
 
 def main():
+    """Run all checks and print a concise pass/fail summary."""
     print("\n")
     print("╔" + "=" * 58 + "╗")
     print("║" + " TESTS DE VÉRIFICATION DU PROJET ".center(58) + "║")

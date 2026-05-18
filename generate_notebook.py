@@ -1,3 +1,9 @@
+"""Génère programmatiquement le notebook pédagogique du TP au format .ipynb.
+
+Le script construit la structure JSON complète (cells markdown + code),
+puis écrit le fichier notebook final à la racine du projet.
+"""
+
 import json
 
 # Créer la structure complète du notebook

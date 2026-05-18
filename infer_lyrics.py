@@ -1,3 +1,13 @@
+"""
+Inférence / génération de paroles depuis un modèle entraîné.
+
+Fonctions principales de ce script:
+- reconstruire les métadonnées utiles (vocabulaire, genres) si nécessaire,
+- charger les checkpoints du modèle custom,
+- générer des paroles avec décodage contrôlé (temperature, top-k, top-p),
+- appliquer des pénalités de répétition pour améliorer la qualité des sorties.
+"""
+
 import pickle
 import numpy as np
 import argparse
@@ -8,6 +18,7 @@ from collections import Counter
 
 
 def get_array_backend():
+    """Return (array_module, using_gpu) based on USE_GPU and CuPy availability."""
     use_gpu = os.getenv("USE_GPU", "auto").lower()
     if use_gpu in ("1", "true", "yes", "auto"):
         try:
@@ -24,14 +35,17 @@ xp, USING_GPU = get_array_backend()
 
 
 def get_project_root():
+    """Return absolute path to the project root (current script directory)."""
     return os.path.dirname(os.path.abspath(__file__))
 
 
 def get_data_path(filename):
+    """Build absolute path to a data file in project root."""
     return os.path.join(get_project_root(), filename)
 
 
 def get_output_path(filename):
+    """Build absolute path inside the outputs/ directory."""
     return os.path.join(get_project_root(), 'outputs', filename)
 
 
@@ -114,12 +128,15 @@ def rebuild_vocab_from_csv(csv_path, max_samples=None):
 
 
 class LyricsGenerationModel:
+    """Minimal forward-only wrapper matching the custom training architecture."""
+
     def __init__(self, vocab_size, embedding_dim=16, hidden_dim=32, num_genres=5):
         self.vocab_size = vocab_size
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
         
     def forward(self, X_batch, genres_batch, weights):
+        """Compute logits for a batch using provided trained weights."""
         batch_size = X_batch.shape[0]
         word_embeds = weights['word_embedding'][X_batch]
         word_embeds_flat = word_embeds.reshape(batch_size, -1)

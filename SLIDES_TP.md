@@ -37,7 +37,7 @@ Mai 2026
 | Rap | 2 500 | Flux rapide, rimes complexes |
 | EDM | 1 732 | Répétitif, énergie haute |
 
-![Distribution des genres dans le dataset](graphs+logs/dataset_distribution.png)
+![Distribution des genres dans le dataset](dataset_distribution.png)
 
 ---
 
@@ -73,7 +73,7 @@ Chanson : [<BOS>, "i", "love", "you", <EOS>]
 **Total : 5 547 617 paires**  
 (4 449 959 train / 1 097 658 val)
 
-![Fréquence des mots dans le vocabulaire](graphs+logs/vocab_frequency.png)
+![Fréquence des mots dans le vocabulaire](vocab_frequency.png)
 
 ---
 
@@ -236,7 +236,7 @@ $$\frac{\partial \mathcal{L}}{\partial E_{\text{word}}} = \texttt{scatter\_add}\
 
 **Amélioration :** PPL initiale ~12 004 (uniforme) → **220.81** (×54)
 
-![Courbes d'entraînement — Loss, PPL, Accuracy, Écart Val-Train](graphs+logs/training_curves.png)
+![Courbes d'entraînement — Loss, PPL, Accuracy, Écart Val-Train](training_curves.png)
 
 ---
 
@@ -250,9 +250,9 @@ $$\frac{\partial \mathcal{L}}{\partial E_{\text{word}}} = \texttt{scatter\_add}\
 | Rap | 0.47 | 0.28 | 0.16 |
 | Rock | 0.53 | 0.08 | 0.00 |
 
-![Qualité de génération par genre](graphs+logs/generation_quality.png)
+![Qualité de génération par genre](generation_quality.png)
 
-![Écart Val − Train](graphs+logs/overfitting_gap.png)
+![Écart Val − Train](overfitting_gap.png)
 
 ---
 
@@ -322,7 +322,7 @@ trainer.train()   # ← 58.3 secondes sur GPU
 | Époques | 3 |
 | Paramètres | 124.4 M |
 
-![GPT-2 Fine-tuning — Loss, PPL, Learning Rate, Grad Norm](graphs+logs/gpt2_training_curve.png)
+![GPT-2 Fine-tuning — Loss, PPL, Learning Rate, Grad Norm](gpt2_training_curve.png)
 
 > La loss val descend régulièrement (2.562 → 2.532 → 2.527), la PPL converge à **12.52**, le LR suit le schedule linéaire HuggingFace, la norme des gradients se stabilise après l'époque 1.
 
@@ -344,7 +344,7 @@ trainer.train()   # ← 58.3 secondes sur GPU
 
 $$\text{Ratio PPL} = \frac{220.81}{12.52} = \times 17.6 \text{ plus précis}$$
 
-![Comparaison des deux modèles](graphs+logs/model_comparison.png)
+![Comparaison des deux modèles](model_comparison.png)
 
 ---
 
@@ -427,7 +427,7 @@ TP_Paroles_Code_Complet/
 ├── TP_Paroles_Code_Complet.py   ← Modèle custom (entraînement from scratch)
 ├── gpt2_finetune.py             ← Fine-tuning GPT-2 (HuggingFace)
 ├── make_graphs.py               ← Génération des 7 graphiques
-├── graphs+logs/
+├── 
 │   ├── training_curves.png      ← Courbes custom (Loss, PPL, Acc, Gap)
 │   ├── gpt2_training_curve.png  ← Courbes GPT-2 (Loss, PPL, LR, GradNorm)
 │   ├── model_comparison.png     ← Tableau comparatif visuel

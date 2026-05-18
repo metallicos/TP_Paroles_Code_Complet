@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Soutenance Technique IA — Génération de Paroles</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-2: #0f1730;
+      --card: #121d37;
+      --line: #2b3c66;
+      --text: #e8efff;
+      --muted: #acbddf;
+      --accent: #7cb2ff;
+      --accent-2: #74e3c5;
+      --warn: #ffbe7a;
+      --code: #0a1328;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(1200px 700px at 10% 0%, #1b2950 0%, var(--bg) 45%, #080d1d 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", "Roboto", Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      background: rgba(8, 13, 29, 0.78);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .brand span { color: var(--accent-2); }
+
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .deck {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px 22px 40px;
+      scroll-snap-type: y proximity;
+    }
+
+    .slide {
+      min-height: calc(100vh - 96px);
+      margin: 18px 0;
+      padding: 32px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(21, 34, 64, .82), rgba(14, 22, 42, .95));
+      box-shadow: 0 22px 45px rgba(0, 0, 0, .28);
+      scroll-snap-align: start;
+      page-break-after: always;
+    }
+
+    .kicker {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .45px;
+      color: #d7e8ff;
+      border: 1px solid #3b5ea2;
+      background: #15264a;
+      border-radius: 999px;
+      padding: 6px 11px;
+      margin-bottom: 12px;
+    }
+
+    h1, h2, h3, h4 { margin: 0 0 10px; line-height: 1.2; }
+    h1 { font-size: 42px; }
+    h2 { font-size: 31px; }
+    h3 { font-size: 22px; color: #d8e7ff; }
+    h4 { font-size: 16px; color: #d6e5ff; }
+
+    p { margin: 8px 0 10px; }
+    .muted { color: var(--muted); }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+    .card {
+      background: linear-gradient(180deg, #142243, #111b35);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #0f1932;
+      padding: 10px;
+    }
+    .metric .v { font-size: 25px; font-weight: 800; color: var(--accent-2); }
+    .metric .l { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: .35px; }
+
+    ul { margin: 8px 0 0 18px; padding: 0; }
+    li { margin: 5px 0; color: #c8d6f2; }
+
+    .diagram {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .node {
+      border: 1px solid #3a578f;
+      border-radius: 10px;
+      background: #14254a;
+      padding: 9px;
+      min-height: 72px;
+      font-size: 12px;
+    }
+    .arrow { text-align: center; color: #86b7ff; font-weight: 800; }
+
+    .img {
+      width: 100%;
+      border-radius: 11px;
+      border: 1px solid var(--line);
+      background: #0a0f1f;
+      margin-top: 8px;
+    }
+
+    .caption {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    pre {
+      margin: 10px 0 0;
+      border: 1px solid #334b79;
+      border-radius: 10px;
+      background: var(--code);
+      color: #dbe8ff;
+      padding: 10px;
+      overflow: auto;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+
+    .eq {
+      border-left: 3px solid var(--accent);
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #0d1730;
+      font-family: "Cambria Math", "Times New Roman", serif;
+      margin-top: 8px;
+      color: #d8e8ff;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid #2f7e6f;
+      background: #113932;
+      color: #d6fff4;
+      margin-right: 5px;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #324b77;
+      padding: 7px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #192a53; color: #e4efff; }
+    td { color: #c9d7f0; }
+
+    @media (max-width: 1040px) {
+      .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+      .diagram { grid-template-columns: 1fr; }
+      .arrow { display: none; }
+      h1 { font-size: 34px; }
+      h2 { font-size: 27px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">Génération Automatique de Paroles de Chanson</span></div>
+    <div class="meta">Abdellah Saaid & Chihab Eddine Ethamry</div>
+    <div class="meta">Module Machine learning </div>
+
+  </div>
+
+  <main class="deck">
+
+    <section class="slide">
+      <div class="kicker">Slide 1 · Introduction</div>
+      <h1>Génération Automatique de Paroles de Chanson</h1>
+      <p class="muted">Abdellah Saaid & Chihab Eddine Ethamry.</p>
+
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 2 · Cadre de soutenance</div>
+      <h2>Objectifs  et plan de lecture</h2>
+      <div class="grid2">
+        <div class="card">
+          <h4>Objectifs de la démonstration</h4>
+          <ul>
+            <li>Décrire rigoureusement l’architecture complète du système IA.</li>
+            <li>Formaliser le pipeline données → apprentissage → inférence.</li>
+            <li>Relier les fonctions de code aux équations d’optimisation.</li>
+            <li>Analyser les limites théoriques du modèle custom.</li>
+            <li>Expliquer l’apport de l’intégration GPT en termes de capacité de modélisation.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Plan technique</h4>
+          <ol style="margin:8px 0 0 20px; color:#c8d6f2;">
+            <li>Formalisation du problème séquentiel.</li>
+            <li>Ingénierie du dataset et transformations.</li>
+            <li>Architecture du réseau neuronal custom et backpropagation manuelle.</li>
+            <li>Objectif d’apprentissage, convergence et régularisation.</li>
+            <li>Décodage probabiliste et contrôle de génération.</li>
+            <li>Cadre Transformer et intégration GPT.</li>
+            <li>Limites, interprétation scientifique et perspectives.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 3 · Architecture système</div>
+      <h2>Architecture globale et flux inter-modules</h2>
+
+      <p class="muted">L’architecture suit un découplage fonctionnel clair: préparation du signal d’apprentissage, entraînement supervisé, inférence contrôlée et extension Transformer. Cette séparation permet d’isoler les hypothèses de chaque couche du système et d’étudier précisément leur impact.</p>
+
+      <div class="diagram">
+        <div class="node"><strong>Ingestion</strong><br/>spotify_songs.csv<br/>pandas I/O</div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>Prétraitement</strong><br/>cleaning, tokenisation,<br/>vocabulaire, encodage</div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>Training Core</strong><br/>réseau neuronal custom<br/>NumPy/CuPy</div>
+      </div>
+      <div class="diagram" style="margin-top:8px;">
+        <div class="node"><strong>Checkpoints</strong><br/>best + epochN<br/>pickle + metadata</div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>Inference Layer</strong><br/>logit penalties<br/>sampling contrôlé</div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>Evaluation Layer</strong><br/>métriques théoriques<br/>PPL, diversité, cohérence</div>
+      </div>
+      <div class="diagram" style="margin-top:8px;">
+        <div class="node"><strong>GPT Branch</strong><br/>HF tokenizer + Trainer<br/>fine-tuning ciblé</div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>Hybrid Flow</strong><br/>socle custom + GPT<br/>qualité améliorée</div>
+        <div class="arrow"></div>
+        <div class="node"><strong>Sortie</strong><br/>Paroles générées<br/>évaluation qualitative</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 4 · Dataset engineering</div>
+      <h2>Ingénierie de données et formalisation du corpus</h2>
+
+      <p class="muted">La qualité du modèle dépend directement de la distribution empirique du corpus. Le pipeline de préparation vise donc à réduire le bruit linguistique, contrôler la variance inter-exemples et préserver une représentation exploitable des structures textuelles propres aux paroles.</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Schéma de données</h4>
+          <pre>track_id, track_name, track_artist, lyrics,
+playlist_genre, playlist_subgenre, language, ...</pre>
+          <p>Colonnes exploitées en priorité: <strong>lyrics</strong>, <strong>playlist_genre</strong>, <strong>language</strong>.</p>
+          <ul>
+            <li>Nettoyage: suppression des NA, lignes trop courtes (&lt; 50 caractères), filtrage langue EN.</li>
+            <li>Sélection des 5 genres majoritaires pour stabiliser l’apprentissage conditionnel.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Hypothèses de modélisation du corpus</h4>
+          <ul>
+            <li>Corpus textuel hétérogène, longueurs très dispersées.</li>
+            <li>Signal supervisé: prédiction du prochain token conditionnée par genre.</li>
+            <li>Langue contrainte à l’anglais pour réduire l’entropie inter-langues.</li>
+          </ul>
+          <div class="eq">N<sub>raw</sub> = 18 454 ; N<sub>clean,en</sub> = 15 371 ; N<sub>top5</sub> = 14 517</div>
+          <div class="eq">Split chanson: Train = 0.8N ; Val = 0.2N</div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 5 · Prétraitement</div>
+      <h2>Pipeline de prétraitement et tokenisation</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Fonctions implémentées</h4>
+          <pre>def preprocess_text(text):
+    text = text.lower()
+    text = text.replace('\n', ' &lt;NEW_LINE&gt; ')
+    text = re.sub(r"[^a-z0-9\s'\-,.:!?()]", '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+def tokenize(text):
+    return text.split()</pre>
+        </div>
+        <div class="card">
+          <h4>Formulation</h4>
+          <div class="eq">x = (w<sub>1</sub>, ..., w<sub>T</sub>) ;  w<sub>t</sub> ∈ V ∪ {&lt;UNK&gt;}</div>
+          <div class="eq">x' = [&lt;BOS&gt;, w<sub>1</sub>, ..., w<sub>T</sub>, &lt;EOS&gt;]</div>
+          <div class="eq">Encode: e(w) = word2idx[w]  sinon e(w)=UNK</div>
+          <p>Le pipeline reste volontairement déterministe et traçable pour reproduire exactement les expériences.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 6 · Vocabulaire & séquences</div>
+      <h2>Construction du vocabulaire, padding et paires d’apprentissage</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Logique de vocabulaire</h4>
+          <ul>
+            <li>Comptage fréquentiel avec Counter.</li>
+            <li>Filtrage MIN_FREQ=3, plafond MAX_VOCAB_SIZE=12000.</li>
+            <li>Ajout des tokens spéciaux (PAD, UNK, BOS, EOS).</li>
+          </ul>
+          <div class="eq">V = TopK({w | f(w) ≥ f<sub>min</sub>}) ; |V| = 12 004</div>
+        </div>
+        <div class="card">
+          <h4>Fenêtre glissante et paires (X,y)</h4>
+          <pre>for i in range(len(tokens)-1):
+    X.append(tokens[:i+1])
+    y.append(tokens[i+1])</pre>
+          <div class="eq">X<sub>i</sub> = (t<sub>0</sub>,...,t<sub>i</sub>) ; y<sub>i</sub> = t<sub>i+1</sub></div>
+          <div class="eq">pad(X,L) = X ⊕ [PAD]^{L-|X|} ; tronqué à L=SEQ_LEN=20</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h4>Volume observé</h4>
+        <table>
+          <tr><th>Set</th><th>Chansons</th><th>Paires</th></tr>
+          <tr><td>Train</td><td>11 613</td><td>4 449 959</td></tr>
+          <tr><td>Validation</td><td>2 904</td><td>1 097 658</td></tr>
+          <tr><td>Total</td><td>14 517</td><td>5 547 617</td></tr>
+        </table>
+      </div>      <img class="img" src="graphs+logs/dataset_distribution%20(2).png" />
+      <div class="caption">Distribution des chansons par genre et langage après nettoyage</div>    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 7 · Architecture du modèle custom</div>
+      <h2>Réseau Feed-Forward conditionné par genre</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Structure tensorielle</h4>
+          <ul>
+            <li>Word embedding: [B, 20, 64]</li>
+            <li>Flatten: [B, 1280]</li>
+            <li>Genre embedding: [B, 64]</li>
+            <li>Concat: [B, 1344]</li>
+            <li>Dense1+ReLU+Dropout: [B, 256]</li>
+            <li>Dense2 logits: [B, 12004]</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Équations forward</h4>
+          <div class="eq">E<sub>w</sub> = W<sub>emb</sub>[X] ; E<sub>g</sub> = G[genre]</div>
+          <div class="eq">h = ReLU([flatten(E<sub>w</sub>),E<sub>g</sub>]W<sub>1</sub> + b<sub>1</sub>)</div>
+          <div class="eq">z = hW<sub>2</sub> + b<sub>2</sub></div>
+          <div class="eq">p = softmax(z),  p<sub>c</sub> = exp(z<sub>c</sub>)/Σ<sub>j</sub>exp(z<sub>j</sub>)</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <pre>class LyricsGenerationModel:
+    def forward(self, X_batch, genres_batch, training=False, dropout_rate=0.0):
+        word_embeds = self.word_embedding[X_batch]
+        word_embeds_flat = word_embeds.reshape(batch_size, -1)
+        genre_embeds = self.genre_embedding[genres_batch]
+        combined = xp.concatenate([word_embeds_flat, genre_embeds], axis=1)
+        z1 = xp.dot(combined, self.W1) + self.b1
+        a1 = xp.maximum(z1, 0)
+        z2 = xp.dot(a1, self.W2) + self.b2
+        return z2, a1, combined, relu_mask, dropout_mask</pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 8 · Fonction objectif</div>
+      <h2>Cross-Entropy, Label Smoothing et Perplexité</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Idée simple de la loss</h4>
+          <div class="eq">Étape 1: le modèle prédit une probabilité pour chaque mot possible.</div>
+          <div class="eq">Étape 2: on compare cette prédiction avec le vrai prochain mot.</div>
+          <div class="eq">Étape 3: plus l’erreur est faible, meilleure est la prédiction.</div>
+          <p>La cross-entropy est la mesure d’erreur principale pour ce type de prédiction next-token.</p>
+        </div>
+        <div class="card">
+          <h4>Pourquoi le label smoothing</h4>
+          <div class="eq">On évite que le modèle devienne trop sûr de lui trop tôt.</div>
+          <div class="eq">On garde des gradients plus stables pendant l’apprentissage.</div>
+          <p>Effet attendu: meilleure généralisation sur des exemples non vus.</p>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:10px;">
+        <div class="card">
+          <h4>Perplexité</h4>
+          <div class="eq">PPL = exp(L)</div>
+          <p>Lecture pratique: plus la perplexité baisse, plus le modèle choisit le bon mot avec confiance.</p>
+        </div>
+        <div class="card">
+          <h4>Masquage PAD</h4>
+          <pre>valid_mask = (y_batch != PAD_IDX)
+d_logits[~valid_mask] = 0.0
+d_logits /= max(valid_count, 1)</pre>
+          <p>Les tokens de padding sont ignorés pour ne pas polluer le calcul du gradient.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 9 · Backpropagation</div>
+      <h2>Backpropagation: comment le modèle se corrige</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Logique en 4 étapes</h4>
+          <div class="eq">1) On calcule l’erreur à la sortie.</div>
+          <div class="eq">2) On propage cette erreur vers les couches précédentes.</div>
+          <div class="eq">3) On mesure l’impact de chaque paramètre sur l’erreur.</div>
+          <div class="eq">4) On met à jour les poids pour réduire l’erreur au passage suivant.</div>
+          <div class="eq">Équation clé: θ ← θ - η ∇<sub>θ</sub>L</div>
+        </div>
+        <div class="card">
+          <h4>Détail important sur les embeddings</h4>
+          <pre>grad_word_embedding = xp.zeros_like(self.word_embedding)
+token_idx = flat_tokens[valid_mask]
+token_grads = flat_grads[valid_mask]
+
+if USING_GPU:
+    cupyx.scatter_add(grad_word_embedding, token_idx, token_grads)
+else:
+    np.add.at(grad_word_embedding, token_idx, token_grads)</pre>
+          <p>Ce mécanisme additionne correctement les gradients quand un même token apparaît plusieurs fois.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h4>Stabilisation numérique</h4>
+        <div class="eq">Softmax stable: évite les débordements numériques.</div>
+        <div class="eq">Gradient clipping: empêche des mises à jour trop brutales.</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 10 · Boucle d’entraînement</div>
+      <h2>Logique d’apprentissage implémentée</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Structure de la boucle</h4>
+          <pre>for epoch in range(start_epoch, NUM_EPOCHS):
+    effective_lr = max(LR * LR_DECAY**epoch, MIN_LEARNING_RATE)
+    train_loss, train_acc = train_epoch(...)
+    val_loss, val_acc = evaluate(...)
+    if val_loss &lt; best_val_loss: save_best_model()
+    save_checkpoint(epoch)
+    if patience_counter &gt;= EARLY_STOP_PATIENCE: break</pre>
+        </div>
+        <div class="card">
+          <h4>Hyperparamètres effectifs (config)</h4>
+          <table>
+            <tr><th>Paramètre</th><th>Valeur</th></tr>
+            <tr><td>EMBEDDING_DIM</td><td>64</td></tr>
+            <tr><td>HIDDEN_DIM</td><td>256</td></tr>
+            <tr><td>SEQ_LEN</td><td>20</td></tr>
+            <tr><td>NUM_EPOCHS</td><td>15</td></tr>
+            <tr><td>BATCH_SIZE</td><td>128</td></tr>
+            <tr><td>LEARNING_RATE</td><td>0.01</td></tr>
+            <tr><td>DROPOUT</td><td>0.15</td></tr>
+            <tr><td>LABEL_SMOOTHING</td><td>0.05</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h4>Comportement attendu d’une convergence saine</h4>
+        <ul>
+          <li>Diminution monotone de la fonction objectif en phase initiale.</li>
+          <li>Réduction progressive de l’écart train/val sans divergence.</li>
+          <li>Stabilisation du taux d’apprentissage effectif via décroissance contrôlée.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 11 · Analyse dynamique d’apprentissage</div>
+      <h2>Lecture théorique de la dynamique d’apprentissage</h2>
+
+      <div class="grid3">
+        <div class="metric"><div class="v">Loss ↓</div><div class="l">Convergence optimiseur</div></div>
+        <div class="metric"><div class="v">PPL ↓</div><div class="l">Réduction incertitude</div></div>
+        <div class="metric"><div class="v">Gap stable</div><div class="l">Généralisation</div></div>
+      </div>
+
+      <div class="grid2" style="margin-top:10px;">
+        <div class="card">
+          <h4>Observations de généralisation</h4>
+          <ul>
+            <li>Gap train/val favorable (val&lt;train) cohérent avec régularisation dropout.</li>
+            <li>Pas de plateau prématuré critique avant epoch 15.</li>
+            <li>Accuracies train/val montent progressivement (~0.06 → ~0.145).</li>
+            <li>PPL reste élevée en absolu: qualité linguistique encore limitée.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Interprétation mathématique</h4>
+          <div class="eq">PPL = exp(L) : toute réduction de L a un effet exponentiel sur la perplexité.</div>
+          <div class="eq">Si L décroît mais que la cohérence reste faible, la limite est architecturale (capacité de dépendances longues).</div>
+        </div>
+      </div>
+      <img class="img" src="graphs+logs/training_curves%20(3).png" />
+      <div class="caption">Courbes de convergence custom: perte, perplexité et accuracy sur train/validation</div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 12 · Pipeline d’inférence</div>
+      <h2>Décodage probabiliste contrôlé</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Équations de sampling</h4>
+          <div class="eq">z' = z / T  (temperature scaling)</div>
+          <div class="eq">Top-k: z<sub>i</sub>=-∞ si i ∉ K<sub>k</sub>(z)</div>
+          <div class="eq">Top-p: conserver le plus petit ensemble S tel que Σ<sub>i∈S</sub>p<sub>i</sub> ≥ p</div>
+          <div class="eq">x<sub>t+1</sub> ~ Categorical(p')</div>
+        </div>
+        <div class="card">
+          <h4>Pénalités en espace logit</h4>
+          <pre>logits_np[tok] -= log(repeat_penalty)
+logits_np[tok] -= presence_penalty
+logits_np[tok] -= frequency_penalty * count
+if repeated_ngram: logits_np[banned] = -1e9</pre>
+          <p>Passer des pénalités en probabilité vers les logits améliore l’effet anti-boucle de manière nettement plus marquée.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h4>Flux inférence</h4>
+        <div class="diagram">
+          <div class="node">Prompt/genre</div>
+          <div class="arrow">→</div>
+          <div class="node">Forward logits</div>
+          <div class="arrow">→</div>
+          <div class="node">Filtrage top-k/top-p + pénalités</div>
+          <div class="arrow">→</div>
+          <div class="node">Échantillonnage + update contexte</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 13 · Limites du modèle custom</div>
+      <h2>Pourquoi la qualité génération reste contrainte</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Limites structurelles</h4>
+          <ul>
+            <li>Pas de mémoire séquentielle explicite (contrairement RNN/Transformer).</li>
+            <li>Contexte fixe court (20 tokens) → dépendances longues mal capturées.</li>
+            <li>Sortie multiclasses massive (12k) avec forte entropie.</li>
+            <li>Biais de fréquence vocabulaire → risque de répétition de tokens fréquents.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Conséquences observées</h4>
+          <ul>
+            <li>Dérive sémantique sur longues générations.</li>
+            <li>Instabilité de structure (couplet/refrain non maintenus).</li>
+            <li>Repetition bigram/trigram élevée sur certains genres.</li>
+            <li>Créativité limitée (mode collapse local sur motifs fréquents).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h4>Lien avec la loi de Zipf</h4>
+        <div class="eq">f(r) ≈ C/r  : les tokens de faible rang dominent les probabilités cumulées.</div>
+        <p>Conséquence: sans mécanisme global de contexte, le décodage auto-régressif favorise les motifs fréquents et la répétition locale.</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 14 · Transformer et GPT</div>
+      <h2>Fondements mathématiques de la branche GPT</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Self-attention (décodeur)</h4>
+          <div class="eq">Q = XW<sub>Q</sub>, K = XW<sub>K</sub>, V = XW<sub>V</sub></div>
+          <div class="eq">Attention(Q,K,V) = softmax((QKᵀ / √d<sub>k</sub>) + M) V</div>
+          <div class="eq">M = masque causal (empêche l’accès aux tokens futurs)</div>
+          <div class="eq">MultiHead(X)=Concat(head<sub>1</sub>,...,head<sub>h</sub>)W<sub>O</sub></div>
+        </div>
+        <div class="card">
+          <h4>Fine-tuning objectif CLM</h4>
+          <div class="eq">L = -Σ<sub>t</sub> log P(x<sub>t</sub> | x<sub>&lt;t</sub>)</div>
+          <p>Le modèle GPT-2 est déjà pré-entraîné; le fine-tuning réalise une adaptation de domaine (lyrics) à faible learning rate.</p>
+          <pre>learning_rate=5e-5
+warmup_steps=50
+weight_decay=0.01
+fp16=True si CUDA</pre>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h4>Intuition théorique du fine-tuning</h4>
+        <div class="eq">θ<sub>new</sub> = θ<sub>pretrain</sub> - η∇L<sub>domain</sub>(θ)</div>
+        <p>Le fine-tuning ajuste localement un espace latent déjà riche: meilleure cohérence globale avec peu d’époques.</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Slide 15 · Intégration GPT dans le workflow</div>
+      <h2>Hybridation pipeline custom + GPT</h2>
+
+      <div class="diagram">
+        <div class="node"><strong>Étape A</strong><br/>Corpus nettoyé</div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>Étape B</strong><br/>Fine-tuning GPT<br/>sur sous-corpus ciblé</div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>Étape C</strong><br/>Génération guidée<br/>prompt genre</div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>Étape D</strong><br/>Filtrage/validation<br/>qualité sortie</div>
+      </div>
+
+      <div class="grid2" style="margin-top:10px;">
+        <div class="card">
+          <h4>Pourquoi nécessaire</h4>
+          <ul>
+            <li>Injecter des dépendances longue portée que le FFN ne modélise pas.</li>
+            <li>Améliorer cohérence grammaticale et continuité narrative.</li>
+            <li>Réduire les artefacts de répétition avec un prior linguistique pré-entraîné.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Impact attendu sur la qualité</h4>
+          <ul>
+            <li>Réduction de la dérive sémantique via self-attention.</li>
+            <li>Meilleure stabilité syntaxique sur séquences longues.</li>
+            <li>Moindre dépendance aux tokens ultra-fréquents.</li>
+          </ul>
+        </div>
+      </div>
+      <img class="img" src="graphs+logs/gpt2_training_curve%20(3).png" />
+      <div class="caption">Courbes GPT-2 fine-tuning: convergence rapide et stabilité du learning rate</div>
+    </section>
+
+
+
+
+
+
+    <section class="slide">
+      <div class="kicker">Slide 16 · Comparaison modèles</div>
+      <h2>Comparaison entre model custom et GPT-2</h2>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Lecture synthétique</h4>
+          <ul>
+            <li><strong>model custom</strong>: excellent pour expliquer les mécanismes d’apprentissage.</li>
+            <li><strong>GPT-2</strong>: meilleure cohérence textuelle et meilleure stabilité sur longues séquences.</li>
+            <li><strong>Coût</strong>: le model custom est plus léger, GPT-2 est plus exigeant en calcul.</li>
+            <li><strong>Positionnement final</strong>: approche hybride = explicabilité + qualité de génération.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Conclusion de comparaison</h4>
+          <p>Le graphe confirme le compromis attendu: le modèle custom reste idéal pour l’analyse pédagogique et la traçabilité, tandis que GPT-2 améliore la qualité linguistique globale. Le choix dépend donc de l’objectif: compréhension interne du modèle, ou qualité finale de génération.</p>
+        </div>
+      </div>
+
+      <img class="img" src="graphs+logs/model_comparison%20(2).png" />
+      <div class="caption">Comparaison visuelle des performances entre le modèle custom et GPT-2</div>
+    </section>
+
+
+
+
+    <section class="slide">
+      <div class="kicker">Slide 17 · Conclusion</div>
+      <h2>Resumé</h2>
+
+      <div class="card">
+        <p>Le projet constitue une implémentation complète d’un système génératif textuel: <strong>ingénierie des données</strong>, <strong>apprentissage supervisé next-token</strong>, <strong>backpropagation manuelle</strong>, <strong>décodage probabiliste contraint</strong> et <strong>extension par fine-tuning GPT</strong>.</p>
+        <p>La valeur scientifique est double: (1) explicabilité profonde via le modèle custom, (2) amélioration de qualité via le modèle Transformer, avec continuité théorique entre modèles.</p>
+      </div>
+
+      <div class="grid4" style="margin-top:10px;">
+        <div class="metric"><div class="v">Custom</div><div class="l">Mécanismes ML explicités</div></div>
+        <div class="metric"><div class="v">GPT</div><div class="l">Qualité linguistique accrue</div></div>
+        <div class="metric"><div class="v">Hybrid</div><div class="l">Pipeline industriel plausible</div></div>
+        <div class="metric"><div class="v">Academic</div><div class="l">Formalisme + implémentation</div></div>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
